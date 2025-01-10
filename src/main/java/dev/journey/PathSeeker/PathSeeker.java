@@ -29,7 +29,10 @@ public class PathSeeker extends MeteorAddon {
                 Modules.get().add(new StorageLooter());
                 Modules.get().add(new PotESP());
                 Modules.get().add(new NbtEditor());
+                Commands.add(new Stats2b2t());
                 Commands.add(new ViewNbtCommand());
+                Commands.add(new GarbageCleanerCommand());
+                Commands.add(new WorldInfoCommand());
         }
 
         @Override
