@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "pathseeker-addon",
+  "version": "1.0.0",
+  "name": "PathSeeker",
+  "description": "PathSeeker Inspired by Trouser Streak",
+  "authors": [
+    "Journey Edition"
+  ],
+  "contact": {
+    "repo": "https://github.com/FaxHack/PathSeeker"
+  },
+  "icon": "assets/icon/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "meteor": [
+      "dev.journey.PathSeeker.PathSeeker"
+    ]
+  },
+  "accessWidener": "pathseeker-addon.accesswidener",
+  "mixins": [
+    "pathseeker.mixins.json"
+  ],
+  "custom": {
+    "meteor-client:color": "255,0,255"
+  },
+  "depends": {
+    "java": ">=21",
+    "minecraft": ">=${mc_version}",
+    "meteor-client": "*"
+  }
+}
