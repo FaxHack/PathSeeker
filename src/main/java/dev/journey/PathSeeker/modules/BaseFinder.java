@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -56,10 +57,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
@@ -67,12 +65,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-/*
-    This BaseFinder was made from the newchunks code,
-    Newchunks was Ported from: https://github.com/BleachDrinker420/BleachHack/blob/master/BleachHack-Fabric-1.16/src/main/java/bleach/hack/module/mods/NewChunks.java
-    Ported for meteor-rejects
-    updated and modified by etianll :D
-*/
+
 public class BaseFinder extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDetectors = settings.createGroup("Block Detectors");
@@ -504,7 +497,7 @@ public class BaseFinder extends Module {
         dellastdata.action = () -> {
             if(isBaseFinderModuleOn==0){
                 error("Please turn on BaseFinder module and push the button again.");
-            } else if(isBaseFinderModuleOn!=0 && (LastBaseFound.x==2000000000 || LastBaseFound.z==2000000000)){
+            } else if(LastBaseFound.x == 2000000000 || LastBaseFound.z == 2000000000){
                 error("Please find a base and run the command again.");
             } else {
                 if (baseChunks.contains(new ChunkPos(LastBaseFound.x, LastBaseFound.z))){
@@ -727,7 +720,7 @@ public class BaseFinder extends Module {
         if (deletewarningTicks <= 100) deletewarningTicks++;
         if (deletewarning>=2){
             if (mc.isInSingleplayer()){
-                String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
+                String[] array = Objects.requireNonNull(mc.getServer()).getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("[/\\\\]");
                 serverip=array[array.length-2];
             } else {
                 serverip = mc.getCurrentServerEntry().address.replace(':', '_');
@@ -751,7 +744,7 @@ public class BaseFinder extends Module {
         }
 
         try {
-            if (baseChunks.stream().toList().size() > 0) {
+            if (!baseChunks.stream().toList().isEmpty()) {
                 for (int b = 0; b < baseChunks.stream().toList().size(); b++) {
                     if (basedistance > Math.sqrt(Math.pow(baseChunks.stream().toList().get(b).x - mc.player.getChunkPos().x, 2) + Math.pow(baseChunks.stream().toList().get(b).z - mc.player.getChunkPos().z, 2))) {
                         closestbaseX = baseChunks.stream().toList().get(b).x;
@@ -940,10 +933,15 @@ public class BaseFinder extends Module {
     }
 
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
-        ActivatedSpawnerDetector.DupeCode(box, sides, lines, shapeMode, event, trcr, trcrdist, nearesttrcr);
+        if (trcr.get() && Math.abs(box.minX- RenderUtils.center.x)<=trcrdist.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=trcrdist.get()*16)
+            if (!nearesttrcr.get())
+                event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
+        event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
     private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
-        ActivatedSpawnerDetector.DupeCode2(box, sides, lines, shapeMode, event, trcr, trcrdist);
+        if (trcr.get() && Math.abs(box.minX-RenderUtils.center.x)<=trcrdist.get()*16 && Math.abs(box.minZ-RenderUtils.center.z)<=trcrdist.get()*16)
+            event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX+0.5, box.minY+((box.maxY-box.minY)/2), box.minZ+0.5, lines);
+        event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0,0,0,0), shapeMode, 0);
     }
 
     @EventHandler
