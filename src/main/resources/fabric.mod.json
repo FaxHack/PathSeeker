@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "pathseeker-addon",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "PathSeeker",
   "description": "PathSeeker Inspired by Trouser Streak",
   "authors": [
