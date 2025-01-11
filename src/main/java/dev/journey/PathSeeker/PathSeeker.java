@@ -1,15 +1,19 @@
 package dev.journey.PathSeeker;
 
-import dev.journey.PathSeeker.commands.ViewNbtCommand;
-import dev.journey.PathSeeker.modules.*;
+//Meteor imports
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+
+//PathSeeker imports
+import dev.journey.PathSeeker.commands.ViewNbtCommand;
+import dev.journey.PathSeeker.modules.*;
+import dev.journey.PathSeeker.commands.*;
+
+//Logging imports
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import dev.journey.PathSeeker.commands.*;
-import dev.journey.PathSeeker.modules.*;
 
 
 public class PathSeeker extends MeteorAddon {
