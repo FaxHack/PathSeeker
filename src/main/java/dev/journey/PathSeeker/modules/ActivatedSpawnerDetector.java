@@ -1,4 +1,3 @@
-//made by etianl :D
 package dev.journey.PathSeeker.modules;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;

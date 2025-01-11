@@ -1,4 +1,3 @@
-//Made by etianl
 package dev.journey.PathSeeker.modules;
 
 import net.minecraft.command.argument.EntityAnchorArgumentType;

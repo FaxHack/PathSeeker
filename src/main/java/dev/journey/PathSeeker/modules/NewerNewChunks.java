@@ -43,10 +43,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.*;
 
-/*
-    Ported from: https://github.com/BleachDrinker420/BleachHack/blob/master/BleachHack-Fabric-1.16/src/main/java/bleach/hack/module/mods/NewChunks.java
-    updated by etianl :D
-*/
 public class NewerNewChunks extends Module {
 	public enum DetectMode {
 		Normal,

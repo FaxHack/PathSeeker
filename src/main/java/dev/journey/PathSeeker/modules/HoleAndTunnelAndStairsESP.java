@@ -1,6 +1,3 @@
-//made by etianl with "inspiration" from Meteor Client.
-//Thank you to them for a bit of this code https://github.com/MeteorDevelopment/meteor-client/blob/master/src/main/java/meteordevelopment/meteorclient/systems/modules/render/TunnelESP.java
-
 package dev.journey.PathSeeker.modules;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
