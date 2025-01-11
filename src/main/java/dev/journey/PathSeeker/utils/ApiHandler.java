@@ -1,43 +1,37 @@
 package dev.journey.PathSeeker.utils;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import dev.journey.PathSeeker.PathSeeker;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 
 public class ApiHandler {
     public static final String API_2B2T_URL = "https://api.2b2t.vc";
+    private static final HttpClient client = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
 
-    public String fetchResponse(String urlString) {
+    public String fetchResponse(String url) {
         try {
-            URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("User-Agent", "PathSeeker/1.0")
+                    .GET()
+                    .timeout(Duration.ofSeconds(10))
+                    .build();
 
-            int status = connection.getResponseCode();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (status == 200) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder content = new StringBuilder();
-                String line;
-
-                while ((line = in.readLine()) != null) {
-                    content.append(line);
-                }
-
-                in.close();
-                connection.disconnect();
-
-                return content.toString();
-            } else if (status == 204) {
+            if (response.statusCode() == 204) {
                 return "204 Undocumented";
-            } else {
-                return null;
             }
+
+            return response.body();
         } catch (Exception e) {
-            PathSeekerUtil.logError("Failed to fetch API response: " + e.getMessage());
+            PathSeeker.LOG.error("[ApiHandler] Failed to fetch response: {}", e.getMessage());
             return null;
         }
     }
