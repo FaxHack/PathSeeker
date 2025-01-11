@@ -1,7 +1,12 @@
 package dev.journey.PathSeeker.utils;
 
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -112,5 +117,43 @@ public class PathSeekerUtil {
         this.lastSeen = lastSeen;
         this.firstSeen = firstSeen;
         this.playtime = playtime;
+    }
+    public static int firework(MinecraftClient mc) {
+
+        // cant use a rocket if not wearing an elytra
+        int elytraSwapSlot = -1;
+        if (!mc.player.getInventory().getArmorStack(2).isOf(Items.ELYTRA))
+        {
+            FindItemResult itemResult = InvUtils.findInHotbar(Items.ELYTRA);
+            if (!itemResult.found()) {
+                return -1;
+            }
+            else
+            {
+                elytraSwapSlot = itemResult.slot();
+                InvUtils.swap(itemResult.slot(), true);
+                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                InvUtils.swapBack();
+                mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+            }
+        }
+
+        FindItemResult itemResult = InvUtils.findInHotbar(Items.FIREWORK_ROCKET);
+        if (!itemResult.found()) return -1;
+
+        if (itemResult.isOffhand()) {
+            mc.interactionManager.interactItem(mc.player, Hand.OFF_HAND);
+            mc.player.swingHand(Hand.OFF_HAND);
+        } else {
+            InvUtils.swap(itemResult.slot(), true);
+            mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+            mc.player.swingHand(Hand.MAIN_HAND);
+            InvUtils.swapBack();
+        }
+        if (elytraSwapSlot != -1)
+        {
+            return elytraSwapSlot;
+        }
+        return 200;
     }
 }
