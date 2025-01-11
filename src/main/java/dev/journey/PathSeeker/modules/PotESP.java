@@ -93,7 +93,6 @@ public class PotESP extends Module {
         naturalPot.add(Items.TRIAL_KEY);
         naturalPot.add(Items.DIAMOND);
         naturalPot.add(Items.DIAMOND_BLOCK);
-        naturalPot.add(Items.MUSIC_DISC_CREATOR_MUSIC_BOX);
     }
     public PotESP() {
         super(PathSeeker.Main,"PotESP", "Finds the dank pots... In Minecraft (Locates decorated pots with un-natural items in them)");

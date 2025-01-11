@@ -2,7 +2,6 @@
 package dev.journey.PathSeeker.modules;
 
 import net.minecraft.command.argument.EntityAnchorArgumentType;
-import net.minecraft.component.type.FoodComponents;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -12,18 +11,15 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.item.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.*;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
@@ -70,11 +66,11 @@ public class StorageLooter extends Module {
             .name("Junk Items")
             .description("Select the items to get rid of.")
             .defaultValue(Arrays.asList(
-                    Items.ROTTEN_FLESH, Items.POISONOUS_POTATO, Items.BONE, Items.SPIDER_EYE, Items.FERMENTED_SPIDER_EYE, Items.PHANTOM_MEMBRANE, Items.BREEZE_ROD, Items.NAUTILUS_SHELL, Items.STRING, Items.LILY_PAD, Items.BEETROOT, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.WHEAT_SEEDS, Items.SUGAR,
+                    Items.ROTTEN_FLESH, Items.POISONOUS_POTATO, Items.BONE, Items.SPIDER_EYE, Items.FERMENTED_SPIDER_EYE, Items.PHANTOM_MEMBRANE, Items.NAUTILUS_SHELL, Items.STRING, Items.LILY_PAD, Items.BEETROOT, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.WHEAT_SEEDS, Items.SUGAR,
                     Items.SHORT_GRASS, Items.TALL_GRASS, Items.SEAGRASS, Items.SEA_PICKLE, Items.FERN, Items.DEAD_BUSH, Items.VINE, Items.BROWN_MUSHROOM, Items.RED_MUSHROOM, Items.WARPED_FUNGUS, Items.CRIMSON_FUNGUS, Items.NETHER_WART, Items.GHAST_TEAR,
                     Items.BOWL, Items.FEATHER, Items.SUGAR_CANE, Items.CACTUS, Items.COCOA_BEANS, Items.RABBIT_HIDE, Items.RABBIT_FOOT, Items.GLOW_LICHEN, Items.SCULK_VEIN,
                     Items.GLOW_ITEM_FRAME, Items.ITEM_FRAME, Items.PAINTING, Items.PAPER, Items.CLOCK, Items.COMPASS, Items.PUFFERFISH, Items.TROPICAL_FISH, Items.GLISTERING_MELON_SLICE, Items.MAGMA_CREAM,
-                    Items.LEAD, Items.SADDLE, Items.CARROT_ON_A_STICK, Items.WARPED_FUNGUS_ON_A_STICK, Items.FROGSPAWN, Items.TURTLE_EGG, Items.TURTLE_SCUTE, Items.SNIFFER_EGG, Items.ARMADILLO_SCUTE, Items.GOAT_HORN, Items.BOOK, Items.WRITABLE_BOOK, Items.WRITTEN_BOOK, Items.BRUSH
+                    Items.LEAD, Items.SADDLE, Items.CARROT_ON_A_STICK, Items.WARPED_FUNGUS_ON_A_STICK, Items.FROGSPAWN, Items.TURTLE_EGG, Items.SNIFFER_EGG, Items.GOAT_HORN, Items.BOOK, Items.WRITABLE_BOOK, Items.WRITTEN_BOOK, Items.BRUSH
             ))
             .visible(() -> moveJunkToContainer.get())
             .build()
@@ -202,7 +198,7 @@ public class StorageLooter extends Module {
                     Items.DIAMOND_LEGGINGS,
                     Items.DIAMOND_BOOTS,
                     Items.SHULKER_BOX
-                    ))
+            ))
             .filter(this::isValidLootItem)
             .build()
     );
@@ -413,7 +409,7 @@ public class StorageLooter extends Module {
                 if (entity.getBlockPos().equals(lastInteractedBlockPos) && entity instanceof ChestMinecartEntity && containerList.get().contains(Items.CHEST_MINECART)) {
                     if (mc.player.currentScreenHandler != null && isContainerScreen(mc.player.currentScreenHandler)) {
                         if (autoStealTicks == 0) {
-                        processContainerItems();
+                            processContainerItems();
                         }
                         if (autoStealTicks<autoStealDelay.get()) {
                             autoStealTicks++;
@@ -824,39 +820,52 @@ public class StorageLooter extends Module {
         score += durabilityscore;
 
         //enchantments score
-        ItemEnchantmentsComponent enchantments = stack.getEnchantments();
         int enchantmentscore = 0;
-        Registry<Enchantment> enchantmentRegistry = mc.world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
-        if (stack.getItem() instanceof ArmorItem) {
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.PROTECTION)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.BLAST_PROTECTION)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.FIRE_PROTECTION)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.PROJECTILE_PROTECTION)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.UNBREAKING)) * 9;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.MENDING)) * 8;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.THORNS)) * 5;
-        } else if (stack.getItem() instanceof SwordItem) {
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.SMITE)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.SHARPNESS)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.BANE_OF_ARTHROPODS)) * 9;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.FIRE_ASPECT)) * 9;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.UNBREAKING)) * 9;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.MENDING)) * 8;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.LOOTING)) * 5;
-        } else if (stack.getItem() instanceof ToolItem) {
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.EFFICIENCY)) * 10;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.UNBREAKING)) * 9;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.MENDING)) * 8;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.SILK_TOUCH)) * 6;
-            enchantmentscore += getEnchantmentLevel(enchantments, enchantmentRegistry.entryOf(Enchantments.FORTUNE)) * 5;
+        if(stack.getNbt()!=null) {
+            NbtCompound nbtCompound = stack.getNbt();
+            if (nbtCompound == null || !nbtCompound.contains("Enchantments")) {
+                enchantmentscore = 0;
+            }
+
+            NbtList enchantmentsList = nbtCompound.getList("Enchantments", NbtElement.COMPOUND_TYPE);
+
+            if (stack.getItem() instanceof ArmorItem) {
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "protection") * 10;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "blast_protection") * 10;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "fire_protection") * 10;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "projectile_protection") * 10;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "unbreaking") * 9;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "mending") * 8;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "thorns") * 5;
+            } else if (stack.getItem() instanceof SwordItem) {
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "smite") * 10;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "sharpness") * 10;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "bane_of_arthropods") * 9;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "fire_aspect") * 9;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "unbreaking") * 9;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "mending") * 8;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "looting") * 5;
+            } else if (stack.getItem() instanceof ToolItem) {
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "efficiency") * 10;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "unbreaking") * 9;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "mending") * 8;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "silk_touch") * 6;
+                enchantmentscore += getEnchantmentLevel(enchantmentsList, "fortune") * 5;
+            }
         }
         score += enchantmentscore;
 
         return score;
     }
 
-    private int getEnchantmentLevel(ItemEnchantmentsComponent enchantments, RegistryEntry<Enchantment> enchantment) {
-        return enchantments.getLevel(enchantment);
+    private int getEnchantmentLevel(NbtList enchantmentsList, String enchantmentId) {
+        for (NbtElement element : enchantmentsList) {
+            NbtCompound enchantment = (NbtCompound) element;
+            if (enchantment.getString("id").endsWith(enchantmentId)) {
+                return enchantment.getInt("lvl");
+            }
+        }
+        return 0;
     }
 
     private boolean isSameItemList(Item item1, Item item2) {

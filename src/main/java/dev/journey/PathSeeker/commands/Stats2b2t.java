@@ -12,6 +12,9 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 
+import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 public class Stats2b2t extends Command {
     private static final String API_ENDPOINT = "/stats/player?playerName=";
     private final PathSeekerUtil pathSeekerUtil;

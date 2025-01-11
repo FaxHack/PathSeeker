@@ -1,5 +1,6 @@
 package dev.journey.PathSeeker.modules;
 
+import dev.journey.PathSeeker.PathSeeker;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -28,7 +29,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
-import dev.journey.PathSeeker.PathSeeker;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
