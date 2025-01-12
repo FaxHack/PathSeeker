@@ -22,7 +22,10 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
 > Make sure your predefined item lists are accurate. Incorrect configurations may result in missing valuable loot.
 
 - **GrimDuraFirework**  
-  A clever fix for fireworks issues on the Mio client when using Grim Durability ElytraFly with a chestplate. Fly smoothly without a hitch! [Credits to meteor-mod](https://github.com/miles352/meteor-mod/blob/master/src/main/java/com/example/addon/modules/GrimDuraFirework.java)  
+  A clever fix for fireworks issues on the Mio client when using Grim Durability ElytraFly with a chestplate. Fly smoothly without a hitch! [Credits to meteor-mod](https://github.com/miles352/meteor-mod/blob/master/src/main/java/com/example/addon/modules/GrimDuraFirework.java)
+  
+- **MobGearESP**  
+  Detects mobs carrying or wearing player equipment. [Credits to windoid](https://github.com/windoid/MobGearESP/blob/master/src/main/java/com/mobgear/addon/modules/MobGearESP.java)  
 
 - **NewerNewChunks**  
   Take control of chunk tracing! Manage chunk data across servers and dimensions with crash-resilient saving, easy sharing options, and pinpoint accuracy.  
