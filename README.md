@@ -6,8 +6,8 @@
 - **Base Finder:** Automatically detect hidden bases and dungeons.  
 - **NBT Editor:** Customize items, entities, and potions with advanced editing tools.  
 - **Player Activity Detector:** Spot nearby players even outside render distance.  
-- **Storage Looter:** Automatically loot containers based on predefined item lists.  
-- And much more!  
+- **Storage Looter:** Automatically loot containers based on predefined item lists.
+- **GrimDuraFirework** A temporary fix for the issue on Mio client where fireworks dont work very well when using grim durability efly with the chestplate on.
 
 ## Why Choose This Mod?  
 This project takes the best elements of TrouserStreak and reimagines them with new features, optimizations, and a fresh codebase designed for stability and performance. Whether you're an explorer, base hunter, or utility enthusiast, this mod provides tools for every need.
@@ -28,6 +28,9 @@ This project takes the best elements of TrouserStreak and reimagines them with n
 
 ## Credits  
 This project builds upon the original TrouserStreak mod. Big thanks to the creators for the inspiration and groundwork.  
+ - [TrouserStreak](https://github.com/etianl/Trouser-Streak)
+ - [meteor-mod](https://github.com/miles352/meteor-mod)
+
 
 ## Contributing  
 Contributions are welcome! Feel free to open issues or submit pull requests.  
