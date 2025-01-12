@@ -1,46 +1,106 @@
 # PathSeeker  
-*A Minecraft utility mod built on the foundation of TrouserStreak, reimagined and enhanced for advanced anarchy server gameplay.*
+*A Minecraft utility mod built on the foundation of TrouserStreak, reimagined and enhanced for advanced anarchy server gameplay. Whether you're hunting bases, exploring new lands, or managing your resources, PathSeeker provides the tools to stay ahead.*  
+
+---
 
 ## Features  
-- **Advanced Chunk Detection:** Locate new chunks, old generation chunks, and more with near-perfect accuracy.  
-- **Base Finder:** Automatically detect hidden bases and dungeons.  
-- **Storage Looter:** Automatically loot containers based on predefined item lists.  
-- **GrimDuraFirework:** A temporary fix for the issue on the Mio client where fireworks don’t work very well when using Grim Durability ElytraFly with a chestplate equipped.  (Credits to meteor-mod)
-- **NewerNewChunks:** Accurately detect and manage chunk data across servers and dimensions, with crash-resilient saving and easy sharing options.
-- **Hole/Tunnel/StairsESP:** Detects 1x1 holes, horizontal tunnels, and staircase tunnels while ignoring passable blocks like torches or water by default. Includes an option to detect only air. (Credits to Meteor Client for TunnelESP and etianl for this version.)
-- PotESP: Detects Decorated Pots with un-natural contents, and also tells you what item it is and the location of the pot. (Credits to etianl :D)
-- PortalPatternFinder: Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. May be useful for finding portal skips in the Nether. (Credits to etianl :D)
-- CaveDisturbanceDetector: Scans for single air blocks within the cave air blocks found in caves and underground structures in 1.13+ chunks. (Credits to etianl :D)
+PathSeeker comes packed with powerful features designed for Minecraft explorers and thrill-seekers:  
+
+- **Advanced Chunk Detection**  
+  Pinpoint new chunks, old generation chunks, and more with near-perfect accuracy to keep your exploration one step ahead.  
+
+- **Base Finder**  
+  Uncover hidden bases and dungeons effortlessly, giving you the edge in anarchy gameplay.  
+
+> [!TIP]  
+> Use Base Finder with NewerNewChunks to drastically improve your chances of locating uncharted bases.
+
+- **Storage Looter**  
+  Automate container looting with customizable item lists because time is treasure in the anarchy world!  
+
+> [!WARNING]  
+> Make sure your predefined item lists are accurate. Incorrect configurations may result in missing valuable loot.
+
+- **GrimDuraFirework**  
+  A clever fix for fireworks issues on the Mio client when using Grim Durability ElytraFly with a chestplate. Fly smoothly without a hitch! [Credits to meteor-mod](https://github.com/miles352/meteor-mod/blob/master/src/main/java/com/example/addon/modules/GrimDuraFirework.java)  
+
+- **NewerNewChunks**  
+  Take control of chunk tracing! Manage chunk data across servers and dimensions with crash-resilient saving, easy sharing options, and pinpoint accuracy.  
+
+> [!IMPORTANT]  
+> To share your chunk data with friends, copy the `TrouserStreak/NewChunks` folder and send it directly.
+
+- **Hole/Tunnel/StairsESP**  
+  Spot 1x1 holes, horizontal tunnels, and staircase tunnels like a pro. By default, it skips passable blocks like torches or water but can be configured to detect only air. (Credits to Meteor Client and etianl)  
+
+- **PotESP**  
+  Detect Decorated Pots with unnatural contents and find out what's inside! Easily locate suspicious pots in your environment. [Credits to etianl](https://github.com/etianl/Trouser-Streak/blob/1.20.4/src/main/java/pwn/noobs/trouserstreak/modules/PotESP.java)  
+
+- **PortalPatternFinder**  
+  Scan for shapes of broken or removed Nether Portals within cave air blocks. Great for tracking portal skips in the Nether for 1.13+ chunks. [Credits to etianl](https://github.com/etianl/Trouser-Streak/blob/1.20.4/src/main/java/pwn/noobs/trouserstreak/modules/PortalPatternFinder.java)  
+
+> [!NOTE]  
+> PortalPatternFinder works best when paired with advanced chunk detection tools.
+
+- **CaveDisturbanceDetector**  
+  Hunt for single air blocks hidden within cave air, helping you identify disturbances in 1.13+ underground structures. [Credits to etianl](https://github.com/etianl/Trouser-Streak/blob/1.20.4/src/main/java/pwn/noobs/trouserstreak/modules/PortalPatternFinder.java)  
+
+> [!CAUTION]  
+> Scanning large areas with CaveDisturbanceDetector may increase resource usage. Adjust your settings accordingly.
 
 ---
 
 ## Why Choose This Mod?  
-This project takes the best elements of TrouserStreak and reimagines them with new features, optimizations, and a fresh codebase designed for stability and performance. Whether you're an explorer, base hunter, or utility enthusiast, this mod provides tools for every need.  
+PathSeeker takes the legendary TrouserStreak to the next level. With cutting-edge features, optimizations, and a redesigned codebase for unmatched stability and performance, this mod is your ultimate companion for anarchy server gameplay. Whether you’re a base raider, chunk tracer, or treasure hunter, PathSeeker empowers your journey.  
+
+---
 
 ## Installation  
-1. Download the latest release from [Releases](https://github.com/FaxHack/PathSeeker/releases/).  
-2. Place the mod `.jar` file in your Minecraft `mods` folder.  
-3. Start Minecraft with the appropriate version and enjoy!  
+Getting started is simple:  
+1. **Download** the latest release from [Releases](https://github.com/FaxHack/PathSeeker/releases/).  
+2. **Place** the mod `.jar` file in your Minecraft `mods` folder.  
+3. **Launch** Minecraft and dive into the chaos!  
+
+> [!NOTE]  
+> Ensure you’re using the correct version of Minecraft (1.21.x or compatible) for the best experience.  
+
+---
 
 ## Requirements  
-- Minecraft 1.21.x or compatible versions.  
-- [ViaFabricPlus](https://modrinth.com/mod/viafabricplus/versions?g=1.21.1&l=fabric&c=release) (optional for cross-version compatibility).  
+- **Minecraft 1.21.x** or compatible versions.  
+- [**ViaFabricPlus**](https://modrinth.com/mod/viafabricplus/versions?g=1.21.1&l=fabric&c=release) *(optional for cross-version compatibility)*.  
+
+---
 
 ## Roadmap  
-- [x] Initial release with core features.  
-- [ ] Implement additional hunting modules.  
-- [ ] Add more automation tools for loot and base management.  
+PathSeeker is always evolving! Here's what's planned:  
+- [x] Core features for the initial release.  
+- [ ] New hunting modules for advanced gameplay.  
+- [ ] Enhanced automation tools for loot and base management.  
+
+---
 
 ## Credits  
-This project builds upon the original TrouserStreak mod. Big thanks to the creators for the inspiration and groundwork.  
- - [TrouserStreak](https://github.com/etianl/Trouser-Streak)  
- - [meteor-mod](https://github.com/miles352/meteor-mod)  
+A big shoutout to the creators and projects that inspired PathSeeker:  
+- [**TrouserStreak**](https://github.com/etianl/Trouser-Streak) for laying the groundwork.  
+- [**meteor-mod**](https://github.com/miles352/meteor-mod) for additional features.
+
+---
 
 ## Contributing  
-Contributions are welcome! Feel free to open issues or submit pull requests.  
+We welcome contributions! If you have ideas, fixes, or new features to share, feel free to open issues or submit pull requests.  
+
+> [!TIP]  
+> Before submitting a pull request, review our coding guidelines for smoother collaboration.  
+
+---
 
 ## License  
-Apache-2.0 license.  
+Licensed under **Apache-2.0**.  
+
+---
 
 ## Support  
-For questions or help, join our Discord [Discord](https://discord.gg/SdH8ZF96mD) or open an issue on GitHub.  
+Need help or have questions?  
+- Join our **[Discord](https://discord.gg/SdH8ZF96mD)** community.  
+- Open an issue directly on **GitHub**.  
