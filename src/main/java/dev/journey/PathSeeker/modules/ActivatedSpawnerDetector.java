@@ -40,7 +40,7 @@ public class ActivatedSpawnerDetector extends Module {
             .name("Less Stash Spam")
             .description("Do not display the message reminding you about stashes if NO chests within 16 blocks of spawner.")
             .defaultValue(true)
-            .visible(() -> extramessage.get())
+            .visible(extramessage::get)
             .build()
     );
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
@@ -73,7 +73,7 @@ public class ActivatedSpawnerDetector extends Module {
             .defaultValue(1)
             .min(1)
             .sliderRange(1,10)
-            .visible(() -> deactivatedSpawner.get())
+            .visible(deactivatedSpawner::get)
             .build()
     );
     private final Setting<Boolean> lessRenderSpam = sgRender.add(new BoolSetting.Builder()
@@ -213,8 +213,7 @@ public class ActivatedSpawnerDetector extends Module {
                 List<BlockEntity> blockEntities = new ArrayList<>(chunk.getBlockEntities().values());
 
                 for (BlockEntity blockEntity : blockEntities) {
-                    if (blockEntity instanceof MobSpawnerBlockEntity){
-                        MobSpawnerBlockEntity spawner = (MobSpawnerBlockEntity) blockEntity;
+                    if (blockEntity instanceof MobSpawnerBlockEntity spawner){
                         BlockPos pos = spawner.getPos();
                         BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
                         if (playerPos.isWithinDistance(pos, renderDistance.get() * 16) && !trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos) && spawner.getLogic().spawnDelay != 20) {
@@ -273,7 +272,7 @@ public class ActivatedSpawnerDetector extends Module {
                                         }
                                     }
                                 }
-                                if (lightsFound == true) ChatUtils.sendMsg(Text.of("The Spawner has torches or other light blocks!"));
+                                if (lightsFound) ChatUtils.sendMsg(Text.of("The Spawner has torches or other light blocks!"));
                             }
                             boolean chestfound = false;
                             for (int x = -16; x < 17; x++) {
@@ -303,8 +302,7 @@ public class ActivatedSpawnerDetector extends Module {
                             else if (!lessSpam.get() && extramessage.get()) error("There may be stashed items in the storage near the spawners!");
                         }
                     }
-                    if (blockEntity instanceof TrialSpawnerBlockEntity){
-                        TrialSpawnerBlockEntity trialspawner = (TrialSpawnerBlockEntity) blockEntity;
+                    if (blockEntity instanceof TrialSpawnerBlockEntity trialspawner){
                         BlockPos tPos = trialspawner.getPos();
                         BlockPos playerPos = new BlockPos(mc.player.getBlockX(), tPos.getY(), mc.player.getBlockZ());
                         if (playerPos.isWithinDistance(tPos, renderDistance.get() * 16) && trialSpawner.get() && !trialspawnerPositions.contains(tPos) && !noRenderPositions.contains(tPos) && !deactivatedSpawnerPositions.contains(tPos) && !spawnerPositions.contains(tPos) && trialspawner.getSpawnerState() != TrialSpawnerState.WAITING_FOR_PLAYERS) {
@@ -350,7 +348,7 @@ public class ActivatedSpawnerDetector extends Module {
             synchronized (spawnerPositions) {
                 for (BlockPos pos : spawnerPositions) {
                     BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                    if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+                    if (playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
                         int startX = pos.getX();
                         int startY = pos.getY();
                         int startZ = pos.getZ();
@@ -366,7 +364,7 @@ public class ActivatedSpawnerDetector extends Module {
             synchronized (trialspawnerPositions) {
                 for (BlockPos pos : trialspawnerPositions) {
                     BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                    if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+                    if (playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
                         int startX = pos.getX();
                         int startY = pos.getY();
                         int startZ = pos.getZ();
