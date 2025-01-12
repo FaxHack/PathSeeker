@@ -5,7 +5,7 @@
 - **Advanced Chunk Detection:** Locate new chunks, old generation chunks, and more with near-perfect accuracy.  
 - **Base Finder:** Automatically detect hidden bases and dungeons.  
 - **Storage Looter:** Automatically loot containers based on predefined item lists.  
-- **GrimDuraFirework:** A temporary fix for the issue on the Mio client where fireworks don’t work very well when using Grim Durability ElytraFly with a chestplate equipped.  
+- **GrimDuraFirework:** A temporary fix for the issue on the Mio client where fireworks don’t work very well when using Grim Durability ElytraFly with a chestplate equipped.  (Credits to meteor-mod)
 - **NewerNewChunks:** Accurately detect and manage chunk data across servers and dimensions, with crash-resilient saving and easy sharing options.
 - **Hole/Tunnel/StairsESP:** Detects 1x1 holes, horizontal tunnels, and staircase tunnels while ignoring passable blocks like torches or water by default. Includes an option to detect only air. (Credits to Meteor Client for TunnelESP and etianl for this version.)
 - PotESP: Detects Decorated Pots with un-natural contents, and also tells you what item it is and the location of the pot. (Credits to etianl :D)
