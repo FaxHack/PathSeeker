@@ -1,13 +1,20 @@
 package dev.journey.PathSeeker.utils;
 
+import dev.journey.PathSeeker.PathSeeker;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 
+import java.awt.*;
+import java.io.File;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -28,30 +35,6 @@ public class PathSeekerUtil {
         this.playtime = 0;
     }
 
-    public String getLastSeen() {
-        return lastSeen;
-    }
-
-    public void setLastSeen(String lastSeen) {
-        this.lastSeen = lastSeen;
-    }
-
-    public String getFirstSeen() {
-        return firstSeen;
-    }
-
-    public void setFirstSeen(String firstSeen) {
-        this.firstSeen = firstSeen;
-    }
-
-    public long getPlaytime() {
-        return playtime;
-    }
-
-    public void setPlaytime(long playtime) {
-        this.playtime = playtime;
-    }
-
     public static String randomColorCode() {
         String[] colorCodes = {"§4", "§c", "§6", "§e", "§2", "§a", "§b", "§3", "§1", "§9", "§d", "§5", "§7", "§8", "§0"};
         return colorCodes[(int) (Math.random() * colorCodes.length)];
@@ -59,7 +42,7 @@ public class PathSeekerUtil {
 
     public static void sendPlayerMessage(String message) {
         if (mc.player != null) {
-            mc.player.sendMessage(Text.of(message), false);
+            mc.player.sendMessage(Text.literal(message), false);
         }
     }
 
@@ -118,18 +101,57 @@ public class PathSeekerUtil {
         this.firstSeen = firstSeen;
         this.playtime = playtime;
     }
-    public static int firework(MinecraftClient mc) {
 
-        // cant use a rocket if not wearing an elytra
+    public static boolean checkOrCreateFile(MinecraftClient mc, String fileName) {
+        File file = FabricLoader.getInstance().getGameDir().resolve(fileName).toFile();
+
+        if (!file.exists()) {
+            try {
+                if (file.createNewFile()) {
+                    if (mc.player != null) {
+                        mc.player.sendMessage(
+                                Text.literal("§8<" + PathSeekerUtil.randomColorCode() + "§o✨§r§8> §7Created " + file.getName() + " in meteor-client folder.")
+                        );
+                        MutableText msg = Text.literal("§8<" + PathSeekerUtil.randomColorCode() + "§o✨§r§8> §7Click §2§lhere §r§7to open the file.");
+                        Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()));
+
+                        MutableText txt = msg.setStyle(style);
+                        mc.player.sendMessage(txt);
+                    }
+                    return true;
+                }
+            } catch (Exception err) {
+                PathSeeker.LOG.error("[PathSeeker] Error creating" + file.getAbsolutePath() + "! - Why:\n" + err);
+            }
+        } else return true;
+
+        return false;
+    }
+
+    public static void openFile(MinecraftClient mc, String fileName) {
+        File file = FabricLoader.getInstance().getGameDir().resolve(fileName).toFile();
+
+        if (Desktop.isDesktopSupported()) {
+            EventQueue.invokeLater(() -> {
+                try {
+                    Desktop.getDesktop().open(file);
+                } catch (Exception err) {
+                    PathSeeker.LOG.error("[PathSeeker] Failed to open " + file.getAbsolutePath() + "! - Why:\n" + err);
+                }
+            });
+        } else {
+            PathSeeker.LOG.error("[PathSeeker] Desktop operations not supported.");
+        }
+    }
+
+    public static int firework(MinecraftClient mc) {
         int elytraSwapSlot = -1;
-        if (!mc.player.getInventory().getArmorStack(2).isOf(Items.ELYTRA))
-        {
+
+        if (!mc.player.getInventory().getArmorStack(2).isOf(Items.ELYTRA)) {
             FindItemResult itemResult = InvUtils.findInHotbar(Items.ELYTRA);
             if (!itemResult.found()) {
                 return -1;
-            }
-            else
-            {
+            } else {
                 elytraSwapSlot = itemResult.slot();
                 InvUtils.swap(itemResult.slot(), true);
                 mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
@@ -150,10 +172,7 @@ public class PathSeekerUtil {
             mc.player.swingHand(Hand.MAIN_HAND);
             InvUtils.swapBack();
         }
-        if (elytraSwapSlot != -1)
-        {
-            return elytraSwapSlot;
-        }
-        return 200;
+
+        return elytraSwapSlot != -1 ? elytraSwapSlot : 200;
     }
 }
