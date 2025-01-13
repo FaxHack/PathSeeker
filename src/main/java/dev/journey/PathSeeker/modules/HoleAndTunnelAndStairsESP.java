@@ -3,6 +3,7 @@
 
 package dev.journey.PathSeeker.modules;
 
+import dev.journey.PathSeeker.PathSeeker;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -16,22 +17,33 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
-import dev.journey.PathSeeker.PathSeeker;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HoleAndTunnelAndStairsESP extends Module {
+    private static final Direction[] DIRECTIONS = {Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH};
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgHParams = settings.createGroup("Hole Parameters");
     private final SettingGroup sgTParams = settings.createGroup("Tunnel Parameters");
     private final SettingGroup sgSParams = settings.createGroup("Stairs Parameters");
     private final SettingGroup sgRender = settings.createGroup("Rendering");
+    public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
+            .name("Render-Distance(Chunks)")
+            .description("How many chunks from the character to render the detected holes/tunnels.")
+            .defaultValue(128)
+            .min(6)
+            .sliderRange(6, 1024)
+            .build()
+    );
     private final Setting<DetectionMode> detectionMode = sgGeneral.add(new EnumSetting.Builder<DetectionMode>()
             .name("Detection Mode")
             .description("Choose what to detect: holes, tunnels, stairs, or all.")
@@ -56,7 +68,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .name("Detection Y Minimum OffSet")
             .description("Scans blocks above or at this this many blocks from minimum build limit.")
             .min(0)
-            .sliderRange(0,319)
+            .sliderRange(0, 319)
             .defaultValue(0)
             .build()
     );
@@ -64,7 +76,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .name("Detection Y Maximum OffSet")
             .description("Scans blocks below or at this this many blocks from maximum build limit.")
             .min(0)
-            .sliderRange(0,319)
+            .sliderRange(0, 319)
             .defaultValue(0)
             .build()
     );
@@ -163,14 +175,6 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .defaultValue(ShapeMode.Both)
             .build()
     );
-    public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
-            .name("Render-Distance(Chunks)")
-            .description("How many chunks from the character to render the detected holes/tunnels.")
-            .defaultValue(128)
-            .min(6)
-            .sliderRange(6,1024)
-            .build()
-    );
     private final Setting<SettingColor> holeLineColor = sgRender.add(new ColorSetting.Builder()
             .name("hole-line-color")
             .description("The color of the lines for the holes being rendered.")
@@ -207,13 +211,12 @@ public class HoleAndTunnelAndStairsESP extends Module {
             .defaultValue(new SettingColor(255, 0, 255, 30))
             .build()
     );
-
-    private static final Direction[] DIRECTIONS = { Direction.EAST, Direction.WEST, Direction.NORTH, Direction.SOUTH };
     private final Long2ObjectMap<TChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final Queue<Chunk> chunkQueue = new LinkedList<>();
     private final Set<Box> holes = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Set<Box> tunnels = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Set<Box> staircases = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
     public HoleAndTunnelAndStairsESP() {
         super(PathSeeker.Main, "Hole/Tunnel/StairsESP", "Finds and highlights holes and tunnels and stairs.");
     }
@@ -226,6 +229,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
         tunnels.clear();
         staircases.clear();
     }
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
         synchronized (chunks) {
@@ -245,6 +249,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
         }
         removeBoxesOutsideRenderDistance();
     }
+
     private void removeBoxesOutsideRenderDistance() {
         double renderDistanceBlocks = renderDistance.get() * 16;
 
@@ -252,12 +257,14 @@ public class HoleAndTunnelAndStairsESP extends Module {
         removeBoxesOutsideRenderDistance(tunnels, renderDistanceBlocks);
         removeBoxesOutsideRenderDistance(staircases, renderDistanceBlocks);
     }
+
     private void removeBoxesOutsideRenderDistance(Set<Box> chunkSet, double renderDistanceBlocks) {
         chunkSet.removeIf(box -> {
-            BlockPos playerPos = new BlockPos(mc.player.getBlockX(), Math.round((float)box.getCenter().getY()), mc.player.getBlockZ());
-            return !playerPos.isWithinDistance(new BlockPos(Math.round((float)box.getCenter().getX()), Math.round((float)box.getCenter().getY()), Math.round((float)box.getCenter().getZ())), renderDistanceBlocks);
+            BlockPos playerPos = new BlockPos(mc.player.getBlockX(), Math.round((float) box.getCenter().getY()), mc.player.getBlockZ());
+            return !playerPos.isWithinDistance(new BlockPos(Math.round((float) box.getCenter().getX()), Math.round((float) box.getCenter().getY()), Math.round((float) box.getCenter().getZ())), renderDistanceBlocks);
         });
     }
+
     @EventHandler
     private void onRender3D(Render3DEvent event) {
         switch (detectionMode.get()) {
@@ -289,6 +296,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
                 break;
         }
     }
+
     private void renderHoles(Renderer3D renderer) {
         if (holes != null) {
             for (Box box : holes) {
@@ -296,6 +304,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             }
         }
     }
+
     private void renderTunnels(Renderer3D renderer) {
         if (tunnels != null) {
             for (Box box : tunnels) {
@@ -303,6 +312,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             }
         }
     }
+
     private void renderStaircases(Renderer3D renderer) {
         if (staircases != null) {
             for (Box box : staircases) {
@@ -310,6 +320,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             }
         }
     }
+
     private void processChunkQueue() {
         int maxChunksPerTick = maxChunks.get();
         int processed = 0;
@@ -325,6 +336,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             }
         }
     }
+
     private void searchChunk(Chunk chunk, TChunk tChunk) {
         var sections = chunk.getSectionArray();
         int Ymin = mc.world.getBottomY() + minY.get();
@@ -379,13 +391,14 @@ public class HoleAndTunnelAndStairsESP extends Module {
             Y += 16;
         }
     }
+
     private void checkHole(BlockPos pos, Set<Box> holes) {
         if (isValidHoleSection(pos)) {
             BlockPos.Mutable currentPos = pos.mutableCopy();
             while (isValidHoleSection(currentPos)) {
                 currentPos.move(Direction.UP);
             }
-            if (currentPos.getY()-pos.getY() >= minHoleDepth.get()) {
+            if (currentPos.getY() - pos.getY() >= minHoleDepth.get()) {
                 Box holeBox = new Box(
                         pos.getX(), pos.getY(), pos.getZ(),
                         pos.getX() + 1, currentPos.getY(), pos.getZ() + 1
@@ -396,9 +409,11 @@ public class HoleAndTunnelAndStairsESP extends Module {
             }
         }
     }
+
     private boolean isValidHoleSection(BlockPos pos) {
         return isPassableBlock(pos) && !isPassableBlock(pos.north()) && !isPassableBlock(pos.south()) && !isPassableBlock(pos.east()) && !isPassableBlock(pos.west());
     }
+
     private void checkTunnel(BlockPos pos) {
         for (Direction dir : DIRECTIONS) {
             BlockPos.Mutable currentPos = pos.mutableCopy();
@@ -434,6 +449,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             }
         }
     }
+
     private boolean isTunnelSection(BlockPos pos, Direction dir) {
         int height = getTunnelHeight(pos);
         if (height < minTunnelHeight.get() || height > maxTunnelHeight.get()) return false;
@@ -448,9 +464,10 @@ public class HoleAndTunnelAndStairsESP extends Module {
         }
         return true;
     }
+
     private void checkDiagonalTunnel(BlockPos pos) {
         for (Direction dir : DIRECTIONS) {
-            for (int i = minDiagonalWidth.get()-1; i < maxDiagonalWidth.get(); i++) {
+            for (int i = minDiagonalWidth.get() - 1; i < maxDiagonalWidth.get(); i++) {
                 BlockPos.Mutable currentPos = pos.mutableCopy();
                 int stepCount = 0;
                 List<Box> potentialBoxes = new ArrayList<>();
@@ -484,7 +501,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
                     stepCount++;
                 }
 
-                if (stepCount/minDiagonalWidth.get() >= minDiagonalLength.get()) {
+                if (stepCount / minDiagonalWidth.get() >= minDiagonalLength.get()) {
                     potentialBoxes.forEach(potentialBox -> {
                         if (!tunnels.contains(potentialBox) && tunnels.stream().noneMatch(existingDiagonal -> existingDiagonal.intersects(potentialBox))) {
                             tunnels.add(potentialBox);
@@ -504,9 +521,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
         for (int i = 0; i < height; i++) {
             if (isPassableBlock(pos.up(i).offset(dir))) waspassableblockfound = true;
         }
-        if (waspassableblockfound) return false;
-
-        return true;
+        return !waspassableblockfound;
     }
 
     private int getTunnelHeight(BlockPos pos) {
@@ -516,6 +531,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
         }
         return height;
     }
+
     private void checkStaircase(BlockPos pos) {
         for (Direction dir : DIRECTIONS) {
             BlockPos.Mutable currentPos = pos.mutableCopy();
@@ -540,13 +556,14 @@ public class HoleAndTunnelAndStairsESP extends Module {
                 stepCount++;
             }
 
-            for (Box stairsBox : potentialStaircaseBoxes){
+            for (Box stairsBox : potentialStaircaseBoxes) {
                 if (stepCount >= minStaircaseLength.get() && !staircases.contains(stairsBox) && !staircases.stream().anyMatch(existingStaircase -> existingStaircase.intersects(stairsBox))) {
                     staircases.add(stairsBox);
                 }
             }
         }
     }
+
     private int getStaircaseHeight(BlockPos pos) {
         int height = 0;
         while (isPassableBlock(pos.up(height)) && height < maxStaircaseHeight.get()) {
@@ -554,6 +571,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
         }
         return height;
     }
+
     private boolean isStaircaseSection(BlockPos pos, Direction dir) {
         int height = getStaircaseHeight(pos);
         if (height < minStaircaseHeight.get() || height > maxStaircaseHeight.get()) return false;
@@ -568,6 +586,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
         }
         return true;
     }
+
     private boolean isPassableBlock(BlockPos pos) {
         BlockState state = mc.world.getBlockState(pos);
         if (airBlocks.get()) {
@@ -597,6 +616,7 @@ public class HoleAndTunnelAndStairsESP extends Module {
             this.z = z;
             this.marked = true;
         }
+
         public long getKey() {
             return ChunkPos.toLong(x, z);
         }

@@ -95,5 +95,6 @@ public class Stats2b2t extends Command {
             long playtimeSecondsMonth,
             int chatsCount,
             boolean prio
-    ) {}
+    ) {
+    }
 }

@@ -1,6 +1,7 @@
 //made by etianl :D
 package dev.journey.PathSeeker.modules;
 
+import dev.journey.PathSeeker.PathSeeker;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -20,14 +21,35 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.WorldChunk;
-import dev.journey.PathSeeker.PathSeeker;
 
 import java.util.*;
 
 public class PotESP extends Module {
+    private static final Set<Item> naturalPot = new HashSet<>();
+
+    static {
+        naturalPot.add(Items.AIR);
+        naturalPot.add(Items.STRING);
+        naturalPot.add(Items.EMERALD);
+        naturalPot.add(Items.EMERALD_BLOCK);
+        naturalPot.add(Items.RAW_IRON_BLOCK);
+        naturalPot.add(Items.IRON_INGOT);
+        naturalPot.add(Items.TRIAL_KEY);
+        naturalPot.add(Items.DIAMOND);
+        naturalPot.add(Items.DIAMOND_BLOCK);
+        naturalPot.add(Items.MUSIC_DISC_CREATOR_MUSIC_BOX);
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
-
+    public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
+            .name("Render-Distance(Chunks)")
+            .description("How many chunks from the character to render the detected chunks.")
+            .defaultValue(32)
+            .min(6)
+            .sliderRange(6, 1024)
+            .build()
+    );
     private final Setting<Boolean> potMessage = sgGeneral.add(new BoolSetting.Builder()
             .name("Extra Message")
             .description("Toggle the message reminding you about pots.")
@@ -38,20 +60,12 @@ public class PotESP extends Module {
             .name("Display Coords")
             .description("Displays coords of activated spawners in chat.")
             .defaultValue(true)
-            .visible(()->potMessage.get())
+            .visible(() -> potMessage.get())
             .build()
     );
     private final Setting<List<Item>> junkItemList = sgGeneral.add(new ItemListSetting.Builder()
             .name("Junk Items")
             .description("Select the items to no look for. Decorated pots containing these items will not be highlighted.")
-            .build()
-    );
-    public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
-            .name("Render-Distance(Chunks)")
-            .description("How many chunks from the character to render the detected chunks.")
-            .defaultValue(32)
-            .min(6)
-            .sliderRange(6,1024)
             .build()
     );
     private final Setting<Boolean> removerenderdist = sgRender.add(new BoolSetting.Builder()
@@ -80,32 +94,22 @@ public class PotESP extends Module {
             .visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both))
             .build()
     );
-
     private final Set<BlockPos> potLocations = Collections.synchronizedSet(new HashSet<>());
-    private static final Set<Item> naturalPot = new HashSet<>();
-    static {
-        naturalPot.add(Items.AIR);
-        naturalPot.add(Items.STRING);
-        naturalPot.add(Items.EMERALD);
-        naturalPot.add(Items.EMERALD_BLOCK);
-        naturalPot.add(Items.RAW_IRON_BLOCK);
-        naturalPot.add(Items.IRON_INGOT);
-        naturalPot.add(Items.TRIAL_KEY);
-        naturalPot.add(Items.DIAMOND);
-        naturalPot.add(Items.DIAMOND_BLOCK);
-        naturalPot.add(Items.MUSIC_DISC_CREATOR_MUSIC_BOX);
-    }
+
     public PotESP() {
-        super(PathSeeker.Main,"PotESP", "Finds the dank pots... In Minecraft (Locates decorated pots with un-natural items in them)");
+        super(PathSeeker.Main, "PotESP", "Finds the dank pots... In Minecraft (Locates decorated pots with un-natural items in them)");
     }
+
     @Override
     public void onActivate() {
         potLocations.clear();
     }
+
     @Override
     public void onDeactivate() {
         potLocations.clear();
     }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         if (mc.world == null) return;
@@ -118,8 +122,7 @@ public class PotESP extends Module {
                 List<BlockEntity> blockEntities = new ArrayList<>(chunk.getBlockEntities().values());
 
                 for (BlockEntity blockEntity : blockEntities) {
-                    if (blockEntity instanceof DecoratedPotBlockEntity){
-                        DecoratedPotBlockEntity pot = (DecoratedPotBlockEntity) blockEntity;
+                    if (blockEntity instanceof DecoratedPotBlockEntity pot) {
                         Item potItem = pot.stack.getItem();
 
                         BlockPos potLocation = pot.getPos();
@@ -135,8 +138,9 @@ public class PotESP extends Module {
                 }
             }
         }
-        if (removerenderdist.get())removeChunksOutsideRenderDistance();
+        if (removerenderdist.get()) removeChunksOutsideRenderDistance();
     }
+
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (potSideColor.get().a > 5 || potLineColor.get().a > 5) {
@@ -150,7 +154,7 @@ public class PotESP extends Module {
                         int endX = pos.getX();
                         int endY = pos.getY();
                         int endZ = pos.getZ();
-                        render(new Box(new Vec3d(startX+1, startY+1, startZ+1), new Vec3d(endX, endY, endZ)), potSideColor.get(), potLineColor.get(), shapeMode.get(), event);
+                        render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), potSideColor.get(), potLineColor.get(), shapeMode.get(), event);
                     }
                 }
             }
@@ -160,11 +164,13 @@ public class PotESP extends Module {
     private void render(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, lines, shapeMode, 0);
     }
+
     private void removeChunksOutsideRenderDistance() {
         double renderDistanceBlocks = renderDistance.get() * 16;
 
         removeChunksOutsideRenderDistance(potLocations, renderDistanceBlocks);
     }
+
     private void removeChunksOutsideRenderDistance(Set<BlockPos> chunkSet, double renderDistanceBlocks) {
         chunkSet.removeIf(blockPos -> {
             BlockPos playerPos = new BlockPos(mc.player.getBlockX(), blockPos.getY(), mc.player.getBlockZ());

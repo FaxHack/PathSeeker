@@ -84,24 +84,6 @@ public class PathSeekerUtil {
         }
     }
 
-    public String getFormattedLastSeen() {
-        return formatDate(this.lastSeen);
-    }
-
-    public String getFormattedFirstSeen() {
-        return formatDate(this.firstSeen);
-    }
-
-    public String getFormattedPlaytime() {
-        return formatPlaytime(this.playtime);
-    }
-
-    public void updateTimeInfo(String lastSeen, String firstSeen, long playtime) {
-        this.lastSeen = lastSeen;
-        this.firstSeen = firstSeen;
-        this.playtime = playtime;
-    }
-
     public static boolean checkOrCreateFile(MinecraftClient mc, String fileName) {
         File file = FabricLoader.getInstance().getGameDir().resolve(fileName).toFile();
 
@@ -174,5 +156,23 @@ public class PathSeekerUtil {
         }
 
         return elytraSwapSlot != -1 ? elytraSwapSlot : 200;
+    }
+
+    public String getFormattedLastSeen() {
+        return formatDate(this.lastSeen);
+    }
+
+    public String getFormattedFirstSeen() {
+        return formatDate(this.firstSeen);
+    }
+
+    public String getFormattedPlaytime() {
+        return formatPlaytime(this.playtime);
+    }
+
+    public void updateTimeInfo(String lastSeen, String firstSeen, long playtime) {
+        this.lastSeen = lastSeen;
+        this.firstSeen = firstSeen;
+        this.playtime = playtime;
     }
 }

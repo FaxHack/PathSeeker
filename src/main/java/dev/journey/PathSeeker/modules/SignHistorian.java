@@ -1,85 +1,80 @@
 package dev.journey.PathSeeker.modules;
 
-import java.util.*;
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Files;
-
+import com.mojang.serialization.DataResult;
 import dev.journey.PathSeeker.PathSeeker;
 import dev.journey.PathSeeker.utils.PathSeekerUtil;
-import net.minecraft.item.*;
-import net.minecraft.block.*;
-import net.minecraft.text.Text;
-import java.util.stream.Stream;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Pair;
-import net.minecraft.nbt.NbtOps;
-import javax.annotation.Nullable;
-import net.minecraft.world.World;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.DyeColor;
-import java.util.stream.Collectors;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import java.nio.file.StandardOpenOption;
-import org.jetbrains.annotations.NotNull;
-import net.minecraft.util.math.Direction;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.util.math.MathHelper;
-import com.mojang.serialization.DataResult;
-import net.minecraft.block.entity.SignText;
-import net.minecraft.util.shape.VoxelShape;
-import net.fabricmc.loader.api.FabricLoader;
-import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.hit.BlockHitResult;
-import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.client.network.ServerInfo;
-import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.client.network.ClientPlayerEntity;
-import meteordevelopment.meteorclient.renderer.ShapeMode;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
-import meteordevelopment.meteorclient.utils.player.Rotations;
-import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IChatHud;
-import meteordevelopment.meteorclient.utils.render.RenderUtils;
+import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
-import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
-import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
-import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixininterface.IChatHud;
+import meteordevelopment.meteorclient.renderer.ShapeMode;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.render.blockesp.ESPBlockData;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
+import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.*;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.SignText;
+import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.ServerInfo;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.boss.WitherEntity;
+import net.minecraft.entity.mob.CreeperEntity;
+import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.item.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.util.DyeColor;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Pair;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.RaycastContext;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Tas [0xTas] <root@0xTas.dev>
  **/
 public class SignHistorian extends Module {
-    public SignHistorian() {
-        super(PathSeeker.Main, "SignHistorian", "Records & restores broken or modified signs.");
-    }
     private final String ERROR_MESSAGE = "PathSeeker";
     private final String BLACKLIST_FILE = "meteor-client/sign-historian/content-blacklist.txt";
-
     private final SettingGroup sgESP = settings.createGroup("ESP Settings");
     private final SettingGroup sgSigns = settings.createGroup("Signs Settings");
     private final SettingGroup sgBlacklist = settings.createGroup("Content Blacklist");
     private final SettingGroup sgPrevention = settings.createGroup("Grief Prevention");
-
     private final Setting<Boolean> espSigns = sgESP.add(
             new BoolSetting.Builder()
                     .name("ESP-signs")
@@ -87,7 +82,6 @@ public class SignHistorian extends Module {
                     .defaultValue(true)
                     .build()
     );
-
     private final Setting<Integer> espRange = sgESP.add(
             new IntSetting.Builder()
                     .name("ESP-range")
@@ -97,7 +91,6 @@ public class SignHistorian extends Module {
                     .defaultValue(128)
                     .build()
     );
-
     private final Setting<Boolean> dynamicColor = sgESP.add(
             new BoolSetting.Builder()
                     .name("dynamic-color")
@@ -105,7 +98,6 @@ public class SignHistorian extends Module {
                     .defaultValue(true)
                     .build()
     );
-
     private final Setting<ESPBlockData> destroyedSettings = sgESP.add(
             new GenericSetting.Builder<ESPBlockData>()
                     .name("destroyed/Missing-signs-ESP")
@@ -121,7 +113,6 @@ public class SignHistorian extends Module {
                     )
                     .build()
     );
-
     private final Setting<ESPBlockData> modifiedSettings = sgESP.add(
             new GenericSetting.Builder<ESPBlockData>()
                     .name("modified-signs-ESP")
@@ -137,7 +128,6 @@ public class SignHistorian extends Module {
                     )
                     .build()
     );
-
     private final Setting<Boolean> strictSetting = sgSigns.add(
             new BoolSetting.Builder()
                     .name("strict-mode")
@@ -145,7 +135,107 @@ public class SignHistorian extends Module {
                     .defaultValue(false)
                     .build()
     );
-
+    private final Setting<Boolean> ignoreBrokenSetting = sgSigns.add(
+            new BoolSetting.Builder()
+                    .name("ignore-purposefully-broken")
+                    .description("Ignores signs you break on purpose (but still tracks them in case you change your mind later.)")
+                    .defaultValue(false)
+                    .build()
+    );
+    private final Setting<Boolean> waxRestoration = sgSigns.add(
+            new BoolSetting.Builder()
+                    .name("wax-restored-signs")
+                    .description("Automatically waxes signs that SignHistorian has restored.")
+                    .defaultValue(true)
+                    .build()
+    );
+    private final Setting<Boolean> griefPrevention = sgPrevention.add(
+            new BoolSetting.Builder()
+                    .name("mob-grief-alarm")
+                    .description("Warns you when nearby signs are in danger of an approaching creeper or wither.")
+                    .defaultValue(true)
+                    .build()
+    );
+    private final Setting<Boolean> chatNotification = sgPrevention.add(
+            new BoolSetting.Builder()
+                    .name("chat-notification")
+                    .description("Warns you in chat when nearby signs are in danger of an approaching creeper.")
+                    .defaultValue(true)
+                    .build()
+    );
+    private final Setting<Double> alarmVolume = sgPrevention.add(
+            new DoubleSetting.Builder()
+                    .name("volume")
+                    .sliderMax(0)
+                    .sliderMax(200)
+                    .defaultValue(0)
+                    .build()
+    );
+    private final Setting<ESPBlockData> dangerESP = sgPrevention.add(
+            new GenericSetting.Builder<ESPBlockData>()
+                    .name("grief-prevention-ESP")
+                    .defaultValue(
+                            new ESPBlockData(
+                                    ShapeMode.Both,
+                                    new SettingColor(255, 0, 25, 255),
+                                    new SettingColor(255, 0, 25, 255),
+                                    true,
+                                    new SettingColor(255, 0, 25, 255)
+                            )
+                    )
+                    .build()
+    );    private final Setting<Boolean> openBlacklistFile = sgBlacklist.add(
+            new BoolSetting.Builder()
+                    .name("open-blacklist-file")
+                    .description("Open the content-blacklist.txt file.")
+                    .defaultValue(false)
+                    .onChanged(it -> {
+                        if (it) {
+                            if (PathSeekerUtil.checkOrCreateFile(mc, BLACKLIST_FILE))
+                                PathSeekerUtil.openFile(mc, BLACKLIST_FILE);
+                            resetBlacklistFileSetting();
+                        }
+                    })
+                    .build()
+    );
+    private final HashSet<String> blacklisted = new HashSet<>();
+    private final Setting<Boolean> contentBlacklist = sgBlacklist.add(
+            new BoolSetting.Builder()
+                    .name("content-blacklist")
+                    .description("Ignore signs that contain specific words or phrases (line-separated list in sign-historian/content-blacklist.txt)")
+                    .defaultValue(false)
+                    .onChanged(it -> {
+                        if (it && PathSeekerUtil.checkOrCreateFile(mc, BLACKLIST_FILE)) {
+                            this.blacklisted.clear();
+                            initBlacklistText();
+                            if (mc.player != null) {
+                                mc.player.sendMessage(Text.of("§8<" + PathSeekerUtil.randomColorCode() + "§o✨§r§8> §7Please write one blacklisted item for each line of the file."));
+                                mc.player.sendMessage(Text.of("§8<" + PathSeekerUtil.randomColorCode() + "§o✨§r§8> §7Spaces and other punctuation will be treated literally."));
+                                mc.player.sendMessage(Text.of("§8<" + PathSeekerUtil.randomColorCode() + "§o✨§r§8> §7You must toggle this setting or the module after updating the blacklist's contents."));
+                            }
+                        }
+                    })
+                    .build()
+    );
+    private final Set<BlockPos> signsBrokenByPlayer = new HashSet<>();
+    private final Set<SignBlockEntity> modifiedSigns = new HashSet<>();
+    private final Set<SignBlockEntity> destroyedSigns = new HashSet<>();
+    private final HashSet<SignBlockEntity> signsToWax = new HashSet<>();
+    private final HashSet<SignBlockEntity> signsToGlowInk = new HashSet<>();
+    private final HashMap<Integer, Vec3d> trackedGriefers = new HashMap<>();
+    private final HashSet<HostileEntity> approachingGriefers = new HashSet<>();
+    private final HashMap<SignBlockEntity, WoodType> woodTypeMap = new HashMap<>();
+    private final HashMap<SignBlockEntity, DyeColor> signsToColor = new HashMap<>();
+    private final HashMap<Integer, Pair<Boolean, Long>> grieferHadLineOfSight = new HashMap<>();
+    private final Map<BlockPos, Pair<SignBlockEntity, BlockState>> serverSigns = new HashMap<>();
+    private int timer = 0;
+    private int dyeSlot = -1;
+    private int pingTicks = 0;
+    private int gracePeriod = 0;
+    private int rotationPriority = 69420;
+    private boolean didDisableWaxAura = false;
+    private @Nullable BlockPos lastTargetedSign = null;
+    private @Nullable RegistryKey<World> currentDim = null;
     private final Setting<Boolean> persistenceSetting = sgSigns.add(
             new BoolSetting.Builder()
                     .name("persistence")
@@ -165,128 +255,23 @@ public class SignHistorian extends Module {
                     })
                     .build()
     );
-
-    private final Setting<Boolean> ignoreBrokenSetting = sgSigns.add(
-            new BoolSetting.Builder()
-                    .name("ignore-purposefully-broken")
-                    .description("Ignores signs you break on purpose (but still tracks them in case you change your mind later.)")
-                    .defaultValue(false)
-                    .build()
-    );
-
-    private final Setting<Boolean> waxRestoration = sgSigns.add(
-            new BoolSetting.Builder()
-                    .name("wax-restored-signs")
-                    .description("Automatically waxes signs that SignHistorian has restored.")
-                    .defaultValue(true)
-                    .build()
-    );
-
-    private final Setting<Boolean> contentBlacklist = sgBlacklist.add(
-            new BoolSetting.Builder()
-                    .name("content-blacklist")
-                    .description("Ignore signs that contain specific words or phrases (line-separated list in sign-historian/content-blacklist.txt)")
-                    .defaultValue(false)
-                    .onChanged(it -> {
-                        if (it && PathSeekerUtil.checkOrCreateFile(mc, BLACKLIST_FILE)) {
-                            this.blacklisted.clear();
-                            initBlacklistText();
-                            if (mc.player != null) {
-                                mc.player.sendMessage(Text.of("§8<"+ PathSeekerUtil.randomColorCode()+"§o✨§r§8> §7Please write one blacklisted item for each line of the file."));
-                                mc.player.sendMessage(Text.of("§8<"+PathSeekerUtil.randomColorCode()+"§o✨§r§8> §7Spaces and other punctuation will be treated literally."));
-                                mc.player.sendMessage(Text.of("§8<"+PathSeekerUtil.randomColorCode()+"§o✨§r§8> §7You must toggle this setting or the module after updating the blacklist's contents."));
-                            }
-                        }
-                    })
-                    .build()
-    );
-
-    private final Setting<Boolean> openBlacklistFile = sgBlacklist.add(
-            new BoolSetting.Builder()
-                    .name("open-blacklist-file")
-                    .description("Open the content-blacklist.txt file.")
-                    .defaultValue(false)
-                    .onChanged(it -> {
-                        if (it) {
-                            if (PathSeekerUtil.checkOrCreateFile(mc, BLACKLIST_FILE)) PathSeekerUtil.openFile(mc, BLACKLIST_FILE);
-                            resetBlacklistFileSetting();
-                        }
-                    })
-                    .build()
-    );
-
-    private final Setting<Boolean> griefPrevention = sgPrevention.add(
-            new BoolSetting.Builder()
-                    .name("mob-grief-alarm")
-                    .description("Warns you when nearby signs are in danger of an approaching creeper or wither.")
-                    .defaultValue(true)
-                    .build()
-    );
-
-    private final Setting<Boolean> chatNotification = sgPrevention.add(
-            new BoolSetting.Builder()
-                    .name("chat-notification")
-                    .description("Warns you in chat when nearby signs are in danger of an approaching creeper.")
-                    .defaultValue(true)
-                    .build()
-    );
-
-    private final Setting<Double> alarmVolume = sgPrevention.add(
-            new DoubleSetting.Builder()
-                    .name("volume")
-                    .sliderMax(0)
-                    .sliderMax(200)
-                    .defaultValue(0)
-                    .build()
-    );
-
-    private final Setting<ESPBlockData> dangerESP = sgPrevention.add(
-            new GenericSetting.Builder<ESPBlockData>()
-                    .name("grief-prevention-ESP")
-                    .defaultValue(
-                            new ESPBlockData(
-                                    ShapeMode.Both,
-                                    new SettingColor(255, 0, 25, 255),
-                                    new SettingColor(255, 0, 25, 255),
-                                    true,
-                                    new SettingColor(255, 0, 25, 255)
-                            )
-                    )
-                    .build()
-    );
-
-    private int timer = 0;
-    private int dyeSlot = -1;
-    private int pingTicks = 0;
-    private int gracePeriod = 0;
-    private int rotationPriority = 69420;
-    private boolean didDisableWaxAura = false;
-    private @Nullable BlockPos lastTargetedSign = null;
-    private @Nullable RegistryKey<World> currentDim = null;
-    private final HashSet<String> blacklisted = new HashSet<>();
-    private final Set<BlockPos> signsBrokenByPlayer = new HashSet<>();
-    private final Set<SignBlockEntity> modifiedSigns = new HashSet<>();
-    private final Set<SignBlockEntity> destroyedSigns = new HashSet<>();
-    private final HashSet<SignBlockEntity> signsToWax = new HashSet<>();
-    private final HashSet<SignBlockEntity> signsToGlowInk = new HashSet<>();
-    private final HashMap<Integer, Vec3d> trackedGriefers = new HashMap<>();
-    private final HashSet<HostileEntity> approachingGriefers = new HashSet<>();
-    private final HashMap<SignBlockEntity, WoodType> woodTypeMap = new HashMap<>();
-    private final HashMap<SignBlockEntity, DyeColor> signsToColor = new HashMap<>();
-    private final HashMap<Integer, Pair<Boolean, Long>> grieferHadLineOfSight = new HashMap<>();
-    private final Map<BlockPos, Pair<SignBlockEntity, BlockState>> serverSigns = new HashMap<>();
+    public SignHistorian() {
+        super(PathSeeker.Main, "SignHistorian", "Records & restores broken or modified signs.");
+    }
 
     private void initBlacklistText() {
         File blackListFile = FabricLoader.getInstance().getGameDir().resolve(BLACKLIST_FILE).toFile();
 
-        try(Stream<String> lineStream = Files.lines(blackListFile.toPath())) {
+        try (Stream<String> lineStream = Files.lines(blackListFile.toPath())) {
             blacklisted.addAll(lineStream.toList());
-        }catch (Exception err) {
-            PathSeeker.LOG.error("[PathSeeker] Failed to read from "+ blackListFile.getAbsolutePath() +"! - Why:\n"+err);
+        } catch (Exception err) {
+            PathSeeker.LOG.error("[PathSeeker] Failed to read from " + blackListFile.getAbsolutePath() + "! - Why:\n" + err);
         }
     }
 
-    private void resetBlacklistFileSetting() { openBlacklistFile.set(false); }
+    private void resetBlacklistFileSetting() {
+        openBlacklistFile.set(false);
+    }
 
     private void initOrLoadFromSignFile() {
         if (mc.world == null || mc.getNetworkHandler() == null) return;
@@ -302,12 +287,12 @@ public class SignHistorian extends Module {
             String dimKey;
             if (currentDim != null) dimKey = currentDim.getValue().toString().replace("minecraft:", "");
             else dimKey = mc.world.getRegistryKey().getValue().toString().replace("minecraft:", "");
-            Path signsFile = historianFolder.resolve( dimKey+"."+address+".signs");
+            Path signsFile = historianFolder.resolve(dimKey + "." + address + ".signs");
             if (signsFile.toFile().exists()) {
                 readSignsFromFile(signsFile);
             } else if (signsFile.toFile().createNewFile()) {
                 if (mc.player != null) mc.player.sendMessage(
-                        Text.of("§8<"+ PathSeekerUtil.randomColorCode()+"✨§8> [§5SignHistorian§8] §7Sign data will be saved to §2§o"+signsFile.getFileName()+" §7in your §7§ometeor-client/sign-historian folder.")
+                        Text.of("§8<" + PathSeekerUtil.randomColorCode() + "✨§8> [§5SignHistorian§8] §7Sign data will be saved to §2§o" + signsFile.getFileName() + " §7in your §7§ometeor-client/sign-historian folder.")
                 );
                 readSignsFromFile(signsFile);
             }
@@ -317,7 +302,7 @@ public class SignHistorian extends Module {
     }
 
     private void readSignsFromFile(Path signsFile) {
-        try(Stream<String> lineStream = Files.lines(signsFile)) {
+        try (Stream<String> lineStream = Files.lines(signsFile)) {
             List<String> entries = lineStream.toList();
             for (String sign : entries) {
                 try {
@@ -345,14 +330,14 @@ public class SignHistorian extends Module {
                     PathSeeker.LOG.error("Failed to parse SignBlockEntity Nbt: {}", String.valueOf(err));
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             PathSeeker.LOG.error(e.toString());
         }
     }
 
     private void writeSignToFile(NbtCompound metadata, NbtCompound cachedState, Path signsFile) {
         try {
-            Files.writeString(signsFile, metadata+" -|- "+cachedState+"\n", StandardOpenOption.APPEND);
+            Files.writeString(signsFile, metadata + " -|- " + cachedState + "\n", StandardOpenOption.APPEND);
         } catch (Exception err) {
             PathSeeker.LOG.error(ERROR_MESSAGE + "{}", String.valueOf(err));
         }
@@ -375,7 +360,7 @@ public class SignHistorian extends Module {
             String dimKey;
             if (currentDim != null) dimKey = currentDim.getValue().toString().replace("minecraft:", "");
             else dimKey = mc.world.getRegistryKey().getValue().toString().replace("minecraft:", "");
-            Path signsFile = historianFolder.resolve(dimKey+"."+address+".signs");
+            Path signsFile = historianFolder.resolve(dimKey + "." + address + ".signs");
             if (signsFile.toFile().exists()) {
                 writeSignToFile(metadata, stateNbt, signsFile);
             } else if (signsFile.toFile().createNewFile()) {
@@ -470,7 +455,7 @@ public class SignHistorian extends Module {
     private BlockPos getTargetedSign() {
         ClientPlayerEntity player = mc.player;
         if (player == null || mc.world == null) return null;
-        HitResult trace = player.raycast(7,0, false);
+        HitResult trace = player.raycast(7, 0, false);
         if (trace != null) {
             BlockPos pos = ((BlockHitResult) trace).getBlockPos();
             if (mc.world.getBlockEntity(pos) instanceof SignBlockEntity) return pos;
@@ -612,7 +597,7 @@ public class SignHistorian extends Module {
             if (newDistance <= MathHelper.square(10)) {
                 return mobHasLoS || (newDistance < oldDistance && grieferHadLineOfSight.get(creeper.getId()).getLeft());
             } else if (newDistance <= MathHelper.square(20)) {
-                return  (newDistance < oldDistance && mobHasLoS);
+                return (newDistance < oldDistance && mobHasLoS);
             }
         } else if (mob instanceof WitherEntity wither) {
             if (newDistance <= MathHelper.square(16)) {
@@ -629,7 +614,7 @@ public class SignHistorian extends Module {
 
     private void processSign(@NotNull SignBlockEntity sbe) {
         if (!sbe.getFrontText().hasText(mc.player) && !sbe.getBackText().hasText(mc.player)) return;
-        else if (contentBlacklist.get() &&  containsBlacklistedText(sbe)) return;
+        else if (contentBlacklist.get() && containsBlacklistedText(sbe)) return;
 
         BlockPos pos = sbe.getPos();
         if (serverSigns.containsKey(pos)) {
@@ -682,7 +667,7 @@ public class SignHistorian extends Module {
         if (dye == Items.GLOW_INK_SAC) {
             signsToGlowInk.remove(sbe);
             if (!signsToWax.contains(sbe) && !signsToColor.containsKey(sbe)) timer = -1;
-        } else if (dye == Items.HONEYCOMB){
+        } else if (dye == Items.HONEYCOMB) {
             signsToWax.remove(sbe);
             if (!signsToColor.containsKey(sbe) && !signsToGlowInk.contains(sbe)) timer = -1;
         } else {
@@ -729,12 +714,12 @@ public class SignHistorian extends Module {
         for (SignBlockEntity sbe : modifiedSigns) {
             if (event.result.getBlockPos().isWithinDistance(sbe.getPos(), 1)) {
                 mc.player.sendMessage(Text.of(
-                        "§8<"+ PathSeekerUtil.randomColorCode()+"✨§8> §e§lOriginal§7§l: §7§o"+ Arrays.stream(sbe.getFrontText().getMessages(false)).map(Text::getString).collect(Collectors.joining(" "))
+                        "§8<" + PathSeekerUtil.randomColorCode() + "✨§8> §e§lOriginal§7§l: §7§o" + Arrays.stream(sbe.getFrontText().getMessages(false)).map(Text::getString).collect(Collectors.joining(" "))
                 ));
                 mc.player.sendMessage(Text.of(
-                        "§8<"+ PathSeekerUtil.randomColorCode()+"✨§8> §6§lWoodType§7§l: "+((AbstractSignBlock) sbe.getCachedState().getBlock()).getWoodType().name()
-                                +" | §3§lColor§7§l: "+sbe.getText(true).getColor().name()
-                                +" | §f§lGlow Ink§7§l: "+sbe.getText(true).isGlowing()
+                        "§8<" + PathSeekerUtil.randomColorCode() + "✨§8> §6§lWoodType§7§l: " + ((AbstractSignBlock) sbe.getCachedState().getBlock()).getWoodType().name()
+                                + " | §3§lColor§7§l: " + sbe.getText(true).getColor().name()
+                                + " | §f§lGlow Ink§7§l: " + sbe.getText(true).isGlowing()
                 ));
                 return;
             }
@@ -750,12 +735,12 @@ public class SignHistorian extends Module {
         for (SignBlockEntity ghost : destroyedSigns) {
             if (packet.getPos().isWithinDistance(ghost.getPos(), 1.5)) {
                 mc.player.sendMessage(Text.of(
-                        "§8<"+ PathSeekerUtil.randomColorCode()+"✨§8> §c§lOriginal§7§l: §7§o"+ Arrays.stream(ghost.getFrontText().getMessages(false)).map(Text::getString).collect(Collectors.joining(" "))
+                        "§8<" + PathSeekerUtil.randomColorCode() + "✨§8> §c§lOriginal§7§l: §7§o" + Arrays.stream(ghost.getFrontText().getMessages(false)).map(Text::getString).collect(Collectors.joining(" "))
                 ));
                 mc.player.sendMessage(Text.of(
-                        "§8<"+ PathSeekerUtil.randomColorCode()+"✨§8> §6§lWoodType§7§l: "+((AbstractSignBlock) ghost.getCachedState().getBlock()).getWoodType().name()
-                                +" | §3§lColor§7§l: "+ghost.getText(true).getColor().name()
-                                +" | §f§lGlow Ink§7§l: "+ghost.getText(true).isGlowing()
+                        "§8<" + PathSeekerUtil.randomColorCode() + "✨§8> §6§lWoodType§7§l: " + ((AbstractSignBlock) ghost.getCachedState().getBlock()).getWoodType().name()
+                                + " | §3§lColor§7§l: " + ghost.getText(true).getColor().name()
+                                + " | §f§lGlow Ink§7§l: " + ghost.getText(true).isGlowing()
                 ));
             }
         }
@@ -771,8 +756,7 @@ public class SignHistorian extends Module {
                 || (event.oldState.getBlock() instanceof WallSignBlock
                 && !(event.newState.getBlock() instanceof WallSignBlock))
                 || (event.oldState.getBlock() instanceof WallHangingSignBlock
-                && !(event.newState.getBlock() instanceof WallHangingSignBlock)))
-        {
+                && !(event.newState.getBlock() instanceof WallHangingSignBlock))) {
             if (lastTargetedSign == null) return;
             if (lastTargetedSign.getX() == event.pos.getX() && lastTargetedSign.getY() == event.pos.getY() && lastTargetedSign.getZ() == event.pos.getZ()) {
                 signsBrokenByPlayer.add(event.pos);
@@ -808,7 +792,6 @@ public class SignHistorian extends Module {
             timer = 3;
         }
 
-        
 
         if (timer % 2 == 0) {
             List<BlockPos> inRange = serverSigns.keySet()
@@ -834,7 +817,8 @@ public class SignHistorian extends Module {
                 } else if (entity instanceof WitherEntity wither) {
                     griefingMob = wither;
                 } else continue;
-                if (!trackedGriefers.containsKey(griefingMob.getId())) trackedGriefers.put(griefingMob.getId(), griefingMob.getPos());
+                if (!trackedGriefers.containsKey(griefingMob.getId()))
+                    trackedGriefers.put(griefingMob.getId(), griefingMob.getPos());
             }
 
             if (!hasNearbySigns()) {
@@ -850,7 +834,7 @@ public class SignHistorian extends Module {
                         mc.player.playSound(SoundEvents.ENTITY_PHANTOM_HURT, alarmVolume.get().floatValue(), 1f);
                         if (chatNotification.get()) {
                             ((IChatHud) mc.inGameHud.getChatHud()).meteor$add(
-                                    Text.literal("§8<"+ PathSeekerUtil.randomColorCode()+"✨§8> [§5SignHistorian§8] §c§lNEARBY SIGNS IN DANGER OF MOB GRIEFING§7§l."),
+                                    Text.literal("§8<" + PathSeekerUtil.randomColorCode() + "✨§8> [§5SignHistorian§8] §c§lNEARBY SIGNS IN DANGER OF MOB GRIEFING§7§l."),
                                     "MobGriefAlarm".hashCode()
                             );
                         }
@@ -1018,4 +1002,6 @@ public class SignHistorian extends Module {
             }
         }
     }
+
+
 }
