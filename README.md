@@ -25,7 +25,10 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
   A clever fix for fireworks issues on the Mio client when using Grim Durability ElytraFly with a chestplate. Fly smoothly without a hitch! [Credits to meteor-mod](https://github.com/miles352/meteor-mod/blob/master/src/main/java/com/example/addon/modules/GrimDuraFirework.java)
   
 - **MobGearESP**  
-  Detects mobs carrying or wearing player equipment. [Credits to windoid](https://github.com/windoid/MobGearESP/blob/master/src/main/java/com/mobgear/addon/modules/MobGearESP.java)  
+  Detects mobs carrying or wearing player equipment. [Credits to windoid](https://github.com/windoid/MobGearESP/blob/master/src/main/java/com/mobgear/addon/modules/MobGearESP.java)
+
+- **SignHistorian**  
+  Records & restores broken or modified signs. [Credits to Stardust](https://github.com/0xTas/stardust/blob/64cd499c62d30be8e479b084a613e0c05b77c8d9/src/main/java/dev/stardust/modules/SignHistorian.java)  
 
 - **NewerNewChunks**  
   Take control of chunk tracing! Manage chunk data across servers and dimensions with crash-resilient saving, easy sharing options, and pinpoint accuracy.  
@@ -86,7 +89,7 @@ PathSeeker is always evolving! Here's what's planned:
 ## Credits  
 A big shoutout to the creators and projects that inspired PathSeeker:  
 - [**TrouserStreak**](https://github.com/etianl/Trouser-Streak) for laying the groundwork.  
-- [**meteor-mod**](https://github.com/miles352/meteor-mod) for additional features.
+- [**meteor-mod**](https://github.com/miles352/meteor-mod) & [**Stardust**](https://github.com/0xTas/stardust) for additional features.
 
 ---
 
