@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PathSeeker - Minecraft Utility Mod</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes starTwinkle {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        .minecraft-btn {
+            background-color: #4CAF50;
+            border: 2px solid #45a049;
+            color: white;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .minecraft-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+        }
+
+        .feature-card {
+            background: rgba(32, 32, 32, 0.9);
+            border: 2px solid #333;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+            border-color: #4CAF50;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            animation: starTwinkle 2s infinite;
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+  <!-- Navigation -->
+  <nav class="bg-gray-800 border-b border-green-600 fixed w-full z-50">
+      <div class="container mx-auto px-6 py-3">
+          <div class="flex justify-between items-center">
+              <div class="text-2xl font-bold text-green-500">PathSeeker</div>
+              <div class="hidden md:flex space-x-8">
+                  <a href="#" class="hover:text-green-500 transition-colors">Home</a>
+                  <a href="#features" class="hover:text-green-500 transition-colors">Features</a>
+                  <a href="#installation" class="hover:text-green-500 transition-colors">Installation</a>
+                  <a href="#support" class="hover:text-green-500 transition-colors">Support</a>
+                  <a href="https://github.com/FaxHack/PathSeeker" class="hover:text-green-500 transition-colors">GitHub</a>
+              </div>
+          </div>
+      </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <div class="relative min-h-screen flex items-center justify-center pt-16">
+      <div id="stars-container"></div>
+      <div class="text-center px-6">
+          <h1 class="text-6xl font-bold mb-4 floating">PathSeeker</h1>
+          <p class="text-xl mb-8 text-green-400">Your Ultimate Tool for Anarchy Gameplay</p>
+          <p class="max-w-2xl mx-auto mb-8 text-gray-300">
+              Enhance your Minecraft experience with powerful features designed specifically for anarchy servers. 
+              Find bases, detect patterns, and dominate the game with advanced utilities.
+          </p>
+          <a href="https://github.com/FaxHack/PathSeeker/releases/latest" class="minecraft-btn inline-block">
+              Download Now
+          </a>
+      </div>
+  </div>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-800">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature Cards -->
+                <div class="feature-card p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">Advanced Chunk Detection</h3>
+                    <p class="text-gray-300">Identify new and modified chunks with precision, perfect for base hunting.</p>
+                </div>
+                <div class="feature-card p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">Base Finder</h3>
+                    <p class="text-gray-300">Sophisticated algorithms to detect potential base locations and player activity.</p>
+                </div>
+                <div class="feature-card p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-4 text-green-400">Storage Looter</h3>
+                    <p class="text-gray-300">Efficiently manage and search through storage systems with enhanced visibility.</p>
+                </div>
+                <!-- More feature cards -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section id="installation" class="py-20">
+      <div class="container mx-auto px-6">
+          <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Installation</h2>
+          <div class="max-w-3xl mx-auto">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <a href="https://github.com/FaxHack/PathSeeker/releases/latest" class="text-center p-6 feature-card rounded-lg">
+                      <div class="text-3xl mb-4">1</div>
+                      <p>Download the mod from GitHub Releases</p>
+                  </a>
+                  <div class="text-center p-6 feature-card rounded-lg">
+                      <div class="text-3xl mb-4">2</div>
+                      <p>Place the .jar file in your mods folder</p>
+                  </div>
+                  <div class="text-center p-6 feature-card rounded-lg">
+                      <div class="text-3xl mb-4">3</div>
+                      <p>Launch Minecraft and enjoy!</p>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </section>
+
+    <!-- Support Section -->
+    <section id="support" class="py-20 bg-gray-800">
+      <div class="container mx-auto px-6">
+          <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Support</h2>
+          <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="feature-card p-6 rounded-lg">
+                  <h3 class="text-xl font-bold mb-4 text-green-400">Community</h3>
+                  <p class="mb-4">Join our Discord community for help and updates:</p>
+                  <a href="https://discord.gg/kjjqEgghxj" class="minecraft-btn inline-block">Join Discord</a>
+              </div>
+              <div class="feature-card p-6 rounded-lg">
+                  <h3 class="text-xl font-bold mb-4 text-green-400">Issues & Bugs</h3>
+                  <p class="mb-4">Report issues on our GitHub page:</p>
+                  <a href="https://github.com/FaxHack/PathSeeker/issues" class="minecraft-btn inline-block">GitHub Issues</a>
+              </div>
+          </div>
+      </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 border-t border-green-600 py-8">
+      <div class="container mx-auto px-6">
+          <div class="flex flex-col md:flex-row justify-between items-center">
+              <div class="mb-4 md:mb-0">
+                  <p>&copy; 2025 PathSeeker. All rights reserved.</p>
+              </div>
+              <div class="flex space-x-6">
+                  <a href="https://github.com/FaxHack/PathSeeker" class="hover:text-green-500 transition-colors">GitHub</a>
+                  <a href="https://discord.gg/kjjqEgghxj" class="hover:text-green-500 transition-colors">Discord</a>
+                  <a href="https://github.com/FaxHack/PathSeeker/graphs/contributors" class="hover:text-green-500 transition-colors">Contributors</a>
+              </div>
+          </div>
+      </div>
+  </footer>
+
+    <script>
+        // Add animated stars to the background
+        const starsContainer = document.getElementById('stars-container');
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + 'vw';
+            star.style.top = Math.random() * 100 + 'vh';
+            star.style.animationDelay = Math.random() * 2 + 's';
+            starsContainer.appendChild(star);
+        }
+    </script>
+</body>
+</html>
