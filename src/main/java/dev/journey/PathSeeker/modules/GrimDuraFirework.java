@@ -35,7 +35,7 @@ public class GrimDuraFirework extends Module
 
     public GrimDuraFirework()
     {
-        super(PathSeeker.Main, "GrimDuraFirework", "Swaps to your elytra so fireworks actually work.");
+        super(PathSeeker.Main, "GrimFirework", "Swaps to your elytra so fireworks actually work.");
     }
 
     int fireworkTickDelay = 0;

@@ -32,6 +32,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new MobGearESP());
         Modules.get().add(new GrimDuraFirework());
         Modules.get().add(new SignHistorian());
+        Modules.get().add(new ElytraSwap());
         Commands.add(new Stats2b2t());
         Commands.add(new ViewNbtCommand());
         Commands.add(new GarbageCleanerCommand());
