@@ -15,9 +15,9 @@ jobs:
         with:
           java-version: 21
           distribution: adopt
-      - name: elevate gradle perms
-        run: |
-          chmod +x ./gradlew
+#      - name: elevate gradle perms
+#        run: |
+#          chmod +x ./gradlew
       - name: Build with Gradle
         run: ./gradlew build
       - name: grab release tag
