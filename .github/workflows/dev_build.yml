@@ -1,0 +1,32 @@
+name: Publish Development Build
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: adopt
+      - name: Build with Gradle
+        run: ./gradlew build
+      - name: grab release tag
+        id: branch_tag
+        run: |
+          echo "tag=$(echo v${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+      - name: Release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: '${{ secrets.GITHUB_TOKEN }}'
+          automatic_release_tag: '${{ env.tag }}'
+          prerelease: true
+          title: 'Dev Build for ${{ env.tag }}'
+          files: |
+            ./build/libs/*.jar
