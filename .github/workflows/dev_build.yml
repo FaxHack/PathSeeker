@@ -16,7 +16,7 @@ jobs:
           java-version: 21
           distribution: adopt
       - name: elevate gradle perms
-      - run: |
+        run: |
           git update-index --chmod=+x gradlew
       - name: Build with Gradle
         run: ./gradlew build
