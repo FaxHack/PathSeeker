@@ -15,12 +15,9 @@ jobs:
         with:
           java-version: 21
           distribution: adopt
-#      - name: elevate gradle perms
-#        run: |
-#          chmod +x ./gradlew
       - name: Build with Gradle
         run: ./gradlew build
-      - name: grab release tag
+      - name: Grab Release Tag
         id: branch_tag
         run: |
           echo "tag=$(echo v${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
