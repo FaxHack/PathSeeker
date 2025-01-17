@@ -34,7 +34,7 @@ jobs:
         shell: bash
 
       - name: Release
-        uses: marvinpinto/action-automatic-releases@1.4.0 # Pin a specific version
+        uses: marvinpinto/action-automatic-releases@1.0.3 # Pin a specific version
         with:
           repo_token: '${{ secrets.GITHUB_TOKEN }}'
           automatic_release_tag: '${{ env.tag }}'
