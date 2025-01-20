@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class PathSeeker extends MeteorAddon {
     public static final Logger LOG = LoggerFactory.getLogger(PathSeeker.class);
     public static final Category Main = new Category("PathSeeker");
+    public static final Category Hunting = new Category("PathSeeker-Hunting");
 
     @Override
     public void onInitialize() {
