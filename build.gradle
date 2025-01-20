@@ -10,9 +10,29 @@ version = project.mod_version
 group = project.maven_group
 
 repositories {
-    mavenCentral()
-    maven { url "https://maven.meteordev.org/releases"}
-    maven { url "https://maven.meteordev.org/snapshots" }
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+    maven {
+        name = "Meteor Dev Releases"
+        url = "https://maven.meteordev.org/releases"
+    }
+    maven {
+        name = "Meteor Dev Snapshots"
+        url = "https://maven.meteordev.org/snapshots"
+    }
+
+    flatDir {
+        dirs 'libs'
+    }
 }
 
 loom {
@@ -28,8 +48,14 @@ dependencies {
     // Meteor
     modImplementation "meteordevelopment:meteor-client:${project.meteor_version}"
 
+    // Xaero's Minimap
+    modImplementation("maven.modrinth:xaeroplus:2.24.7+fabric-1.21")
+
     // Other
     implementation 'org.json:json:20231013'
+    modImplementation("net.lenni0451:LambdaEvents:2.4.2")
+    modImplementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    modImplementation "baritone-api-fabric:baritone-api-fabric:1.10.2"
 }
 
 processResources {

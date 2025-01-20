@@ -1,4 +1,4 @@
-package dev.journey.PathSeeker.modules;
+package dev.journey.PathSeeker.modules.render;
 
 import dev.journey.PathSeeker.PathSeeker;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;

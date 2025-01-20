@@ -1,4 +1,4 @@
-package dev.journey.PathSeeker.modules;
+package dev.journey.PathSeeker.modules.utility;
 
 import com.mojang.serialization.DataResult;
 import dev.journey.PathSeeker.PathSeeker;

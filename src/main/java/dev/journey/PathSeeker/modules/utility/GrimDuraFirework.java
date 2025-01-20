@@ -1,4 +1,4 @@
-package dev.journey.PathSeeker.modules;
+package dev.journey.PathSeeker.modules.utility;
 
 /*
  * Ported from https://github.com/miles352/meteor-mod/blob/master/src/main/java/com/example/addon/modules/GrimDuraFirework.java
