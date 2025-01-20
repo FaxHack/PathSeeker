@@ -10,7 +10,16 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
   Pinpoint new chunks, old generation chunks, and more with near-perfect accuracy to keep your exploration one step ahead.  
 
 - **Base Finder**  
-  Uncover hidden bases and dungeons effortlessly, giving you the edge in anarchy gameplay.  
+  Uncover hidden bases and dungeons effortlessly, giving you the edge in anarchy gameplay.
+
+- **Pitch40Util**
+  Used alongside meteors pitch40. Auto sets min and max bounds so that you continue to gain height. Also has an auto firework mode for when you lose velocity.
+
+- **TrailFollower** (Requires XaeroPlus)
+Follows trails in all dimensions using either pitch40 or baritone. May break on path splits or other cases.
+
+- **NoJumpDelay**
+  Removes delay between jumps.
 
 > [!TIP]  
 > Use Base Finder with NewerNewChunks to drastically improve your chances of locating uncharted bases.
