@@ -141,6 +141,7 @@ public class MobGearESP extends Module {
     @EventHandler
     private void onRender3D(Render3DEvent event) {
         count = 0;
+        assert mc.world != null;
         for (Entity entity : mc.world.getEntities()) {
             if (!(entity instanceof LivingEntity livingEntity)) continue;
             if (shouldSkip(livingEntity)) continue;

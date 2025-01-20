@@ -15,6 +15,10 @@ import net.minecraft.util.Hand;
 
 import java.awt.*;
 import java.io.File;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -110,7 +114,7 @@ public class PathSeekerUtil {
         return false;
     }
 
-    public static void openFile(MinecraftClient mc, String fileName) {
+    public static void openFile(MinecraftClient ignoredMc, String fileName) {
         File file = FabricLoader.getInstance().getGameDir().resolve(fileName).toFile();
 
         if (Desktop.isDesktopSupported()) {
@@ -156,6 +160,43 @@ public class PathSeekerUtil {
         }
 
         return elytraSwapSlot != -1 ? elytraSwapSlot : 200;
+    }
+
+    public static void sendWebhook(String webhookURL, String title, String message, String pingID, String playerName) {
+        String json = "";
+        json += "{\"embeds\": [{"
+                + "\"title\": \"" + title + "\","
+                + "\"description\": \"" + message + "\","
+                + "\"color\": 15258703,"
+                + "\"footer\": {"
+                + "\"text\": \"From: " + playerName + "\"}"
+                + "}]}";
+        sendWebhook(webhookURL, json, pingID);
+    }
+
+    public static void sendWebhook(String webhookURL, String jsonObject, String pingID) {
+        sendRequest(webhookURL, jsonObject);
+
+        if (pingID != null) {
+            jsonObject = "{\"content\": \"<@" + pingID + ">\"}";
+            sendRequest(webhookURL, jsonObject);
+        }
+    }
+
+    private static void sendRequest(String webhookURL, String json) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI(webhookURL))
+                    .header("Content-Type", "application/json")
+                    .header("User-Agent", "Mozilla")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String getFormattedLastSeen() {
