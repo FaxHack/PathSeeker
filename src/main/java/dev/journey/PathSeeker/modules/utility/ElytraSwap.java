@@ -31,7 +31,7 @@ public class ElytraSwap extends Module {
     );
 
     public ElytraSwap() {
-        super(PathSeeker.Main, "ElytraSwap", "Automatically swaps between a chestplate and an elytra.");
+        super(PathSeeker.Utility, "ElytraSwap", "Automatically swaps between a chestplate and an elytra.");
     }
 
     @Override

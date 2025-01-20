@@ -7,6 +7,6 @@ public class NoJumpDelay extends Module
 {
     public NoJumpDelay()
     {
-        super(PathSeeker.Main, "NoJumpDelay", "Removes delay between jumps.");
+        super(PathSeeker.Utility, "NoJumpDelay", "Removes delay between jumps.");
     }
 }

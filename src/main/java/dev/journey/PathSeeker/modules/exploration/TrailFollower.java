@@ -209,7 +209,7 @@ public class TrailFollower extends Module
 
     public TrailFollower()
     {
-        super(PathSeeker.Main, "TrailFollower", "Automatically follows trails in all dimensions.");
+        super(PathSeeker.Hunting, "TrailFollower", "Automatically follows trails in all dimensions.");
     }
 
     void resetTrail()

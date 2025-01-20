@@ -135,7 +135,7 @@ public class MobGearESP extends Module {
     private final Set<Entity> scannedEntities = Collections.synchronizedSet(new HashSet<>());
     private int count;
     public MobGearESP() {
-        super(PathSeeker.Main, "MobGearESP", "ESP Module that highlights mobs likely wearing player gear.");
+        super(PathSeeker.Render, "MobGearESP", "ESP Module that highlights mobs likely wearing player gear.");
     }
 
     @EventHandler

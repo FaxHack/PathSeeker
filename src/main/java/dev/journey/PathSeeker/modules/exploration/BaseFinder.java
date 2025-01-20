@@ -521,7 +521,7 @@ public class BaseFinder extends Module {
     private String lastblockfound7;
     private int entityScanTicks;
     public BaseFinder() {
-        super(PathSeeker.Main, "BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains.");
+        super(PathSeeker.Hunting, "BaseFinder", "Estimates if a build or base may be in the chunk based on the blocks it contains.");
     }
 
     private Set<EntityType<?>> getDefaultCreatures() {

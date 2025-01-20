@@ -144,7 +144,7 @@ public class PortalPatternFinder extends Module {
     private double PortalDistance = 2000000000;
 
     public PortalPatternFinder() {
-        super(PathSeeker.Main, "PortalPatternFinder", "Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**");
+        super(PathSeeker.Hunting, "PortalPatternFinder", "Scans for the shapes of broken/removed Nether Portals within the cave air blocks found in caves and underground structures in 1.13+ chunks. **May be useful for finding portal skips in the Nether**");
     }
 
     @Override

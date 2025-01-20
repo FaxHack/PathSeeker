@@ -33,7 +33,7 @@ public class OldChunkNotifier extends Module {
     );
 
     public OldChunkNotifier() {
-        super(PathSeeker.Main, "OldChunkNotifier", "Pings you on discord if you find old chunks");
+        super(PathSeeker.Render, "OldChunkNotifier", "Pings you on discord if you find old chunks");
     }
 
     @Override

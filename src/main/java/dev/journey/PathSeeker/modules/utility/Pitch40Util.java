@@ -69,7 +69,7 @@ public class Pitch40Util extends Module {
     private int elytraSwapSlot;
 
     public Pitch40Util() {
-        super(PathSeeker.Main, "Pitch40Util", "Maintains pitch 40 flight on 2b2t and dynamically adjusts bounds");
+        super(PathSeeker.Utility, "Pitch40Util", "Maintains pitch 40 flight on 2b2t and dynamically adjusts bounds");
         this.elytraFlyModule = Modules.get().get(ElytraFly.class);
         reset();
     }

@@ -256,7 +256,7 @@ public class SignHistorian extends Module {
                     .build()
     );
     public SignHistorian() {
-        super(PathSeeker.Main, "SignHistorian", "Records & restores broken or modified signs.");
+        super(PathSeeker.Utility, "SignHistorian", "Records & restores broken or modified signs.");
     }
 
     private void initBlacklistText() {

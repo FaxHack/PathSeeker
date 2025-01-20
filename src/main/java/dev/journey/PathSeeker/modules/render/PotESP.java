@@ -97,7 +97,7 @@ public class PotESP extends Module {
     private final Set<BlockPos> potLocations = Collections.synchronizedSet(new HashSet<>());
 
     public PotESP() {
-        super(PathSeeker.Main, "PotESP", "Finds the dank pots... In Minecraft (Locates decorated pots with un-natural items in them)");
+        super(PathSeeker.Render, "PotESP", "Finds the dank pots... In Minecraft (Locates decorated pots with un-natural items in them)");
     }
 
     @Override

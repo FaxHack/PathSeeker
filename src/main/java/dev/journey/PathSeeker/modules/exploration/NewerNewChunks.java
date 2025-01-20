@@ -369,7 +369,7 @@ public class NewerNewChunks extends Module {
     private boolean saveDataWasOn = false;
 
     public NewerNewChunks() {
-        super(PathSeeker.Main, "NewerNewChunks", "Detects new chunks by scanning the order of chunk section palettes. Can also check liquid flow, and block ticking packets.");
+        super(PathSeeker.Hunting, "NewerNewChunks", "Detects new chunks by scanning the order of chunk section palettes. Can also check liquid flow, and block ticking packets.");
     }
 
     @Override
