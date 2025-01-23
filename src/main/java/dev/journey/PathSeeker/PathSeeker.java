@@ -6,10 +6,7 @@ import dev.journey.PathSeeker.commands.ViewNbtCommand;
 import dev.journey.PathSeeker.commands.WorldInfoCommand;
 import dev.journey.PathSeeker.modules.automation.StorageLooter;
 import dev.journey.PathSeeker.modules.exploration.*;
-import dev.journey.PathSeeker.modules.render.HoleAndTunnelAndStairsESP;
-import dev.journey.PathSeeker.modules.render.MobGearESP;
-import dev.journey.PathSeeker.modules.render.OldChunkNotifier;
-import dev.journey.PathSeeker.modules.render.PotESP;
+import dev.journey.PathSeeker.modules.render.*;
 import dev.journey.PathSeeker.modules.utility.*;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
@@ -48,7 +45,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new ElytraSwap());
         Modules.get().add(new Pitch40Util());
         Modules.get().add(new NoJumpDelay());
-
+        Modules.get().add(new DroppedItemESP());
         //Commands
 
         Commands.add(new Stats2b2t());
