@@ -22,7 +22,6 @@ public class PathSeeker extends MeteorAddon {
     //public static final Category Main = new Category("PathSeeker");
     public static final Category Hunting = new Category("PathHunting");
     public static final Category Render = new Category("PathRender");
-    public static final Category Automation = new Category("PathAutomation");
     public static final Category Utility = new Category("PathUtils");
 
     @Override
@@ -46,6 +45,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new Pitch40Util());
         Modules.get().add(new NoJumpDelay());
         Modules.get().add(new DroppedItemESP());
+        Modules.get().add(new EntityClusterESP());
         //Commands
 
         Commands.add(new Stats2b2t());
@@ -70,7 +70,6 @@ public class PathSeeker extends MeteorAddon {
         Modules.registerCategory(Hunting);
         Modules.registerCategory(Utility);
         Modules.registerCategory(Render);
-        Modules.registerCategory(Automation);
     }
 
     public String getPackage() {
