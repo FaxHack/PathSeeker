@@ -31,7 +31,7 @@ Follows trails in all dimensions using either pitch40 or baritone. May break on 
 > Make sure your predefined item lists are accurate. Incorrect configurations may result in missing valuable loot.
 
 - **GrimDuraFirework**  
-  A clever fix for fireworks issues on the Mio client when using Grim Durability ElytraFly with a chestplate. Fly smoothly without a hitch! [Credits to meteor-mod](https://github.com/miles352/meteor-mod/blob/master/src/main/java/com/example/addon/modules/GrimDuraFirework.java)
+  A clever fix for fireworks issues on the Mio client when using Grim Durability ElytraFly with a chestplate. Fly smoothly without a hitch! [Credits to meteor-mod](https://github.com/miles352/meteor-stashhunting-addon/blob/master/src/main/java/com/example/addon/modules/GrimDuraFirework.java)
   
 - **MobGearESP**  
   Detects mobs carrying or wearing player equipment. [Credits to windoid](https://github.com/windoid/MobGearESP/blob/master/src/main/java/com/mobgear/addon/modules/MobGearESP.java)
@@ -98,7 +98,7 @@ PathSeeker is always evolving! Here's what's planned:
 ## Credits  
 A big shoutout to the creators and projects that inspired PathSeeker:  
 - [**TrouserStreak**](https://github.com/etianl/Trouser-Streak) for laying the groundwork.  
-- [**meteor-mod**](https://github.com/miles352/meteor-mod) & [**Stardust**](https://github.com/0xTas/stardust) for additional features.
+- [**meteor-mod**](https://github.com/miles352/meteor-stashhunting-addon) & [**Stardust**](https://github.com/0xTas/stardust) for additional features.
 
 ---
 
