@@ -31,6 +31,7 @@ public class PathSeeker extends MeteorAddon {
         //Modules
 
         Modules.get().add(new ActivatedSpawnerDetector());
+        Modules.get().add(new StackedMinecartsDetector());
         Modules.get().add(new CaveDisturbanceDetector());
         Modules.get().add(new PortalPatternFinder());
         Modules.get().add(new HoleAndTunnelAndStairsESP());
@@ -46,6 +47,8 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new NoJumpDelay());
         Modules.get().add(new DroppedItemESP());
         Modules.get().add(new EntityClusterESP());
+        //Modules.get().add(new ChestIndex());
+        
         //Commands
 
         Commands.add(new Stats2b2t());
