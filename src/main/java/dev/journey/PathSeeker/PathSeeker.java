@@ -1,9 +1,6 @@
 package dev.journey.PathSeeker;
 
-import dev.journey.PathSeeker.commands.GarbageCleanerCommand;
-import dev.journey.PathSeeker.commands.Stats2b2t;
-import dev.journey.PathSeeker.commands.ViewNbtCommand;
-import dev.journey.PathSeeker.commands.WorldInfoCommand;
+import dev.journey.PathSeeker.commands.*;
 import dev.journey.PathSeeker.modules.automation.StorageLooter;
 import dev.journey.PathSeeker.modules.exploration.*;
 import dev.journey.PathSeeker.modules.render.*;
@@ -48,9 +45,11 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new DroppedItemESP());
         Modules.get().add(new EntityClusterESP());
         //Modules.get().add(new ChestIndex());
-        
+
         //Commands
 
+        Commands.add(new MeteorFolderCommand());
+        Commands.add(new ScreenshotFolderCommand());
         Commands.add(new Stats2b2t());
         Commands.add(new ViewNbtCommand());
         Commands.add(new GarbageCleanerCommand());
