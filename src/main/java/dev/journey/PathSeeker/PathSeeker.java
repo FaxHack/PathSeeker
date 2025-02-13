@@ -52,7 +52,6 @@ public class PathSeeker extends MeteorAddon {
         Commands.add(new ScreenshotFolderCommand());
         Commands.add(new Stats2b2t());
         Commands.add(new ViewNbtCommand());
-        Commands.add(new GarbageCleanerCommand());
         Commands.add(new WorldInfoCommand());
 
         if (FabricLoader.getInstance().isModLoaded("xaeroplus"))
