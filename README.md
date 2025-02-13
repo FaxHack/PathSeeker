@@ -31,7 +31,7 @@ Follows trails in all dimensions using either pitch40 or baritone. May break on 
    Open the Minecraft screenshot folder.
   
 - **MeteorFolderCommand**
-   Open#s meteor-client folder.
+   Open meteor-client folder.
 
 - **NoJumpDelay**
   Removes delay between jumps.
