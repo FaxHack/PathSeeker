@@ -18,6 +18,21 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
 - **TrailFollower** (Requires XaeroPlus)
 Follows trails in all dimensions using either pitch40 or baritone. May break on path splits or other cases.
 
+- **StackedMinecartDetector**
+  Detects if a stacked spawner is in the area.
+  
+- **EntityClusterESP**
+  Highlights the centre point of entity clusters.
+  
+- **DroppedItemESP**
+  Highlights important dropped items.
+  
+- **ScreenshotFolderCommand**
+   Open the Minecraft screenshot folder.
+  
+- **MeteorFolderCommand**
+   Open#s meteor-client folder.
+
 - **NoJumpDelay**
   Removes delay between jumps.
 
@@ -90,7 +105,7 @@ Getting started is simple:
 ## Roadmap  
 PathSeeker is always evolving! Here's what's planned:  
 - [x] Core features for the initial release.  
-- [ ] New hunting modules for advanced gameplay.  
+- [x] New hunting modules for advanced gameplay.  
 - [ ] Enhanced automation tools for loot and base management.  
 
 ---
