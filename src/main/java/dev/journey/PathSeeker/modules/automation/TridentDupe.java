@@ -1,4 +1,5 @@
-//Partial Credits to Killet and who ever originally found it.
+// Credits to Killet, Laztec, and Ionar for contributing the source code for this module.
+// https://github.com/Killetx/TridentDupe
 
 package dev.journey.PathSeeker.modules.automation;
 
