@@ -2,6 +2,7 @@ package dev.journey.PathSeeker;
 
 import dev.journey.PathSeeker.commands.*;
 import dev.journey.PathSeeker.modules.automation.StorageLooter;
+import dev.journey.PathSeeker.modules.automation.TridentDupe;
 import dev.journey.PathSeeker.modules.exploration.*;
 import dev.journey.PathSeeker.modules.render.*;
 import dev.journey.PathSeeker.modules.utility.*;
@@ -26,7 +27,6 @@ public class PathSeeker extends MeteorAddon {
         LOG.info("Initializing Path-Seeker!");
 
         //Modules
-
         Modules.get().add(new ActivatedSpawnerDetector());
         Modules.get().add(new StackedMinecartsDetector());
         Modules.get().add(new CaveDisturbanceDetector());
@@ -41,18 +41,18 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new SignHistorian());
         Modules.get().add(new ElytraSwap());
         Modules.get().add(new Pitch40Util());
-        Modules.get().add(new NoJumpDelay());
+        Modules.get().add(new NOJumpDelay());
         Modules.get().add(new DroppedItemESP());
         Modules.get().add(new EntityClusterESP());
+        Modules.get().add(new TridentDupe());
+        //Modules.get().add(new DelayPackets());
         //Modules.get().add(new ChestIndex());
 
+            
         //Commands
-
         Commands.add(new MeteorFolderCommand());
         Commands.add(new ScreenshotFolderCommand());
         Commands.add(new Stats2b2t());
-        Commands.add(new ViewNbtCommand());
-        Commands.add(new WorldInfoCommand());
 
         if (FabricLoader.getInstance().isModLoaded("xaeroplus"))
         {

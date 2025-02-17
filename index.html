@@ -128,12 +128,12 @@
                     <p class="text-gray-300">Efficiently manage and search through storage systems with enhanced visibility.</p>
                 </div>
                 <div class="feature-card p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 text-green-400">NewerNewChunks</h3>
-                    <p class="text-gray-300">Enhanced chunk analysis for the latest Minecraft versions.</p>
+                    <h3 class="text-xl font-bold mb-4 text-green-400">StackedMinecartDetector</h3>
+                    <p class="text-gray-300">Detects for hidden stacked spawner is in the area.</p>
                 </div>
                 <div class="feature-card p-6 rounded-lg">
                     <h3 class="text-xl font-bold mb-4 text-green-400">GrimDuraFirework</h3>
-                    <p class="text-gray-300">Advanced durability tracking and item management system.</p>
+                    <p class="text-gray-300">A clever fix for fireworks issues on the Mio client when using Grim Durability ElytraFly with a chestplate. Fly smoothly without a hitch!</p>
                 </div>
                 <div class="feature-card p-6 rounded-lg">
                     <h3 class="text-xl font-bold mb-4 text-green-400">ESP Features</h3>
@@ -143,127 +143,132 @@
         </div>
     </section>
 
-        <!-- Releases Section -->
-<section id="releases" class="py-20">
-    <div class="container mx-auto px-6">
-        <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Latest Releases</h2>
-        
-        <!-- Latest Release -->
-        <div class="max-w-4xl mx-auto mb-12">
-            <div class="feature-card p-6 rounded-lg">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-2xl font-bold text-green-400">Latest Release</h3>
-                    <span class="version-tag">v1.0.4</span>
-                </div>
-                <div class="changelog-item">
-                    <h4 class="font-bold mb-2">What's New:</h4>
-                    <ul class="list-disc ml-4 mb-4">
-                        <li><strong>TrailFollower:</strong> Follows trails in all dimensions using pitch40 or baritone. Requires XaeroPlus.</li>
-                        <li><strong>Pitch40Util:</strong> Used alongside meteors pitch40. Auto sets min and max bounds for height gain with auto firework mode.</li>
-                        <li><strong>NoJumpDelay:</strong> Removes delay between jumps.</li>
-                    </ul>
-                </div>
-                <div class="changelog-item">
-                    <h4 class="font-bold mb-2">Current Features:</h4>
-                    <ul class="list-disc ml-4 mb-4">
-                        <h5 class="font-semibold mt-2">Utility:</h5>
-                        <li>ActivatedSpawnerDetector: Detects activated spawners nearby</li>
-                        <li>SignHistorian: Record and restore broken or modified signs</li>
-                        <li>ElytraSwap: Automatic elytra management</li>
-                        <li>NoJumpDelay: Removes delay between jumps</li>
-                        
-                        <h5 class="font-semibold mt-2">Exploration:</h5>
-                        <li>Base Finder: Advanced base detection for anarchy servers</li>
-                        <li>NewChunks: Identify newly generated chunks</li>
-                        <li>PortalPatternFinder: Locate broken/removed Nether Portals</li>
-                        <li>CaveDisturbanceDetector: Detect minor cave disruptions</li>
-                        <li>TrailFollower: Follows trails using pitch40 or baritone</li>
-                        <li>Pitch40Util: Height gain and velocity management</li>
-                        
-                        <h5 class="font-semibold mt-2">Renders:</h5>
-                        <li>Hole, Tunnel, and Stair ESP</li>
-                        <li>PotESP: Decorated Pot tracking</li>
-                        <li>MobGearESP: Player equipment detection on mobs</li>
+    <!-- Releases Section -->
+    <section id="releases" class="py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Latest Releases</h2>
 
-                        <h5 class="font-semibold mt-2">Automation:</h5>
-                        <li>StorageLooter: Automatically loots containers and organizes items</li>
-                    </ul>
+            <!-- Latest Release -->
+            <div class="max-w-4xl mx-auto mb-12">
+                <div class="feature-card p-6 rounded-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-green-400">Latest Release</h3>
+                        <span class="version-tag">v1.0.5</span>
+                    </div>
+                    <div class="changelog-item">
+                        <h4 class="font-bold mb-2">What's New:</h4>
+                        <ul class="list-disc ml-4 mb-4">
+                            <li><strong>StackedMinecartDetector:</strong> Detects if stacked spawner is in the area</li>
+                            <li><strong>EntityClusterESP:</strong> Highlights the centre point of entity clusters</li>
+                            <li><strong>DroppedItemESP:</strong> Highlights important dropped items</li>
+                            <li><strong>ScreenshotFolderCommand:</strong> Open Minecraft screenshot folder</li>
+                            <li><strong>MeteorFolderCommand:</strong> Open meteor-client folder</li>
+                        </ul>
+                    </div>
+                    <div class="changelog-item">
+                        <h4 class="font-bold mb-2">Current Features:</h4>
+                        <ul class="list-disc ml-4 mb-4">
+                            <h5 class="font-semibold mt-2">Utility:</h5>
+                            <li>ActivatedSpawnerDetector: Detects activated spawners nearby</li>
+                            <li>SignHistorian: Record and restore broken or modified signs</li>
+                            <li>ElytraSwap: Automatic elytra management</li>
+                            <li>NoJumpDelay: Removes delay between jumps</li>
+
+                            <h5 class="font-semibold mt-2">Exploration:</h5>
+                            <li>Base Finder: Advanced base detection for anarchy servers</li>
+                            <li>NewChunks: Identify newly generated chunks</li>
+                            <li>PortalPatternFinder: Locate broken/removed Nether Portals</li>
+                            <li>CaveDisturbanceDetector: Detect minor cave disruptions</li>
+                            <li>TrailFollower: Follows trails using pitch40 or baritone (Requires XaeroPlus)</li>
+                            <li>Pitch40Util: Height gain and velocity management</li>
+
+                            <h5 class="font-semibold mt-2">Renders:</h5>
+                            <li>Hole, Tunnel, and Stair ESP</li>
+                            <li>PotESP: Decorated Pot tracking</li>
+                            <li>MobGearESP: Player equipment detection on mobs</li>
+                            <li>StackedMinecartDetector: Stacked spawner detection</li>
+                            <li>EntityClusterESP: Entity cluster center point highlighting</li>
+                            <li>DroppedItemESP: Important item highlighting</li>
+
+                            <h5 class="font-semibold mt-2">Automation:</h5>
+                            <li>StorageLooter: Automatically loots containers and organizes items</li>
+                        </ul>
+                    </div>
+                    <div class="changelog-item">
+                        <h4 class="font-bold mb-2">Known Issues:</h4>
+                        <ul class="list-disc ml-4 mb-4">
+                            <li>Minor rendering glitches during dimension transitions</li>
+                            <li>Rare server-side compatibility issues with certain chunk detection methods</li>
+                        </ul>
+                    </div>
+                    <div class="mt-6">
+                        <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.5" class="minecraft-btn inline-block">
+                            Download v1.0.5
+                        </a>
+                    </div>
                 </div>
-                <div class="changelog-item">
-                    <h4 class="font-bold mb-2">Known Issues:</h4>
-                    <ul class="list-disc ml-4 mb-4">
-                        <li>Minor rendering glitches during dimension transitions</li>
-                        <li>Rare server-side compatibility issues with certain chunk detection methods</li>
-                    </ul>
-                </div>
-                <div class="mt-6">
-                    <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.4" class="minecraft-btn inline-block">
-                        Download v1.0.4
-                    </a>
+            </div>
+
+            <!-- Previous Releases -->
+            <div class="max-w-4xl mx-auto">
+                <h3 class="text-xl font-bold mb-6 text-green-400">Previous Releases</h3>
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="feature-card p-6 rounded-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-lg font-bold">Version 1.0.4</h4>
+                            <span class="version-tag">v1.0.4</span>
+                        </div>
+                        <ul class="list-disc ml-4 mb-4">
+                            <li><strong>TrailFollower:</strong> New trail following system</li>
+                            <li><strong>Pitch40Util:</strong> Advanced height gain management</li>
+                            <li><strong>NoJumpDelay:</strong> Jump delay removal system</li>
+                        </ul>
+                        <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.4" class="text-green-400 hover:text-green-500">View Release →</a>
+                    </div>
+
+                    <div class="feature-card p-6 rounded-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-lg font-bold">Version 1.0.3</h4>
+                            <span class="version-tag">v1.0.3</span>
+                        </div>
+                        <ul class="list-disc ml-4 mb-4">
+                            <li><strong>SignHistorian:</strong> Record and restore broken or modified signs</li>
+                            <li><strong>ElytraSwap:</strong> Automatic elytra swapping</li>
+                            <li><strong>ActivatedSpawnerDetector:</strong> New configuration options</li>
+                            <li><strong>PathSeekerUtils:</strong> Code refactoring and API fixes</li>
+                        </ul>
+                        <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.3" class="text-green-400 hover:text-green-500">View Release →</a>
+                    </div>
+
+                    <div class="feature-card p-6 rounded-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-lg font-bold">Version 1.0.2</h4>
+                            <span class="version-tag">v1.0.2</span>
+                        </div>
+                        <ul class="list-disc ml-4 mb-4">
+                            <li>Added NewChunks detection system</li>
+                            <li>Improved Base Finder algorithm</li>
+                            <li>Added MobGearESP feature</li>
+                        </ul>
+                        <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.2" class="text-green-400 hover:text-green-500">View Release →</a>
+                    </div>
+
+                    <div class="feature-card p-6 rounded-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-lg font-bold">Version 1.0.1</h4>
+                            <span class="version-tag">v1.0.1</span>
+                        </div>
+                        <ul class="list-disc ml-4 mb-4">
+                            <li>Added PotESP feature</li>
+                            <li>Improved tunnel detection</li>
+                            <li>Fixed compatibility issues</li>
+                        </ul>
+                        <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.1" class="text-green-400 hover:text-green-500">View Release →</a>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Previous Releases -->
-        <div class="max-w-4xl mx-auto">
-            <h3 class="text-xl font-bold mb-6 text-green-400">Previous Releases</h3>
-            <div class="grid grid-cols-1 gap-6">
-                <div class="feature-card p-6 rounded-lg">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="text-lg font-bold">Version 1.0.3</h4>
-                        <span class="version-tag">v1.0.3</span>
-                    </div>
-                    <ul class="list-disc ml-4 mb-4">
-                        <li><strong>SignHistorian:</strong> Record and restore broken or modified signs</li>
-                        <li><strong>ElytraSwap:</strong> Automatic elytra swapping</li>
-                        <li><strong>ActivatedSpawnerDetector:</strong> New configuration options</li>
-                        <li><strong>PathSeekerUtils:</strong> Code refactoring and API fixes</li>
-                    </ul>
-                    <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.3" class="text-green-400 hover:text-green-500">View Release →</a>
-                </div>
-
-                <div class="feature-card p-6 rounded-lg">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="text-lg font-bold">Version 1.0.2</h4>
-                        <span class="version-tag">v1.0.2</span>
-                    </div>
-                    <ul class="list-disc ml-4 mb-4">
-                        <li>Added NewChunks detection system</li>
-                        <li>Improved Base Finder algorithm</li>
-                        <li>Added MobGearESP feature</li>
-                    </ul>
-                    <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.2" class="text-green-400 hover:text-green-500">View Release →</a>
-                </div>
-
-                <div class="feature-card p-6 rounded-lg">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="text-lg font-bold">Version 1.0.1</h4>
-                        <span class="version-tag">v1.0.1</span>
-                    </div>
-                    <ul class="list-disc ml-4 mb-4">
-                        <li>Added PotESP feature</li>
-                        <li>Improved tunnel detection</li>
-                        <li>Fixed compatibility issues</li>
-                    </ul>
-                    <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.1" class="text-green-400 hover:text-green-500">View Release →</a>
-                </div>
-
-                <div class="feature-card p-6 rounded-lg">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="text-lg font-bold">Version 1.0.0</h4>
-                        <span class="version-tag">v1.0.0</span>
-                    </div>
-                    <ul class="list-disc ml-4 mb-4">
-                        <li>Initial release</li>
-                        <li>Base finder functionality</li>
-                        <li>Basic chunk detection</li>
-                    </ul>
-                    <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.0" class="text-green-400 hover:text-green-500">View Release →</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+    </section>
 
     <!-- Installation Section -->
     <section id="installation" class="py-20 bg-gray-800">

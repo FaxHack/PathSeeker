@@ -1,6 +1,6 @@
 package dev.journey.PathSeeker.mixin;
 
-import dev.journey.PathSeeker.modules.utility.NoJumpDelay;
+import dev.journey.PathSeeker.modules.utility.NOJumpDelay;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +15,7 @@ public class LivingEntityMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void onTick(CallbackInfo ci) {
-        if (Modules.get().get(NoJumpDelay.class).isActive()) {
+        if (Modules.get().get(NOJumpDelay.class).isActive()) {
             jumpingCooldown = 0;
         }
     }

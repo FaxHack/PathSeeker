@@ -119,7 +119,7 @@ public class ActivatedSpawnerDetector extends Module {
     private final Setting<Boolean> airChecker = sgGeneral.add(new BoolSetting.Builder()
             .name("Check Air Disturbances")
             .description("Displays spawners as activated if there are disturbances in the air around them. For example if a torch was placed and removed it will detect that.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
@@ -308,34 +308,35 @@ public class ActivatedSpawnerDetector extends Module {
                 WorldChunk chunk = mc.world.getChunk(chunkX, chunkZ);
                 List<BlockEntity> blockEntities = new ArrayList<>(chunk.getBlockEntities().values());
 
-                for (BlockEntity blockEntity : blockEntities) {
-                    if (blockEntity instanceof MobSpawnerBlockEntity spawner) {
-                        activatedSpawnerFound = false;
-                        BlockPos pos = spawner.getPos();
-                        BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                        String monster = null;
-                        if (spawner.getLogic().spawnEntry != null && spawner.getLogic().spawnEntry.getNbt().get("id") != null)
-                            monster = spawner.getLogic().spawnEntry.getNbt().get("id").toString();
-                        if (playerPos.isWithinDistance(pos, renderDistance.get() * 16) && !trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos)) {
-                            if (airChecker.get() && (spawner.getLogic().spawnDelay == 20 || spawner.getLogic().spawnDelay == 0)) {
-                                boolean airFound = false;
-                                boolean caveAirFound = false;
-                                if (monster != null && !scannedPositions.contains(pos)) {
-                                    if (monster.contains("zombie") || monster.contains("skeleton") || monster.contains(":spider")) {
-                                        for (int x = -2; x < 2; x++) {
-                                            for (int y = -1; y < 3; y++) {
-                                                for (int z = -2; z < 2; z++) {
-                                                    BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                                                    if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR)
-                                                        airFound = true;
-                                                    if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
-                                                        caveAirFound = true;
-                                                    if (caveAirFound && airFound) break;
-                                                }
-                                            }
-                                        }
-                                        if (caveAirFound && airFound) {
-                                            if (monster.equals(":spider")) displayMessage("dungeon", pos, ":spider");
+                                            for (BlockEntity blockEntity : blockEntities) {
+                                                if (blockEntity instanceof MobSpawnerBlockEntity spawner) {
+                                                    activatedSpawnerFound = false;
+                                                    BlockPos pos = spawner.getPos();
+                                                    BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
+                                                    String monster = null;
+                                                    if (spawner.getLogic().spawnEntry != null && spawner.getLogic().spawnEntry.getNbt().get("id") != null)
+                                                        monster = spawner.getLogic().spawnEntry.getNbt().get("id").toString();
+                                                    if (playerPos.isWithinDistance(pos, renderDistance.get() * 16) && !trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos)) {
+                                                        boolean b = monster.contains("zombie") || monster.contains("skeleton") || monster.contains(":spider");
+                                                        if (airChecker.get() && (spawner.getLogic().spawnDelay == 20 || spawner.getLogic().spawnDelay == 0)) {
+                                                            boolean airFound = false;
+                                                            boolean caveAirFound = false;
+                                                            if (monster != null && !scannedPositions.contains(pos)) {
+                                                                if (b) {
+                                                                    for (int x = -2; x < 2; x++) {
+                                                                        for (int y = -1; y < 3; y++) {
+                                                                            for (int z = -2; z < 2; z++) {
+                                                                                BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
+                                                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR)
+                                                                                    airFound = true;
+                                                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
+                                                                                    caveAirFound = true;
+                                                                                if (caveAirFound && airFound) break;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    if (caveAirFound && airFound) {
+                                                                        if (monster.equals(":spider")) displayMessage("dungeon", pos, ":spider");
                                             else displayMessage("dungeon", pos, "null");
                                         }
                                     } else if (monster.contains("cave_spider")) {
@@ -377,25 +378,17 @@ public class ActivatedSpawnerDetector extends Module {
                                 if (mc.world.getRegistryKey() == World.NETHER && spawner.getLogic().spawnDelay == 0)
                                     return;
                                 if (chatFeedback.get()) {
-                                    if (monster != null) {
-                                        if (monster.contains("zombie") || monster.contains("skeleton") || monster.contains(":spider")) {
-                                            if (monster == ":spider") displayMessage("dungeon", pos, ":spider");
-                                            else displayMessage("dungeon", pos, "null");
-                                        } else if (monster.contains("cave_spider")) {
-                                            displayMessage("cave_spider", pos, "null");
-                                        } else if (monster.contains("silverfish")) {
-                                            displayMessage("silverfish", pos, "null");
-                                        } else if (monster.contains("blaze")) {
-                                            displayMessage("blaze", pos, "null");
-                                        } else if (monster.contains("magma")) {
-                                            displayMessage("magma", pos, "null");
-                                        } else {
-                                            if (displaycoords.get())
-                                                ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
-                                            else ChatUtils.sendMsg(Text.of("Detected Activated Spawner!"));
-                                            spawnerPositions.add(pos);
-                                            activatedSpawnerFound = true;
-                                        }
+                                    if (b) {
+                                        if (monster.equals(":spider")) displayMessage("dungeon", pos, ":spider");
+                                        else displayMessage("dungeon", pos, "null");
+                                    } else if (monster.contains("cave_spider")) {
+                                        displayMessage("cave_spider", pos, "null");
+                                    } else if (monster.contains("silverfish")) {
+                                        displayMessage("silverfish", pos, "null");
+                                    } else if (monster.contains("blaze")) {
+                                        displayMessage("blaze", pos, "null");
+                                    } else if (monster.contains("magma")) {
+                                        displayMessage("magma", pos, "null");
                                     } else {
                                         if (displaycoords.get())
                                             ChatUtils.sendMsg(Text.of("Detected Activated Spawner! Block Position: " + pos));
@@ -507,7 +500,7 @@ public class ActivatedSpawnerDetector extends Module {
                 CombinedPositions.addAll(deactivatedSpawnerPositions);
                 CombinedPositions.addAll(trialspawnerPositions);
 
-                if (CombinedPositions.stream().toList().size() > 0) {
+                if (!CombinedPositions.stream().toList().isEmpty()) {
                     for (int b = 0; b < CombinedPositions.stream().toList().size(); b++) {
                         if (SpawnerDistance > Math.sqrt(Math.pow(CombinedPositions.stream().toList().get(b).getX() - mc.player.getBlockX(), 2) + Math.pow(CombinedPositions.stream().toList().get(b).getZ() - mc.player.getBlockZ(), 2))) {
                             closestSpawnerX = Math.round((float) CombinedPositions.stream().toList().get(b).getX());
@@ -531,7 +524,7 @@ public class ActivatedSpawnerDetector extends Module {
             synchronized (spawnerPositions) {
                 for (BlockPos pos : spawnerPositions) {
                     BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                    if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+                    if (playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
                         int startX = pos.getX();
                         int startY = pos.getY();
                         int startZ = pos.getZ();
@@ -539,24 +532,10 @@ public class ActivatedSpawnerDetector extends Module {
                         int endY = pos.getY();
                         int endZ = pos.getZ();
                         if (!nearesttrcr.get()) {
-                            if (rangerendering.get() && !lessRenderSpam.get())
-                                renderRange(new Box(new Vec3d(startX + 17, startY + 17, startZ + 17), new Vec3d(endX - 16, endY - 16, endZ - 16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
-                            else if (rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))
-                                renderRange(new Box(new Vec3d(startX + 17, startY + 17, startZ + 17), new Vec3d(endX - 16, endY - 16, endZ - 16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
-                            if (deactivatedSpawnerPositions.contains(pos))
-                                render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
-                            else
-                                render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
+                            DupeCode(event, pos, startX, startY, startZ, endX, endY, endZ);
                         } else if (nearesttrcr.get()) {
-                            if (rangerendering.get() && !lessRenderSpam.get())
-                                renderRange(new Box(new Vec3d(startX + 17, startY + 17, startZ + 17), new Vec3d(endX - 16, endY - 16, endZ - 16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
-                            else if (rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))
-                                renderRange(new Box(new Vec3d(startX + 17, startY + 17, startZ + 17), new Vec3d(endX - 16, endY - 16, endZ - 16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
-                            if (deactivatedSpawnerPositions.contains(pos))
-                                render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
-                            else
-                                render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
-                            render2(new Box(new Vec3d(closestSpawnerX, closestSpawnerY, closestSpawnerZ), new Vec3d(closestSpawnerX, closestSpawnerY, closestSpawnerZ)), spawnerSideColor.get(), spawnerLineColor.get(), ShapeMode.Sides, event);
+                            DupeCode(event, pos, startX, startY, startZ, endX, endY, endZ);
+                            render2(new Box(new Vec3d(closestSpawnerX, closestSpawnerY, closestSpawnerZ), new Vec3d(closestSpawnerX, closestSpawnerY, closestSpawnerZ)), spawnerSideColor.get(), spawnerLineColor.get(), event);
                         }
                     }
                 }
@@ -564,7 +543,7 @@ public class ActivatedSpawnerDetector extends Module {
             synchronized (trialspawnerPositions) {
                 for (BlockPos pos : trialspawnerPositions) {
                     BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                    if (pos != null && playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
+                    if (playerPos.isWithinDistance(pos, renderDistance.get() * 16)) {
                         int startX = pos.getX();
                         int startY = pos.getY();
                         int startZ = pos.getZ();
@@ -572,24 +551,10 @@ public class ActivatedSpawnerDetector extends Module {
                         int endY = pos.getY();
                         int endZ = pos.getZ();
                         if (!nearesttrcr.get()) {
-                            if (trialSpawner.get() && rangerendering.get() && !lessRenderSpam.get())
-                                renderRange(new Box(new Vec3d(startX + 15, startY + 15, startZ + 15), new Vec3d(endX - 14, endY - 14, endZ - 14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
-                            else if (trialSpawner.get() && rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))
-                                renderRange(new Box(new Vec3d(startX + 15, startY + 15, startZ + 15), new Vec3d(endX - 14, endY - 14, endZ - 14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
-                            if (deactivatedSpawnerPositions.contains(pos))
-                                render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
-                            else
-                                render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), trialSideColor.get(), trialLineColor.get(), shapeMode.get(), event);
+                            DupeCode2(event, pos, startX, startY, startZ, endX, endY, endZ);
                         } else if (nearesttrcr.get()) {
-                            if (trialSpawner.get() && rangerendering.get() && !lessRenderSpam.get())
-                                renderRange(new Box(new Vec3d(startX + 15, startY + 15, startZ + 15), new Vec3d(endX - 14, endY - 14, endZ - 14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
-                            else if (trialSpawner.get() && rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))
-                                renderRange(new Box(new Vec3d(startX + 15, startY + 15, startZ + 15), new Vec3d(endX - 14, endY - 14, endZ - 14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
-                            if (deactivatedSpawnerPositions.contains(pos))
-                                render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
-                            else
-                                render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), trialSideColor.get(), trialLineColor.get(), shapeMode.get(), event);
-                            render2(new Box(new Vec3d(closestSpawnerX, closestSpawnerY, closestSpawnerZ), new Vec3d(closestSpawnerX, closestSpawnerY, closestSpawnerZ)), trialSideColor.get(), trialLineColor.get(), ShapeMode.Sides, event);
+                            DupeCode2(event, pos, startX, startY, startZ, endX, endY, endZ);
+                            render2(new Box(new Vec3d(closestSpawnerX, closestSpawnerY, closestSpawnerZ), new Vec3d(closestSpawnerX, closestSpawnerY, closestSpawnerZ)), trialSideColor.get(), trialLineColor.get(), event);
                         }
                     }
                 }
@@ -597,10 +562,32 @@ public class ActivatedSpawnerDetector extends Module {
         }
     }
 
+    private void DupeCode2(Render3DEvent event, BlockPos pos, int startX, int startY, int startZ, int endX, int endY, int endZ) {
+        if (trialSpawner.get() && rangerendering.get() && !lessRenderSpam.get())
+            renderRange(new Box(new Vec3d(startX + 15, startY + 15, startZ + 15), new Vec3d(endX - 14, endY - 14, endZ - 14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
+        else if (trialSpawner.get() && rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))
+            renderRange(new Box(new Vec3d(startX + 15, startY + 15, startZ + 15), new Vec3d(endX - 14, endY - 14, endZ - 14)), trangeSideColor.get(), trangeLineColor.get(), shapeMode.get(), event);
+        if (deactivatedSpawnerPositions.contains(pos))
+            render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
+        else
+            render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), trialSideColor.get(), trialLineColor.get(), shapeMode.get(), event);
+    }
+
+    private void DupeCode(Render3DEvent event, BlockPos pos, int startX, int startY, int startZ, int endX, int endY, int endZ) {
+        if (rangerendering.get() && !lessRenderSpam.get())
+            renderRange(new Box(new Vec3d(startX + 17, startY + 17, startZ + 17), new Vec3d(endX - 16, endY - 16, endZ - 16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
+        else if (rangerendering.get() && lessRenderSpam.get() && !noRenderPositions.contains(pos))
+            renderRange(new Box(new Vec3d(startX + 17, startY + 17, startZ + 17), new Vec3d(endX - 16, endY - 16, endZ - 16)), rangeSideColor.get(), rangeLineColor.get(), shapeMode.get(), event);
+        if (deactivatedSpawnerPositions.contains(pos))
+            render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), despawnerSideColor.get(), despawnerLineColor.get(), shapeMode.get(), event);
+        else
+            render(new Box(new Vec3d(startX + 1, startY + 1, startZ + 1), new Vec3d(endX, endY, endZ)), spawnerSideColor.get(), spawnerLineColor.get(), shapeMode.get(), event);
+    }
+
     private void displayMessage(String key, BlockPos pos, String key2) {
         if (chatFeedback.get()) {
-            if (key == "dungeon") {
-                if (key2 == ":spider") {
+            if (Objects.equals(key, "dungeon")) {
+                if (Objects.equals(key2, ":spider")) {
                     if (mc.world.getBlockState(pos.down()).getBlock() == Blocks.BIRCH_PLANKS && enableWoodlandMansion.get()) {
                         activatedSpawnerFound = true;
                         spawnerPositions.add(pos);
@@ -625,25 +612,25 @@ public class ActivatedSpawnerDetector extends Module {
                         else ChatUtils.sendMsg(Text.of("Detected Activated §cDUNGEON§r Spawner!"));
                     }
                 }
-            } else if (key == "cave_spider" && enableMineshaft.get()) {
+            } else if (Objects.equals(key, "cave_spider") && enableMineshaft.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
                 if (displaycoords.get())
                     ChatUtils.sendMsg(Text.of("Detected Activated §cMINESHAFT§r Spawner! Block Position: " + pos));
                 else ChatUtils.sendMsg(Text.of("Detected Activated §cMINESHAFT§r Spawner!"));
-            } else if (key == "silverfish" && enableStronghold.get()) {
+            } else if (Objects.equals(key, "silverfish") && enableStronghold.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
                 if (displaycoords.get())
                     ChatUtils.sendMsg(Text.of("Detected Activated §cSTRONGHOLD§r Spawner! Block Position: " + pos));
                 else ChatUtils.sendMsg(Text.of("Detected Activated §cSTRONGHOLD§r Spawner!"));
-            } else if (key == "blaze" && enableFortress.get()) {
+            } else if (Objects.equals(key, "blaze") && enableFortress.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
                 if (displaycoords.get())
                     ChatUtils.sendMsg(Text.of("Detected Activated §cFORTRESS§r Spawner! Block Position: " + pos));
                 else ChatUtils.sendMsg(Text.of("Detected Activated §cFORTRESS§r Spawner!"));
-            } else if (key == "magma" && enableBastion.get()) {
+            } else if (Objects.equals(key, "magma") && enableBastion.get()) {
                 activatedSpawnerFound = true;
                 spawnerPositions.add(pos);
                 if (displaycoords.get())
@@ -666,10 +653,10 @@ public class ActivatedSpawnerDetector extends Module {
         event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0, 0, 0, 0), shapeMode, 0);
     }
 
-    private void render2(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
+    private void render2(Box box, Color sides, Color lines, Render3DEvent event) {
         if (trcr.get() && Math.abs(box.minX - RenderUtils.center.x) <= renderDistance.get() * 16 && Math.abs(box.minZ - RenderUtils.center.z) <= renderDistance.get() * 16)
             event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, box.minX + 0.5, box.minY + ((box.maxY - box.minY) / 2), box.minZ + 0.5, lines);
-        event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0, 0, 0, 0), shapeMode, 0);
+        event.renderer.box(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ, sides, new Color(0, 0, 0, 0), ShapeMode.Sides, 0);
     }
 
     private void renderRange(Box box, Color sides, Color lines, ShapeMode shapeMode, Render3DEvent event) {
