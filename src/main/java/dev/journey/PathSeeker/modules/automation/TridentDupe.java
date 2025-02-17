@@ -1,5 +1,6 @@
 // Credits to Killet, Laztec, and Ionar for contributing the source code for this module.
 // https://github.com/Killetx/TridentDupe
+// Credits to Journey For porting dupe to 1.21.1
 
 package dev.journey.PathSeeker.modules.automation;
 
