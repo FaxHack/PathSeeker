@@ -45,7 +45,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new DroppedItemESP());
         Modules.get().add(new EntityClusterESP());
         Modules.get().add(new TridentDupe());
-        //Modules.get().add(new DelayPackets());
+        Modules.get().add(new Firework());
         //Modules.get().add(new ChestIndex());
 
             
