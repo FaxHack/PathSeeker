@@ -122,6 +122,12 @@ public class ActivatedSpawnerDetector extends Module {
             .defaultValue(false)
             .build()
     );
+    private final Setting<Boolean> ignoreGeodes = sgGeneral.add(new BoolSetting.Builder()
+            .name("Ignore Geodes")
+            .description("Skips air check for spawners near geode blocks to reduce false positives.")
+            .defaultValue(true)
+            .build()
+    );
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("Storage Blocks")
             .description("Storage Blocks the module checks for when considering displaying messages and renders.")
@@ -296,6 +302,16 @@ public class ActivatedSpawnerDetector extends Module {
         closestSpawnerZ = 2000000000;
         SpawnerDistance = 2000000000;
     }
+    private static final Set<Block> GEODE_BLOCKS = Set.of(
+            Blocks.AMETHYST_BLOCK,
+            Blocks.BUDDING_AMETHYST,
+            Blocks.CALCITE,
+            Blocks.SMOOTH_BASALT,
+            Blocks.AMETHYST_CLUSTER,
+            Blocks.LARGE_AMETHYST_BUD,
+            Blocks.MEDIUM_AMETHYST_BUD,
+            Blocks.SMALL_AMETHYST_BUD
+    );
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
@@ -308,35 +324,54 @@ public class ActivatedSpawnerDetector extends Module {
                 WorldChunk chunk = mc.world.getChunk(chunkX, chunkZ);
                 List<BlockEntity> blockEntities = new ArrayList<>(chunk.getBlockEntities().values());
 
-                                            for (BlockEntity blockEntity : blockEntities) {
-                                                if (blockEntity instanceof MobSpawnerBlockEntity spawner) {
-                                                    activatedSpawnerFound = false;
-                                                    BlockPos pos = spawner.getPos();
-                                                    BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
-                                                    String monster = null;
-                                                    if (spawner.getLogic().spawnEntry != null && spawner.getLogic().spawnEntry.getNbt().get("id") != null)
-                                                        monster = spawner.getLogic().spawnEntry.getNbt().get("id").toString();
-                                                    if (playerPos.isWithinDistance(pos, renderDistance.get() * 16) && !trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos)) {
-                                                        boolean b = monster.contains("zombie") || monster.contains("skeleton") || monster.contains(":spider");
-                                                        if (airChecker.get() && (spawner.getLogic().spawnDelay == 20 || spawner.getLogic().spawnDelay == 0)) {
-                                                            boolean airFound = false;
-                                                            boolean caveAirFound = false;
-                                                            if (monster != null && !scannedPositions.contains(pos)) {
-                                                                if (b) {
-                                                                    for (int x = -2; x < 2; x++) {
-                                                                        for (int y = -1; y < 3; y++) {
-                                                                            for (int z = -2; z < 2; z++) {
-                                                                                BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                                                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR)
-                                                                                    airFound = true;
-                                                                                if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
-                                                                                    caveAirFound = true;
-                                                                                if (caveAirFound && airFound) break;
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                    if (caveAirFound && airFound) {
-                                                                        if (monster.equals(":spider")) displayMessage("dungeon", pos, ":spider");
+                for (BlockEntity blockEntity : blockEntities) {
+                    if (blockEntity instanceof MobSpawnerBlockEntity spawner) {
+                        activatedSpawnerFound = false;
+                        BlockPos pos = spawner.getPos();
+                        BlockPos playerPos = new BlockPos(mc.player.getBlockX(), pos.getY(), mc.player.getBlockZ());
+                        String monster = null;
+                        if (spawner.getLogic().spawnEntry != null && spawner.getLogic().spawnEntry.getNbt().get("id") != null)
+                            monster = Objects.requireNonNull(spawner.getLogic().spawnEntry.getNbt().get("id")).toString();
+                        if (playerPos.isWithinDistance(pos, renderDistance.get() * 16) && !trialspawnerPositions.contains(pos) && !noRenderPositions.contains(pos) && !deactivatedSpawnerPositions.contains(pos) && !spawnerPositions.contains(pos)) {
+                            boolean b = monster.contains("zombie") || monster.contains("skeleton") || monster.contains(":spider");
+                            if (airChecker.get() && (spawner.getLogic().spawnDelay == 20 || spawner.getLogic().spawnDelay == 0)) {
+                                boolean airFound = false;
+                                boolean caveAirFound = false;
+                                boolean geodeNearby = false;
+                                // Check for geode blocks if ignoreGeodes is enabled
+                                if (ignoreGeodes.get()) {
+                                    for (int x = -5; x <= 5; x++) {
+                                        for (int y = -5; y <= 5; y++) {
+                                            for (int z = -5; z <= 5; z++) {
+                                                BlockPos bpos = pos.add(x, y, z);
+                                                if (GEODE_BLOCKS.contains(mc.world.getBlockState(bpos).getBlock())) {
+                                                    geodeNearby = true;
+                                                    break;
+                                                }
+                                            }
+                                            if (geodeNearby) break;
+                                        }
+                                        if (geodeNearby) break;
+                                    }
+                                }
+                                if (!geodeNearby && !scannedPositions.contains(pos)) {
+                                    if (b) { // Zombie, skeleton, spider
+                                        for (int x = -2; x < 2; x++) {
+                                            for (int y = -1; y < 3; y++) {
+                                                for (int z = -2; z < 2; z++) {
+                                                    BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
+                                                    if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR)
+                                                        airFound = true;
+                                                    if (mc.world.getBlockState(bpos).getBlock() == Blocks.CAVE_AIR)
+                                                        caveAirFound = true;
+                                                    if (caveAirFound && airFound) break;
+                                                }
+                                                if (caveAirFound && airFound) break;
+                                            }
+                                            if (caveAirFound && airFound) break;
+                                        }
+                                        if (caveAirFound && airFound) {
+                                            if (monster.equals(":spider")) displayMessage("dungeon", pos, ":spider");
                                             else displayMessage("dungeon", pos, "null");
                                         }
                                     } else if (monster.contains("cave_spider")) {
@@ -350,15 +385,17 @@ public class ActivatedSpawnerDetector extends Module {
                                                         caveAirFound = true;
                                                     if (caveAirFound && airFound) break;
                                                 }
+                                                if (caveAirFound && airFound) break;
                                             }
+                                            if (caveAirFound && airFound) break;
                                         }
                                         if (caveAirFound && airFound) {
                                             displayMessage("cave_spider", pos, "null");
                                         }
                                     } else if (monster.contains("silverfish")) {
-                                        for (int x = -3; x < 3 + 1; x++) {
-                                            for (int y = -2; y < 3 + 1; y++) {
-                                                for (int z = -3; z < 3 + 1; z++) {
+                                        for (int x = -3; x < 4; x++) {
+                                            for (int y = -2; y < 4; y++) {
+                                                for (int z = -3; z < 4; z++) {
                                                     BlockPos bpos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
                                                     if (mc.world.getBlockState(bpos).getBlock() == Blocks.AIR)
                                                         airFound = true;
@@ -366,7 +403,9 @@ public class ActivatedSpawnerDetector extends Module {
                                                         caveAirFound = true;
                                                     if (caveAirFound && airFound) break;
                                                 }
+                                                if (caveAirFound && airFound) break;
                                             }
+                                            if (caveAirFound && airFound) break;
                                         }
                                         if (caveAirFound && airFound) {
                                             displayMessage("silverfish", pos, "null");
@@ -416,7 +455,6 @@ public class ActivatedSpawnerDetector extends Module {
                                     if (chatFeedback.get() && lightsFound)
                                         ChatUtils.sendMsg(Text.of("The Spawner has torches or other light blocks!"));
                                 }
-
                                 boolean chestfound = false;
                                 for (int x = -16; x < 17; x++) {
                                     for (int y = -16; y < 17; y++) {
