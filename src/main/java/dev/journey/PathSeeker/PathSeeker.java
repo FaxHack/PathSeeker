@@ -4,6 +4,7 @@ import dev.journey.PathSeeker.commands.*;
 import dev.journey.PathSeeker.modules.automation.StorageLooter;
 import dev.journey.PathSeeker.modules.automation.TridentDupe;
 import dev.journey.PathSeeker.modules.exploration.*;
+import dev.journey.PathSeeker.modules.exploration.searcharea.SearchArea;
 import dev.journey.PathSeeker.modules.render.*;
 import dev.journey.PathSeeker.modules.utility.*;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
@@ -46,6 +47,8 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new EntityClusterESP());
         Modules.get().add(new TridentDupe());
         Modules.get().add(new Firework());
+        Modules.get().add(new SearchArea());
+        Modules.get().add(new GrimEfly());
         //Modules.get().add(new ChestIndex());
 
             

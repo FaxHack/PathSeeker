@@ -1,10 +1,12 @@
 package dev.journey.PathSeeker.utils;
 
 import dev.journey.PathSeeker.PathSeeker;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.text.ClickEvent;
@@ -12,6 +14,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.Vec3d;
 
 import java.awt.*;
 import java.io.File;
@@ -197,6 +200,16 @@ public class PathSeekerUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    public static void setPressed(KeyBinding key, boolean pressed)
+    {
+        key.setPressed(pressed);
+        Input.setKeyState(key, pressed);
+    }
+    public static Vec3d positionInDirection(Vec3d pos, double yaw, double distance)
+    {
+        Vec3d offset = (new Vec3d(Math.sin(-yaw * Math.PI / 180), 0, Math.cos(-yaw * Math.PI / 180)).normalize()).multiply(distance);
+        return pos.add(offset);
     }
 
     public String getFormattedLastSeen() {
