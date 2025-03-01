@@ -267,7 +267,7 @@ public class ActivatedSpawnerDetector extends Module {
     private boolean activatedSpawnerFound = false;
 
     public ActivatedSpawnerDetector() {
-        super(PathSeeker.Utility, "ActivatedSpawnerDetector", "Detects if a player has been near a mob spawner in the past. May be useful for finding player made stashes in dungeons, mineshafts, and other places.");
+        super(PathSeeker.Hunting, "ActivatedSpawnerDetector", "Detects if a player has been near a mob spawner in the past. May be useful for finding player made stashes in dungeons, mineshafts, and other places.");
     }
 
     @Override
