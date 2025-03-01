@@ -1,7 +1,7 @@
 package dev.journey.PathSeeker;
 
 import dev.journey.PathSeeker.commands.*;
-import dev.journey.PathSeeker.modules.automation.AreaLoader;
+//import dev.journey.PathSeeker.modules.automation.AreaLoader;
 import dev.journey.PathSeeker.modules.automation.StorageLooter;
 import dev.journey.PathSeeker.modules.automation.TridentDupe;
 import dev.journey.PathSeeker.modules.exploration.*;
@@ -49,7 +49,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new EntityClusterESP());
         Modules.get().add(new TridentDupe());
         Modules.get().add(new Firework());
-        Modules.get().add(new AreaLoader());
+        //Modules.get().add(new AreaLoader());
         //Modules.get().add(new ChestIndex());
 
             
