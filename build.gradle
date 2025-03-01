@@ -53,6 +53,7 @@ dependencies {
 
     // Other
     implementation 'org.json:json:20231013'
+    implementation 'com.google.code.gson:gson:2.8.9'
     modImplementation("net.lenni0451:LambdaEvents:2.4.2")
     modImplementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
     modImplementation "baritone-api-fabric:baritone-api-fabric:1.10.2"

@@ -1,6 +1,6 @@
 package dev.journey.PathSeeker.utils;
 
-import dev.journey.PathSeeker.PathSeeker;
+
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -99,18 +99,19 @@ public class PathSeekerUtil {
                 if (file.createNewFile()) {
                     if (mc.player != null) {
                         mc.player.sendMessage(
-                                Text.literal("§8<" + PathSeekerUtil.randomColorCode() + "§o✨§r§8> §7Created " + file.getName() + " in meteor-client folder.")
+                                Text.literal("§8<" + PathSeekerUtil.randomColorCode() + "§o✨§r§8> §7Created " + file.getName() + " in meteor-client folder."),
+                                false
                         );
                         MutableText msg = Text.literal("§8<" + PathSeekerUtil.randomColorCode() + "§o✨§r§8> §7Click §2§lhere §r§7to open the file.");
                         Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()));
 
                         MutableText txt = msg.setStyle(style);
-                        mc.player.sendMessage(txt);
+                        mc.player.sendMessage(txt, false);
                     }
                     return true;
                 }
             } catch (Exception err) {
-                PathSeeker.LOG.error("[PathSeeker] Error creating" + file.getAbsolutePath() + "! - Why:\n" + err);
+                logError("[PathSeeker] Error creating " + file.getAbsolutePath() + "! - Why:\n" + err);
             }
         } else return true;
 
@@ -125,11 +126,11 @@ public class PathSeekerUtil {
                 try {
                     Desktop.getDesktop().open(file);
                 } catch (Exception err) {
-                    PathSeeker.LOG.error("[PathSeeker] Failed to open " + file.getAbsolutePath() + "! - Why:\n" + err);
+                    logError("[PathSeeker] Error creating " + file.getAbsolutePath() + "! - Why:\n" + err);
                 }
             });
         } else {
-            PathSeeker.LOG.error("[PathSeeker] Desktop operations not supported.");
+            logError("[PathSeeker] Desktop operations not supported.");
         }
     }
 

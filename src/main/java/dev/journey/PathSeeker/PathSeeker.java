@@ -1,12 +1,12 @@
 package dev.journey.PathSeeker;
 
 import dev.journey.PathSeeker.commands.*;
-import dev.journey.PathSeeker.modules.automation.StorageLooter;
+import dev.journey.PathSeeker.modules.automation.AreaLoader;
 import dev.journey.PathSeeker.modules.automation.TridentDupe;
 import dev.journey.PathSeeker.modules.exploration.*;
-import dev.journey.PathSeeker.modules.exploration.searcharea.SearchArea;
 import dev.journey.PathSeeker.modules.render.*;
 import dev.journey.PathSeeker.modules.utility.*;
+import dev.journey.PathSeeker.utils.Update.UpdateChecker;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.modules.Category;
@@ -26,6 +26,7 @@ public class PathSeeker extends MeteorAddon {
     @Override
     public void onInitialize() {
         LOG.info("Initializing Path-Seeker!");
+        UpdateChecker.checkForUpdate();
 
         //Modules
         Modules.get().add(new ActivatedSpawnerDetector());
@@ -35,20 +36,16 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new HoleAndTunnelAndStairsESP());
         Modules.get().add(new NewerNewChunks());
         Modules.get().add(new BaseFinder());
-        Modules.get().add(new StorageLooter());
         Modules.get().add(new PotESP());
         Modules.get().add(new MobGearESP());
         Modules.get().add(new GrimDuraFirework());
         Modules.get().add(new SignHistorian());
-        Modules.get().add(new ElytraSwap());
         Modules.get().add(new Pitch40Util());
         Modules.get().add(new NOJumpDelay());
         Modules.get().add(new DroppedItemESP());
         Modules.get().add(new EntityClusterESP());
         Modules.get().add(new TridentDupe());
-        Modules.get().add(new Firework());
-        Modules.get().add(new SearchArea());
-        Modules.get().add(new GrimEfly());
+        Modules.get().add(new AreaLoader());
         //Modules.get().add(new ChestIndex());
 
             
@@ -60,7 +57,6 @@ public class PathSeeker extends MeteorAddon {
         if (FabricLoader.getInstance().isModLoaded("xaeroplus"))
         {
             Modules.get().add(new TrailFollower());
-            Modules.get().add(new OldChunkNotifier());
         }
         else
         {

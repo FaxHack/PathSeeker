@@ -1,9 +1,8 @@
 package dev.journey.PathSeeker.commands;
 
-import com.google.gson.Gson;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import dev.journey.PathSeeker.PathSeeker;
+import com.nimbusds.jose.shaded.gson.Gson;
 import dev.journey.PathSeeker.utils.ApiHandler;
 import dev.journey.PathSeeker.utils.PathSeekerUtil;
 import meteordevelopment.meteorclient.commands.Command;
@@ -39,7 +38,8 @@ public class Stats2b2t extends Command {
                     player.sendMessage(
                             Text.of(
                                     "§8<" + PathSeekerUtil.randomColorCode() + "§o✨" + "§r§8> §4§oPlayer not found§7..."
-                            )
+                            ),
+                            false
                     );
                 } else {
                     try {
@@ -72,11 +72,12 @@ public class Stats2b2t extends Command {
                                                 "    §7Last Seen: " + colorCode + "§o" + formattedLastSeen + "\n" +
                                                 "    §7Playtime: " + colorCode + "§o" + formattedPlaytime + "\n" +
                                                 "    §7Playtime in last month: " + colorCode + "§o" + formattedPlaytimeInMonth
-                                )
+                                ),
+                                false
                         );
                     } catch (Exception err) {
-                        PathSeeker.LOG.error("[Stats2b2t] Failed to deserialize JSON: {}", err.getMessage());
-                        error("§7Failed to deserialize response from the server§4..!");
+                        System.err.println("[Stats2b2t] Failed to deserialize JSON: " + err.getMessage());
+                        error("Failed to deserialize response from the server!");
                     }
                 }
             });

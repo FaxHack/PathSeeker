@@ -8,7 +8,7 @@
     "2b2tJourney"
   ],
   "contact": {
-    "repo": "https://github.com/FaxHack/PathSeeker"
+    "repo": "https://github.com/FaxHack/PathSeeker/tree/1.21.4"
   },
   "icon": "assets/icon/icon.png",
   "environment": "client",
