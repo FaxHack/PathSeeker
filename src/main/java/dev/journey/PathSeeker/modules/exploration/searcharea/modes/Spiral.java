@@ -5,34 +5,28 @@ import dev.journey.PathSeeker.modules.exploration.searcharea.SearchAreaModes;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.util.math.BlockPos;
 
-import java.io.*;
-
+import java.io.File;
+import java.io.FileReader;
 
 import static dev.journey.PathSeeker.utils.PathSeekerUtil.setPressed;
 
-public class Spiral extends SearchAreaMode
-{
+public class Spiral extends SearchAreaMode {
     private PathingDataSpiral pd;
     private boolean goingToStart = true;
     private long startTime;
 
-    public Spiral()
-    {
+    public Spiral() {
         super(SearchAreaModes.Spiral);
     }
 
     @Override
-    public void onActivate()
-    {
+    public void onActivate() {
         startTime = System.nanoTime();
         goingToStart = true;
         File file = getJsonFile(super.toString());
-        if (file == null || !file.exists())
-        {
+        if (file == null || !file.exists()) {
             pd = new PathingDataSpiral(mc.player.getBlockPos(), mc.player.getBlockPos(), -90.0f, true, 0, 0);
-        }
-        else
-        {
+        } else {
             try {
                 FileReader reader = new FileReader(file);
                 pd = GSON.fromJson(reader, PathingDataSpiral.class);
@@ -45,40 +39,32 @@ public class Spiral extends SearchAreaMode
     }
 
     @Override
-    public void onDeactivate()
-    {
+    public void onDeactivate() {
         super.onDeactivate();
         super.saveToJson(goingToStart, pd);
 
     }
 
     @Override
-    public void onTick()
-    {
+    public void onTick() {
         // autosave every 10 minutes in case of crashes
-        if (System.nanoTime() - startTime > 6e11)
-        {
+        if (System.nanoTime() - startTime > 6e11) {
             startTime = System.nanoTime();
             super.saveToJson(goingToStart, pd);
         }
 
-        if (System.nanoTime() < paused)
-        {
+        if (System.nanoTime() < paused) {
             setPressed(mc.options.forwardKey, false);
             return;
         }
 
 
-        if (goingToStart)
-        {
+        if (goingToStart) {
 
-            if (Math.sqrt(mc.player.getBlockPos().getSquaredDistance(pd.currPos.getX(), mc.player.getY(), pd.currPos.getZ())) < 5)
-            {
+            if (Math.sqrt(mc.player.getBlockPos().getSquaredDistance(pd.currPos.getX(), mc.player.getY(), pd.currPos.getZ())) < 5) {
                 goingToStart = false;
                 mc.player.setVelocity(0, 0, 0);
-            }
-            else
-            {
+            } else {
                 mc.player.setYaw((float) Rotations.getYaw(pd.currPos.toCenterPos()));
                 setPressed(mc.options.forwardKey, true);
             }
@@ -88,31 +74,26 @@ public class Spiral extends SearchAreaMode
         setPressed(mc.options.forwardKey, true);
         mc.player.setYaw(pd.yawDirection);
         int blockGap = 16 * searchArea.rowGap.get();
-        if (pd.mainPath && Math.abs(mc.player.getX() - pd.initialPos.getX()) >= (blockGap + pd.spiralWidth))
-        {
+        if (pd.mainPath && Math.abs(mc.player.getX() - pd.initialPos.getX()) >= (blockGap + pd.spiralWidth)) {
             pd.yawDirection += 90.0f;
-            pd.initialPos = new BlockPos((int)mc.player.getX(), pd.initialPos.getY(), pd.initialPos.getZ());
+            pd.initialPos = new BlockPos((int) mc.player.getX(), pd.initialPos.getY(), pd.initialPos.getZ());
             pd.spiralWidth += blockGap;
             pd.mainPath = false;
             mc.player.setVelocity(0, 0, 0);
-        }
-        else if (!pd.mainPath && Math.abs(mc.player.getZ() - pd.initialPos.getZ()) >= (blockGap + pd.spiralHeight))
-        {
+        } else if (!pd.mainPath && Math.abs(mc.player.getZ() - pd.initialPos.getZ()) >= (blockGap + pd.spiralHeight)) {
             pd.yawDirection += 90.0f;
-            pd.initialPos = new BlockPos(pd.initialPos.getX(), pd.initialPos.getY(), (int)mc.player.getZ());
+            pd.initialPos = new BlockPos(pd.initialPos.getX(), pd.initialPos.getY(), (int) mc.player.getZ());
             pd.spiralHeight += blockGap;
             pd.mainPath = true;
             mc.player.setVelocity(0, 0, 0);
         }
     }
 
-    public static class PathingDataSpiral extends PathingData
-    {
+    public static class PathingDataSpiral extends PathingData {
         public int spiralWidth = 0;
         public int spiralHeight = 0;
 
-        public PathingDataSpiral(BlockPos initialPos, BlockPos currPos, float yawDirection, boolean mainPath, int spiralWidth, int spiralHeight)
-        {
+        public PathingDataSpiral(BlockPos initialPos, BlockPos currPos, float yawDirection, boolean mainPath, int spiralWidth, int spiralHeight) {
             this.initialPos = initialPos;
             this.currPos = currPos;
             this.yawDirection = yawDirection;

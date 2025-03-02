@@ -4,8 +4,8 @@ package dev.journey.PathSeeker.modules.exploration.searcharea;
 import dev.journey.PathSeeker.PathSeeker;
 import dev.journey.PathSeeker.modules.exploration.searcharea.modes.Rectangle;
 import dev.journey.PathSeeker.modules.exploration.searcharea.modes.Spiral;
-import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
@@ -18,33 +18,6 @@ import net.minecraft.util.math.BlockPos;
 public class SearchArea extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-
-    public final Setting<SearchAreaModes> chunkLoadMode = sgGeneral.add(new EnumSetting.Builder<SearchAreaModes>()
-            .name("Mode")
-            .description("The mode chunks are loaded.")
-            .defaultValue(SearchAreaModes.Rectangle)
-            .onModuleActivated(chunkMode -> onModeChanged(chunkMode.get()))
-            .onChanged(this::onModeChanged)
-            .build()
-    );
-
-    public final Setting<BlockPos> startPos = sgGeneral.add(new BlockPosSetting.Builder()
-            .name("Start Position")
-            .description("The coordinates to start the rectangle at. Y Pos is ignored")
-            .defaultValue(new BlockPos(0,0,0))
-            .visible(() -> chunkLoadMode.get() == SearchAreaModes.Rectangle)
-            .build()
-    );
-
-    public final Setting<BlockPos> targetPos = sgGeneral.add(new BlockPosSetting.Builder()
-            .name("End Position")
-            .description("The coordinates to end the rectangle at. Y Pos is ignored")
-            .defaultValue(new BlockPos(0,0,0))
-            .visible(() -> chunkLoadMode.get() == SearchAreaModes.Rectangle)
-            .build()
-    );
-
     public final Setting<Integer> rowGap = sgGeneral.add(new IntSetting.Builder()
             .name("Path Gap")
             .description("The amount of chunks to space between each chunk path.")
@@ -53,21 +26,18 @@ public class SearchArea extends Module {
             .sliderRange(0, 32)
             .build()
     );
-
     public final Setting<String> saveLocation = sgGeneral.add(new StringSetting.Builder()
             .name("Save Name")
             .description("The name to use for the folder that saves data, if you leave it blank, no data will be saved.")
             .defaultValue("")
             .build()
     );
-
     public final Setting<WebhookSettings> webhookMode = sgGeneral.add(new EnumSetting.Builder<WebhookSettings>()
             .name("Webhook Mode")
             .description("The mode for discord webhooks.")
             .defaultValue(WebhookSettings.Off)
             .build()
     );
-
     public final Setting<String> webhookLink = sgGeneral.add(new StringSetting.Builder()
             .name("Webhook Link")
             .description("A discord webhook link. Looks like this: https://discord.com/api/webhooks/webhookUserId/webHookTokenOrSomething")
@@ -75,7 +45,6 @@ public class SearchArea extends Module {
             .visible(() -> webhookMode.get() != WebhookSettings.Off)
             .build()
     );
-
     public final Setting<Boolean> pingForStashFinder = sgGeneral.add(new BoolSetting.Builder()
             .name("Ping For Stash Finder")
             .description("Pings you for stash finder and base finder messages")
@@ -83,7 +52,6 @@ public class SearchArea extends Module {
             .visible(() -> webhookMode.get() == WebhookSettings.LogBoth || webhookMode.get() == WebhookSettings.LogStashes)
             .build()
     );
-
     public final Setting<String> discordId = sgGeneral.add(new StringSetting.Builder()
             .name("Discord ID")
             .description("Your discord ID")
@@ -91,7 +59,29 @@ public class SearchArea extends Module {
             .visible(() -> webhookMode.get() != WebhookSettings.Off && pingForStashFinder.get())
             .build()
     );
-
+    private SearchAreaMode currentMode = new Rectangle();
+    public final Setting<SearchAreaModes> chunkLoadMode = sgGeneral.add(new EnumSetting.Builder<SearchAreaModes>()
+            .name("Mode")
+            .description("The mode chunks are loaded.")
+            .defaultValue(SearchAreaModes.Rectangle)
+            .onModuleActivated(chunkMode -> onModeChanged(chunkMode.get()))
+            .onChanged(this::onModeChanged)
+            .build()
+    );
+    public final Setting<BlockPos> startPos = sgGeneral.add(new BlockPosSetting.Builder()
+            .name("Start Position")
+            .description("The coordinates to start the rectangle at. Y Pos is ignored")
+            .defaultValue(new BlockPos(0, 0, 0))
+            .visible(() -> chunkLoadMode.get() == SearchAreaModes.Rectangle)
+            .build()
+    );
+    public final Setting<BlockPos> targetPos = sgGeneral.add(new BlockPosSetting.Builder()
+            .name("End Position")
+            .description("The coordinates to end the rectangle at. Y Pos is ignored")
+            .defaultValue(new BlockPos(0, 0, 0))
+            .visible(() -> chunkLoadMode.get() == SearchAreaModes.Rectangle)
+            .build()
+    );
     public final Setting<Boolean> disconnectOnCompletion = sgGeneral.add(new BoolSetting.Builder()
             .name("Disconnect on Completion")
             .description("Whether to disconnect after the path is complete. This will turn autoreconnect off when disconnecting.")
@@ -100,16 +90,12 @@ public class SearchArea extends Module {
             .build()
     );
 
-
     public SearchArea() {
         super(PathSeeker.Hunting, "search-area", "Either loads chunks in a rectangle to a certain point from you, or spirals endlessly from you. Useful with Stash Finder or other map saving mods.");
     }
 
-    private SearchAreaMode currentMode = new Rectangle();
-
     @Override
-    public WWidget getWidget(GuiTheme theme)
-    {
+    public WWidget getWidget(GuiTheme theme) {
         WVerticalList list = theme.verticalList();
         WButton clear = list.add(theme.button("Clear Currently Selected")).widget();
 
@@ -128,14 +114,12 @@ public class SearchArea extends Module {
     }
 
     @Override
-    public void onDeactivate()
-    {
+    public void onDeactivate() {
         currentMode.onDeactivate();
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event)
-    {
+    private void onTick(TickEvent.Post event) {
         currentMode.onTick();
     }
 
@@ -147,13 +131,11 @@ public class SearchArea extends Module {
     }
 
     @EventHandler
-    private void onMessageReceive(ReceiveMessageEvent event)
-    {
+    private void onMessageReceive(ReceiveMessageEvent event) {
         currentMode.onMessageReceive(event);
     }
 
-    public enum WebhookSettings
-    {
+    public enum WebhookSettings {
         Off,
         LogChat,
         LogStashes,

@@ -5,7 +5,6 @@
 package dev.journey.PathSeeker.modules.automation;
 
 import dev.journey.PathSeeker.PathSeeker;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
@@ -16,6 +15,7 @@ import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
@@ -28,7 +28,10 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 public class TridentDupe extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -54,22 +57,12 @@ public class TridentDupe extends Module {
     );
 
     private final Queue<Packet<?>> delayedPackets = new LinkedList<>();
-    private boolean cancel = true;
     private final List<TimedTask> scheduledTasks = new ArrayList<>();
     private final List<TimedTask> scheduledTasks2 = new ArrayList<>();
+    private boolean cancel = true;
 
     public TridentDupe() {
         super(PathSeeker.Utility, "trident-dupe", "Dupes tridents in first hotbar slot.");
-    }
-
-    private static class TimedTask {
-        private final long executeTime;
-        private final Runnable task;
-
-        TimedTask(long executeTime, Runnable task) {
-            this.executeTime = executeTime;
-            this.task = task;
-        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
@@ -102,7 +95,7 @@ public class TridentDupe extends Module {
     }
 
     private void dupe() {
-        int delayInt = (int)(delay.get() * 100);
+        int delayInt = (int) (delay.get() * 100);
 
         int lowestHotbarSlot = 0;
         int lowestHotbarDamage = 1000;
@@ -183,6 +176,16 @@ public class TridentDupe extends Module {
     private void onScreenOpen(OpenScreenEvent event) {
         if (event.screen instanceof DisconnectedScreen) {
             toggle();
+        }
+    }
+
+    private static class TimedTask {
+        private final long executeTime;
+        private final Runnable task;
+
+        TimedTask(long executeTime, Runnable task) {
+            this.executeTime = executeTime;
+            this.task = task;
         }
     }
 }

@@ -25,7 +25,9 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
+import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.*;
@@ -40,247 +42,27 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /*
     Ported from: https://github.com/BleachDrinker420/BleachHack/blob/master/BleachHack-Fabric-1.16/src/main/java/bleach/hack/module/mods/NewChunks.java
     updated by etianl :D
 */
 public class NewerNewChunks extends Module {
-    public enum DetectMode {
-        Normal,
-        IgnoreBlockExploit,
-        BlockExploitMode
-    }
-    private final SettingGroup specialGroup = settings.createGroup("Disable PaletteExploit if server version <1.18");
-    private final SettingGroup specialGroup2 = settings.createGroup("Detection for chunks that were generated in old versions.");
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgCdata = settings.createGroup("Saved Chunk Data");
-    private final SettingGroup sgcacheCdata = settings.createGroup("Cached Chunk Data");
-    private final SettingGroup sgRender = settings.createGroup("Render");
-
-    private final Setting<Boolean> PaletteExploit = specialGroup.add(new BoolSetting.Builder()
-            .name("PaletteExploit")
-            .description("Detects new chunks by scanning the order of chunk section palettes. Highlights chunks being updated from an old version.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<Boolean> beingUpdatedDetector = specialGroup.add(new BoolSetting.Builder()
-            .name("Detection for chunks that haven't been explored since <=1.17")
-            .description("Marks chunks as their own color if they are currently being updated from old version.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<Boolean> overworldOldChunksDetector = specialGroup2.add(new BoolSetting.Builder()
-            .name("Pre 1.17 Overworld OldChunk Detector")
-            .description("Marks chunks as generated in an old version if they have specific blocks above Y 0 and are in the overworld.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<Boolean> netherOldChunksDetector = specialGroup2.add(new BoolSetting.Builder()
-            .name("Pre 1.16 Nether OldChunk Detector")
-            .description("Marks chunks as generated in an old version if they are missing blocks found in the new Nether.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<Boolean> endOldChunksDetector = specialGroup2.add(new BoolSetting.Builder()
-            .name("Pre 1.13 End OldChunk Detector")
-            .description("Marks chunks as generated in an old version if they have the biome of minecraft:the_end.")
-            .defaultValue(true)
-            .build()
-    );
-    public final Setting<DetectMode> detectmode = sgGeneral.add(new EnumSetting.Builder<DetectMode>()
-            .name("Chunk Detection Mode")
-            .description("Anything other than normal is for old servers where build limits are being increased due to updates.")
-            .defaultValue(DetectMode.Normal)
-            .build()
-    );
-    private final Setting<Boolean> liquidexploit = sgGeneral.add(new BoolSetting.Builder()
-            .name("LiquidExploit")
-            .description("Estimates newchunks based on flowing liquids.")
-            .defaultValue(false)
-            .build()
-    );
-    private final Setting<Boolean> blockupdateexploit = sgGeneral.add(new BoolSetting.Builder()
-            .name("BlockUpdateExploit")
-            .description("Estimates newchunks based on block updates. THESE MAY POSSIBLY BE OLD. BlockExploitMode needed to help determine false positives.")
-            .defaultValue(false)
-            .build()
-    );
-    private final Setting<Boolean> remove = sgcacheCdata.add(new BoolSetting.Builder()
-            .name("RemoveOnModuleDisabled")
-            .description("Removes the cached chunks when disabling the module.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<Boolean> worldleaveremove = sgcacheCdata.add(new BoolSetting.Builder()
-            .name("RemoveOnLeaveWorldOrChangeDimensions")
-            .description("Removes the cached chunks when leaving the world or changing dimensions.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<Boolean> removerenderdist = sgcacheCdata.add(new BoolSetting.Builder()
-            .name("RemoveOutsideRenderDistance")
-            .description("Removes the cached chunks when they leave the defined render distance.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> save = sgCdata.add(new BoolSetting.Builder()
-            .name("SaveChunkData")
-            .description("Saves the cached chunks to a file.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<Boolean> load = sgCdata.add(new BoolSetting.Builder()
-            .name("LoadChunkData")
-            .description("Loads the saved chunks from the file.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<Boolean> autoreload = sgCdata.add(new BoolSetting.Builder()
-            .name("AutoReloadChunks")
-            .description("Reloads the chunks automatically from your savefiles on a delay.")
-            .defaultValue(false)
-            .visible(load::get)
-            .build()
-    );
-    private final Setting<Integer> removedelay = sgCdata.add(new IntSetting.Builder()
-            .name("AutoReloadDelayInSeconds")
-            .description("Reloads the chunks automatically from your savefiles on a delay.")
-            .sliderRange(1,300)
-            .defaultValue(60)
-            .visible(() -> autoreload.get() && load.get())
-            .build()
-    );
-
-    @Override
-    public WWidget getWidget(GuiTheme theme) {
-        WTable table = theme.table();
-        WButton deletedata = table.add(theme.button("**DELETE CHUNK DATA**")).expandX().minWidth(100).widget();
-        deletedata.action = () -> {
-            if (deletewarning==0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL CHUNK DATA FOR THIS DIMENSION.");
-            deletewarningTicks=0;
-            deletewarning++;
-        };
-        table.row();
-        return table;
-    }
-    public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
-            .name("Render-Distance(Chunks)")
-            .description("How many chunks from the character to render the detected chunks.")
-            .defaultValue(64)
-            .min(6)
-            .sliderRange(6,1024)
-            .build()
-    );
-    public final Setting<Integer> renderHeight = sgRender.add(new IntSetting.Builder()
-            .name("render-height")
-            .description("The height at which new chunks will be rendered")
-            .defaultValue(0)
-            .sliderRange(-112,319)
-            .build()
-    );
-
-    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
-    );
-
-    private final Setting<SettingColor> newChunksSideColor = sgRender.add(new ColorSetting.Builder()
-            .name("new-chunks-side-color")
-            .description("Color of the chunks that are completely new.")
-            .defaultValue(new SettingColor(255, 0, 0, 95))
-            .visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both))
-            .build()
-    );
-    private final Setting<SettingColor> tickexploitChunksSideColor = sgRender.add(new ColorSetting.Builder()
-            .name("BlockExploitChunks-side-color")
-            .description("MAY POSSIBLY BE OLD. Color of the chunks that have been triggered via block ticking packets")
-            .defaultValue(new SettingColor(0, 0, 255, 75))
-            .visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.BlockExploitMode)
-            .build()
-    );
-
-    private final Setting<SettingColor> oldChunksSideColor = sgRender.add(new ColorSetting.Builder()
-            .name("old-chunks-side-color")
-            .description("Color of the chunks that have been loaded before.")
-            .defaultValue(new SettingColor(0, 255, 0, 40))
-            .visible(() -> shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both)
-            .build()
-    );
-    private final Setting<SettingColor> beingUpdatedOldChunksSideColor = sgRender.add(new ColorSetting.Builder()
-            .name("being-updated-chunks-side-color")
-            .description("Color of the chunks that haven't been explored since versions <=1.17.")
-            .defaultValue(new SettingColor(255, 210, 0, 60))
-            .visible(() -> shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both)
-            .build()
-    );
-    private final Setting<SettingColor> OldGenerationOldChunksSideColor = sgRender.add(new ColorSetting.Builder()
-            .name("old-version-chunks-side-color")
-            .description("Color of the chunks that have been loaded before in old versions.")
-            .defaultValue(new SettingColor(190, 255, 0, 40))
-            .visible(() -> shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both)
-            .build()
-    );
-
-    private final Setting<SettingColor> newChunksLineColor = sgRender.add(new ColorSetting.Builder()
-            .name("new-chunks-line-color")
-            .description("Color of the chunks that are completely new.")
-            .defaultValue(new SettingColor(255, 0, 0, 205))
-            .visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both))
-            .build()
-    );
-    private final Setting<SettingColor> tickexploitChunksLineColor = sgRender.add(new ColorSetting.Builder()
-            .name("BlockExploitChunks-line-color")
-            .description("MAY POSSIBLY BE OLD. Color of the chunks that have been triggered via block ticking packets")
-            .defaultValue(new SettingColor(0, 0, 255, 170))
-            .visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get()== DetectMode.BlockExploitMode)
-            .build()
-    );
-
-    private final Setting<SettingColor> oldChunksLineColor = sgRender.add(new ColorSetting.Builder()
-            .name("old-chunks-line-color")
-            .description("Color of the chunks that have been loaded before.")
-            .defaultValue(new SettingColor(0, 255, 0, 80))
-            .visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
-            .build()
-    );
-    private final Setting<SettingColor> beingUpdatedOldChunksLineColor = sgRender.add(new ColorSetting.Builder()
-            .name("being-updated-chunks-line-color")
-            .description("Color of the chunks that haven't been explored since versions <=1.17.")
-            .defaultValue(new SettingColor(255, 220, 0, 100))
-            .visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
-            .build()
-    );
-    private final Setting<SettingColor> OldGenerationOldChunksLineColor = sgRender.add(new ColorSetting.Builder()
-            .name("old-version-chunks-line-color")
-            .description("Color of the chunks that have been loaded before in old versions.")
-            .defaultValue(new SettingColor(190, 255, 0, 80))
-            .visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
-            .build()
-    );
     private static final ExecutorService taskExecutor = Executors.newCachedThreadPool();
-    private int deletewarningTicks=666;
-    private int deletewarning=0;
-    private String serverip;
-    private String world;
-    private final Set<ChunkPos> newChunks = Collections.synchronizedSet(new HashSet<>());
-    private final Set<ChunkPos> oldChunks = Collections.synchronizedSet(new HashSet<>());
-    private final Set<ChunkPos> beingUpdatedOldChunks = Collections.synchronizedSet(new HashSet<>());
-    private final Set<ChunkPos> OldGenerationOldChunks = Collections.synchronizedSet(new HashSet<>());
-    private final Set<ChunkPos> tickexploitChunks = Collections.synchronizedSet(new HashSet<>());
-    private static final Direction[] searchDirs = new Direction[] { Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.UP };
-    private int errticks=0;
-    private int autoreloadticks=0;
-    private int loadingticks=0;
-    private boolean worldchange=false;
-    private int justenabledsavedata=0;
-    private boolean saveDataWasOn = false;
+    private static final Direction[] searchDirs = new Direction[]{Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.UP};
     private static final Set<Block> ORE_BLOCKS = new HashSet<>();
+    private static final Set<Block> DEEPSLATE_BLOCKS = new HashSet<>();
+    private static final Set<Block> NEW_OVERWORLD_BLOCKS = new HashSet<>();
+    private static final Set<Block> NEW_NETHER_BLOCKS = new HashSet<>();
+
     static {
         ORE_BLOCKS.add(Blocks.COAL_ORE);
         ORE_BLOCKS.add(Blocks.DEEPSLATE_COAL_ORE);
@@ -299,7 +81,7 @@ public class NewerNewChunks extends Module {
         ORE_BLOCKS.add(Blocks.EMERALD_ORE);
         ORE_BLOCKS.add(Blocks.DEEPSLATE_EMERALD_ORE);
     }
-    private static final Set<Block> DEEPSLATE_BLOCKS = new HashSet<>();
+
     static {
         DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE);
         DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE_COPPER_ORE);
@@ -311,7 +93,7 @@ public class NewerNewChunks extends Module {
         DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE_LAPIS_ORE);
         DEEPSLATE_BLOCKS.add(Blocks.DEEPSLATE_DIAMOND_ORE);
     }
-    private static final Set<Block> NEW_OVERWORLD_BLOCKS = new HashSet<>();
+
     static {
         NEW_OVERWORLD_BLOCKS.add(Blocks.DEEPSLATE);
         NEW_OVERWORLD_BLOCKS.add(Blocks.AMETHYST_BLOCK);
@@ -349,7 +131,7 @@ public class NewerNewChunks extends Module {
         NEW_OVERWORLD_BLOCKS.add(Blocks.FLOWERING_AZALEA_LEAVES);
         NEW_OVERWORLD_BLOCKS.add(Blocks.POWDER_SNOW);
     }
-    private static final Set<Block> NEW_NETHER_BLOCKS = new HashSet<>();
+
     static {
         NEW_NETHER_BLOCKS.add(Blocks.ANCIENT_DEBRIS);
         NEW_NETHER_BLOCKS.add(Blocks.BASALT);
@@ -370,6 +152,202 @@ public class NewerNewChunks extends Module {
         NEW_NETHER_BLOCKS.add(Blocks.SOUL_SOIL);
         NEW_NETHER_BLOCKS.add(Blocks.SOUL_FIRE);
     }
+
+    private final SettingGroup specialGroup = settings.createGroup("Disable PaletteExploit if server version <1.18");
+    private final SettingGroup specialGroup2 = settings.createGroup("Detection for chunks that were generated in old versions.");
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    public final Setting<DetectMode> detectmode = sgGeneral.add(new EnumSetting.Builder<DetectMode>()
+            .name("Chunk Detection Mode")
+            .description("Anything other than normal is for old servers where build limits are being increased due to updates.")
+            .defaultValue(DetectMode.Normal)
+            .build()
+    );
+    private final SettingGroup sgCdata = settings.createGroup("Saved Chunk Data");
+    private final SettingGroup sgcacheCdata = settings.createGroup("Cached Chunk Data");
+    private final SettingGroup sgRender = settings.createGroup("Render");
+    public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
+            .name("Render-Distance(Chunks)")
+            .description("How many chunks from the character to render the detected chunks.")
+            .defaultValue(64)
+            .min(6)
+            .sliderRange(6, 1024)
+            .build()
+    );
+    public final Setting<Integer> renderHeight = sgRender.add(new IntSetting.Builder()
+            .name("render-height")
+            .description("The height at which new chunks will be rendered")
+            .defaultValue(0)
+            .sliderRange(-112, 319)
+            .build()
+    );
+    private final Setting<Boolean> PaletteExploit = specialGroup.add(new BoolSetting.Builder()
+            .name("PaletteExploit")
+            .description("Detects new chunks by scanning the order of chunk section palettes. Highlights chunks being updated from an old version.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> beingUpdatedDetector = specialGroup.add(new BoolSetting.Builder()
+            .name("Detection for chunks that haven't been explored since <=1.17")
+            .description("Marks chunks as their own color if they are currently being updated from old version.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> overworldOldChunksDetector = specialGroup2.add(new BoolSetting.Builder()
+            .name("Pre 1.17 Overworld OldChunk Detector")
+            .description("Marks chunks as generated in an old version if they have specific blocks above Y 0 and are in the overworld.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> netherOldChunksDetector = specialGroup2.add(new BoolSetting.Builder()
+            .name("Pre 1.16 Nether OldChunk Detector")
+            .description("Marks chunks as generated in an old version if they are missing blocks found in the new Nether.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> endOldChunksDetector = specialGroup2.add(new BoolSetting.Builder()
+            .name("Pre 1.13 End OldChunk Detector")
+            .description("Marks chunks as generated in an old version if they have the biome of minecraft:the_end.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> liquidexploit = sgGeneral.add(new BoolSetting.Builder()
+            .name("LiquidExploit")
+            .description("Estimates newchunks based on flowing liquids.")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Boolean> blockupdateexploit = sgGeneral.add(new BoolSetting.Builder()
+            .name("BlockUpdateExploit")
+            .description("Estimates newchunks based on block updates. THESE MAY POSSIBLY BE OLD. BlockExploitMode needed to help determine false positives.")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Boolean> remove = sgcacheCdata.add(new BoolSetting.Builder()
+            .name("RemoveOnModuleDisabled")
+            .description("Removes the cached chunks when disabling the module.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> worldleaveremove = sgcacheCdata.add(new BoolSetting.Builder()
+            .name("RemoveOnLeaveWorldOrChangeDimensions")
+            .description("Removes the cached chunks when leaving the world or changing dimensions.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> removerenderdist = sgcacheCdata.add(new BoolSetting.Builder()
+            .name("RemoveOutsideRenderDistance")
+            .description("Removes the cached chunks when they leave the defined render distance.")
+            .defaultValue(false)
+            .build()
+    );
+    private final Setting<Boolean> save = sgCdata.add(new BoolSetting.Builder()
+            .name("SaveChunkData")
+            .description("Saves the cached chunks to a file.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> load = sgCdata.add(new BoolSetting.Builder()
+            .name("LoadChunkData")
+            .description("Loads the saved chunks from the file.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> autoreload = sgCdata.add(new BoolSetting.Builder()
+            .name("AutoReloadChunks")
+            .description("Reloads the chunks automatically from your savefiles on a delay.")
+            .defaultValue(false)
+            .visible(load::get)
+            .build()
+    );
+    private final Setting<Integer> removedelay = sgCdata.add(new IntSetting.Builder()
+            .name("AutoReloadDelayInSeconds")
+            .description("Reloads the chunks automatically from your savefiles on a delay.")
+            .sliderRange(1, 300)
+            .defaultValue(60)
+            .visible(() -> autoreload.get() && load.get())
+            .build()
+    );
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+    private final Setting<SettingColor> newChunksSideColor = sgRender.add(new ColorSetting.Builder()
+            .name("new-chunks-side-color")
+            .description("Color of the chunks that are completely new.")
+            .defaultValue(new SettingColor(255, 0, 0, 95))
+            .visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both))
+            .build()
+    );
+    private final Setting<SettingColor> tickexploitChunksSideColor = sgRender.add(new ColorSetting.Builder()
+            .name("BlockExploitChunks-side-color")
+            .description("MAY POSSIBLY BE OLD. Color of the chunks that have been triggered via block ticking packets")
+            .defaultValue(new SettingColor(0, 0, 255, 75))
+            .visible(() -> (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) && detectmode.get() == DetectMode.BlockExploitMode)
+            .build()
+    );
+    private final Setting<SettingColor> oldChunksSideColor = sgRender.add(new ColorSetting.Builder()
+            .name("old-chunks-side-color")
+            .description("Color of the chunks that have been loaded before.")
+            .defaultValue(new SettingColor(0, 255, 0, 40))
+            .visible(() -> shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both)
+            .build()
+    );
+    private final Setting<SettingColor> beingUpdatedOldChunksSideColor = sgRender.add(new ColorSetting.Builder()
+            .name("being-updated-chunks-side-color")
+            .description("Color of the chunks that haven't been explored since versions <=1.17.")
+            .defaultValue(new SettingColor(255, 210, 0, 60))
+            .visible(() -> shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both)
+            .build()
+    );
+    private final Setting<SettingColor> OldGenerationOldChunksSideColor = sgRender.add(new ColorSetting.Builder()
+            .name("old-version-chunks-side-color")
+            .description("Color of the chunks that have been loaded before in old versions.")
+            .defaultValue(new SettingColor(190, 255, 0, 40))
+            .visible(() -> shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both)
+            .build()
+    );
+    private final Setting<SettingColor> newChunksLineColor = sgRender.add(new ColorSetting.Builder()
+            .name("new-chunks-line-color")
+            .description("Color of the chunks that are completely new.")
+            .defaultValue(new SettingColor(255, 0, 0, 205))
+            .visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both))
+            .build()
+    );
+    private final Setting<SettingColor> tickexploitChunksLineColor = sgRender.add(new ColorSetting.Builder()
+            .name("BlockExploitChunks-line-color")
+            .description("MAY POSSIBLY BE OLD. Color of the chunks that have been triggered via block ticking packets")
+            .defaultValue(new SettingColor(0, 0, 255, 170))
+            .visible(() -> (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) && detectmode.get() == DetectMode.BlockExploitMode)
+            .build()
+    );
+    private final Setting<SettingColor> oldChunksLineColor = sgRender.add(new ColorSetting.Builder()
+            .name("old-chunks-line-color")
+            .description("Color of the chunks that have been loaded before.")
+            .defaultValue(new SettingColor(0, 255, 0, 80))
+            .visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
+            .build()
+    );
+    private final Setting<SettingColor> beingUpdatedOldChunksLineColor = sgRender.add(new ColorSetting.Builder()
+            .name("being-updated-chunks-line-color")
+            .description("Color of the chunks that haven't been explored since versions <=1.17.")
+            .defaultValue(new SettingColor(255, 220, 0, 100))
+            .visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
+            .build()
+    );
+    private final Setting<SettingColor> OldGenerationOldChunksLineColor = sgRender.add(new ColorSetting.Builder()
+            .name("old-version-chunks-line-color")
+            .description("Color of the chunks that have been loaded before in old versions.")
+            .defaultValue(new SettingColor(190, 255, 0, 80))
+            .visible(() -> shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both)
+            .build()
+    );
+    private final Set<ChunkPos> newChunks = Collections.synchronizedSet(new HashSet<>());
+    private final Set<ChunkPos> oldChunks = Collections.synchronizedSet(new HashSet<>());
+    private final Set<ChunkPos> beingUpdatedOldChunks = Collections.synchronizedSet(new HashSet<>());
+    private final Set<ChunkPos> OldGenerationOldChunks = Collections.synchronizedSet(new HashSet<>());
+    private final Set<ChunkPos> tickexploitChunks = Collections.synchronizedSet(new HashSet<>());
     Set<Path> FILE_PATHS = new HashSet<>(Set.of(
             Paths.get("OldChunkData.txt"),
             Paths.get("BeingUpdatedChunkData.txt"),
@@ -377,9 +355,34 @@ public class NewerNewChunks extends Module {
             Paths.get("NewChunkData.txt"),
             Paths.get("BlockExploitChunkData.txt")
     ));
+    private int deletewarningTicks = 666;
+    private int deletewarning = 0;
+    private String serverip;
+    private String world;
+    private int errticks = 0;
+    private int autoreloadticks = 0;
+    private int loadingticks = 0;
+    private boolean worldchange = false;
+    private int justenabledsavedata = 0;
+    private boolean saveDataWasOn = false;
+
     public NewerNewChunks() {
-        super(PathSeeker.Hunting,"NewerNewChunks", "Detects new chunks by scanning the order of chunk section palettes. Can also check liquid flow, and block ticking packets.");
+        super(PathSeeker.Hunting, "NewerNewChunks", "Detects new chunks by scanning the order of chunk section palettes. Can also check liquid flow, and block ticking packets.");
     }
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        WTable table = theme.table();
+        WButton deletedata = table.add(theme.button("**DELETE CHUNK DATA**")).expandX().minWidth(100).widget();
+        deletedata.action = () -> {
+            if (deletewarning == 0) error("PRESS AGAIN WITHIN 5s TO DELETE ALL CHUNK DATA FOR THIS DIMENSION.");
+            deletewarningTicks = 0;
+            deletewarning++;
+        };
+        table.row();
+        return table;
+    }
+
     private void clearChunkData() {
         newChunks.clear();
         oldChunks.clear();
@@ -387,23 +390,24 @@ public class NewerNewChunks extends Module {
         OldGenerationOldChunks.clear();
         tickexploitChunks.clear();
     }
+
     @Override
     public void onActivate() {
-        if (save.get())saveDataWasOn = true;
-        else if (!save.get())saveDataWasOn = false;
+        if (save.get()) saveDataWasOn = true;
+        else if (!save.get()) saveDataWasOn = false;
         if (autoreload.get()) {
             clearChunkData();
         }
         if (save.get() || load.get() && mc.world != null) {
-            world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
-            if (mc.isInSingleplayer()){
+            world = mc.world.getRegistryKey().getValue().toString().replace(':', '_');
+            if (mc.isInSingleplayer()) {
                 String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
-                serverip=array[array.length-2];
+                serverip = array[array.length - 2];
             } else {
                 serverip = mc.getCurrentServerEntry().address.replace(':', '_');
             }
         }
-        if (save.get()){
+        if (save.get()) {
             try {
                 Files.createDirectories(Paths.get("TrouserStreak", "NewChunks", serverip, world));
             } catch (IOException e) {
@@ -425,25 +429,27 @@ public class NewerNewChunks extends Module {
                 }
             }
         }
-        if (load.get()){
+        if (load.get()) {
             loadData();
         }
-        autoreloadticks=0;
-        loadingticks=0;
-        worldchange=false;
-        justenabledsavedata=0;
+        autoreloadticks = 0;
+        loadingticks = 0;
+        worldchange = false;
+        justenabledsavedata = 0;
     }
+
     @Override
     public void onDeactivate() {
-        autoreloadticks=0;
-        loadingticks=0;
-        worldchange=false;
-        justenabledsavedata=0;
-        if (remove.get()|autoreload.get()) {
+        autoreloadticks = 0;
+        loadingticks = 0;
+        worldchange = false;
+        justenabledsavedata = 0;
+        if (remove.get() | autoreload.get()) {
             clearChunkData();
         }
         super.onDeactivate();
     }
+
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
         if (event.screen instanceof DisconnectedScreen) {
@@ -452,25 +458,27 @@ public class NewerNewChunks extends Module {
             }
         }
         if (event.screen instanceof DownloadingTerrainScreen) {
-            worldchange=true;
+            worldchange = true;
         }
     }
+
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         if (worldleaveremove.get()) {
             clearChunkData();
         }
     }
+
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        world= mc.world.getRegistryKey().getValue().toString().replace(':', '_');
+        world = mc.world.getRegistryKey().getValue().toString().replace(':', '_');
 
-        if (deletewarningTicks<=100) deletewarningTicks++;
-        else deletewarning=0;
-        if (deletewarning>=2){
-            if (mc.isInSingleplayer()){
+        if (deletewarningTicks <= 100) deletewarningTicks++;
+        else deletewarning = 0;
+        if (deletewarning >= 2) {
+            if (mc.isInSingleplayer()) {
                 String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
-                serverip=array[array.length-2];
+                serverip = array[array.length - 2];
             } else {
                 serverip = mc.getCurrentServerEntry().address.replace(':', '_');
             }
@@ -485,80 +493,82 @@ public class NewerNewChunks extends Module {
                 e.printStackTrace();
             }
             error("Chunk Data deleted for this Dimension.");
-            deletewarning=0;
+            deletewarning = 0;
         }
 
-        if (detectmode.get()== DetectMode.Normal && blockupdateexploit.get()){
-            if (errticks<6){
-                errticks++;}
-            if (errticks==5){
+        if (detectmode.get() == DetectMode.Normal && blockupdateexploit.get()) {
+            if (errticks < 6) {
+                errticks++;
+            }
+            if (errticks == 5) {
                 error("BlockExploitMode RECOMMENDED. Required to determine false positives from the Block Exploit from the OldChunks.");
             }
-        } else errticks=0;
+        } else errticks = 0;
 
-        if (load.get()){
-            if (loadingticks<1){
+        if (load.get()) {
+            if (loadingticks < 1) {
                 loadData();
                 loadingticks++;
             }
-        } else if (!load.get()){
-            loadingticks=0;
+        } else if (!load.get()) {
+            loadingticks = 0;
         }
 
         if (autoreload.get()) {
             autoreloadticks++;
-            if (autoreloadticks==removedelay.get()*20){
+            if (autoreloadticks == removedelay.get() * 20) {
                 clearChunkData();
-                if (load.get()){
+                if (load.get()) {
                     loadData();
                 }
-            } else if (autoreloadticks>=removedelay.get()*20){
-                autoreloadticks=0;
+            } else if (autoreloadticks >= removedelay.get() * 20) {
+                autoreloadticks = 0;
             }
         }
 
-        if (load.get() && worldchange){		//autoreload when entering different dimensions
-            if (worldleaveremove.get()){
+        if (load.get() && worldchange) {        //autoreload when entering different dimensions
+            if (worldleaveremove.get()) {
                 clearChunkData();
             }
             loadData();
-            worldchange=false;
+            worldchange = false;
         }
 
-        if (!save.get())saveDataWasOn = false;
-        if (save.get() && justenabledsavedata<=2 && !saveDataWasOn){
+        if (!save.get()) saveDataWasOn = false;
+        if (save.get() && justenabledsavedata <= 2 && !saveDataWasOn) {
             justenabledsavedata++;
-            if (justenabledsavedata == 1){
+            if (justenabledsavedata == 1) {
                 synchronized (newChunks) {
-                    for (ChunkPos chunk : newChunks){
+                    for (ChunkPos chunk : newChunks) {
                         saveData(Paths.get("NewChunkData.txt"), chunk);
                     }
                 }
                 synchronized (OldGenerationOldChunks) {
-                    for (ChunkPos chunk : OldGenerationOldChunks){
+                    for (ChunkPos chunk : OldGenerationOldChunks) {
                         saveData(Paths.get("OldGenerationChunkData.txt"), chunk);
                     }
                 }
                 synchronized (beingUpdatedOldChunks) {
-                    for (ChunkPos chunk : beingUpdatedOldChunks){
+                    for (ChunkPos chunk : beingUpdatedOldChunks) {
                         saveData(Paths.get("BeingUpdatedChunkData.txt"), chunk);
                     }
                 }
                 synchronized (oldChunks) {
-                    for (ChunkPos chunk : oldChunks){
+                    for (ChunkPos chunk : oldChunks) {
                         saveData(Paths.get("OldChunkData.txt"), chunk);
                     }
                 }
                 synchronized (tickexploitChunks) {
-                    for (ChunkPos chunk : tickexploitChunks){
+                    for (ChunkPos chunk : tickexploitChunks) {
                         saveData(Paths.get("BlockExploitChunkData.txt"), chunk);
                     }
                 }
             }
         }
 
-        if (removerenderdist.get())removeChunksOutsideRenderDistance();
+        if (removerenderdist.get()) removeChunksOutsideRenderDistance();
     }
+
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (mc.player == null) return;
@@ -566,8 +576,8 @@ public class NewerNewChunks extends Module {
         if (newChunksLineColor.get().a > 5 || newChunksSideColor.get().a > 5) {
             synchronized (newChunks) {
                 for (ChunkPos c : newChunks) {
-                    if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get()*16)) {
-                        render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
+                    if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get() * 16)) {
+                        render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX() + 16, c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ() + 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
                     }
                 }
             }
@@ -575,43 +585,43 @@ public class NewerNewChunks extends Module {
         if (tickexploitChunksLineColor.get().a > 5 || tickexploitChunksSideColor.get().a > 5) {
             synchronized (tickexploitChunks) {
                 for (ChunkPos c : tickexploitChunks) {
-                    if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get()*16)) {
-                        if (detectmode.get()== DetectMode.BlockExploitMode && blockupdateexploit.get()) {
-                            render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), tickexploitChunksSideColor.get(), tickexploitChunksLineColor.get(), shapeMode.get(), event);
-                        } else if ((detectmode.get()== DetectMode.Normal) && blockupdateexploit.get()) {
-                            render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
-                        } else if ((detectmode.get()== DetectMode.IgnoreBlockExploit) && blockupdateexploit.get()) {
-                            render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
-                        } else if ((detectmode.get()== DetectMode.BlockExploitMode | detectmode.get()== DetectMode.Normal | detectmode.get()== DetectMode.IgnoreBlockExploit) && !blockupdateexploit.get()) {
-                            render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
+                    if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get() * 16)) {
+                        if (detectmode.get() == DetectMode.BlockExploitMode && blockupdateexploit.get()) {
+                            render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX() + 16, c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ() + 16)), tickexploitChunksSideColor.get(), tickexploitChunksLineColor.get(), shapeMode.get(), event);
+                        } else if ((detectmode.get() == DetectMode.Normal) && blockupdateexploit.get()) {
+                            render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX() + 16, c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ() + 16)), newChunksSideColor.get(), newChunksLineColor.get(), shapeMode.get(), event);
+                        } else if ((detectmode.get() == DetectMode.IgnoreBlockExploit) && blockupdateexploit.get()) {
+                            render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX() + 16, c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ() + 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
+                        } else if ((detectmode.get() == DetectMode.BlockExploitMode | detectmode.get() == DetectMode.Normal | detectmode.get() == DetectMode.IgnoreBlockExploit) && !blockupdateexploit.get()) {
+                            render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX() + 16, c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ() + 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
                         }
                     }
                 }
             }
         }
-        if (oldChunksLineColor.get().a > 5 || oldChunksSideColor.get().a > 5){
+        if (oldChunksLineColor.get().a > 5 || oldChunksSideColor.get().a > 5) {
             synchronized (oldChunks) {
                 for (ChunkPos c : oldChunks) {
-                    if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get()*16)) {
-                        render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
+                    if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get() * 16)) {
+                        render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX() + 16, c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ() + 16)), oldChunksSideColor.get(), oldChunksLineColor.get(), shapeMode.get(), event);
                     }
                 }
             }
         }
-        if (beingUpdatedOldChunksLineColor.get().a > 5 || beingUpdatedOldChunksSideColor.get().a > 5){
+        if (beingUpdatedOldChunksLineColor.get().a > 5 || beingUpdatedOldChunksSideColor.get().a > 5) {
             synchronized (beingUpdatedOldChunks) {
                 for (ChunkPos c : beingUpdatedOldChunks) {
-                    if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get()*16)) {
-                        render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), beingUpdatedOldChunksSideColor.get(), beingUpdatedOldChunksLineColor.get(), shapeMode.get(), event);
+                    if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get() * 16)) {
+                        render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX() + 16, c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ() + 16)), beingUpdatedOldChunksSideColor.get(), beingUpdatedOldChunksLineColor.get(), shapeMode.get(), event);
                     }
                 }
             }
         }
-        if (OldGenerationOldChunksLineColor.get().a > 5 || OldGenerationOldChunksSideColor.get().a > 5){
+        if (OldGenerationOldChunksLineColor.get().a > 5 || OldGenerationOldChunksSideColor.get().a > 5) {
             synchronized (OldGenerationOldChunks) {
                 for (ChunkPos c : OldGenerationOldChunks) {
-                    if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get()*16)) {
-                        render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX()+16, c.getStartPos().getY()+renderHeight.get(), c.getStartPos().getZ()+16)), OldGenerationOldChunksSideColor.get(), OldGenerationOldChunksLineColor.get(), shapeMode.get(), event);
+                    if (c != null && playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistance.get() * 16)) {
+                        render(new Box(new Vec3d(c.getStartPos().getX(), c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ()), new Vec3d(c.getStartPos().getX() + 16, c.getStartPos().getY() + renderHeight.get(), c.getStartPos().getZ() + 16)), OldGenerationOldChunksSideColor.get(), OldGenerationOldChunksLineColor.get(), shapeMode.get(), event);
                     }
                 }
             }
@@ -624,56 +634,57 @@ public class NewerNewChunks extends Module {
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof AcknowledgeChunksC2SPacket )return; //for some reason this packet keeps getting cast to other packets
+        if (event.packet instanceof AcknowledgeChunksC2SPacket)
+            return; //for some reason this packet keeps getting cast to other packets
         if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof ChunkDeltaUpdateS2CPacket packet && liquidexploit.get()) {
 
             packet.visitUpdates((pos, state) -> {
                 ChunkPos chunkPos = new ChunkPos(pos);
                 if (!state.getFluidState().isEmpty() && !state.getFluidState().isStill()) {
-                    for (Direction dir: searchDirs) {
+                    for (Direction dir : searchDirs) {
                         try {
                             if (mc.world != null && mc.world.getBlockState(pos.offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
                                 tickexploitChunks.remove(chunkPos);
                                 newChunks.add(chunkPos);
-                                if (save.get()){
+                                if (save.get()) {
                                     saveData(Paths.get("NewChunkData.txt"), chunkPos);
                                 }
                                 return;
                             }
-                        } catch (Exception e) {}
-                    }
-                }
-            });
-        }
-        else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof BlockUpdateS2CPacket packet) {
-            ChunkPos chunkPos = new ChunkPos(packet.getPos());
-            if (blockupdateexploit.get()){
-                try {
-                    if (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !tickexploitChunks.contains(chunkPos) && !oldChunks.contains(chunkPos) && !newChunks.contains(chunkPos)){
-                        tickexploitChunks.add(chunkPos);
-                        if (save.get()){
-                            saveData(Paths.get("BlockExploitChunkData.txt"), chunkPos);
+                        } catch (Exception e) {
                         }
                     }
                 }
-                catch (Exception e){}
+            });
+        } else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && event.packet instanceof BlockUpdateS2CPacket packet) {
+            ChunkPos chunkPos = new ChunkPos(packet.getPos());
+            if (blockupdateexploit.get()) {
+                try {
+                    if (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !tickexploitChunks.contains(chunkPos) && !oldChunks.contains(chunkPos) && !newChunks.contains(chunkPos)) {
+                        tickexploitChunks.add(chunkPos);
+                        if (save.get()) {
+                            saveData(Paths.get("BlockExploitChunkData.txt"), chunkPos);
+                        }
+                    }
+                } catch (Exception e) {
+                }
             }
             if (!packet.getState().getFluidState().isEmpty() && !packet.getState().getFluidState().isStill() && liquidexploit.get()) {
-                for (Direction dir: searchDirs) {
+                for (Direction dir : searchDirs) {
                     try {
                         if (mc.world != null && mc.world.getBlockState(packet.getPos().offset(dir)).getFluidState().isStill() && (!OldGenerationOldChunks.contains(chunkPos) && !beingUpdatedOldChunks.contains(chunkPos) && !newChunks.contains(chunkPos) && !oldChunks.contains(chunkPos))) {
                             tickexploitChunks.remove(chunkPos);
                             newChunks.add(chunkPos);
-                            if (save.get()){
+                            if (save.get()) {
                                 saveData(Paths.get("NewChunkData.txt"), chunkPos);
                             }
                             return;
                         }
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                    }
                 }
             }
-        }
-        else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
+        } else if (!(event.packet instanceof AcknowledgeChunksC2SPacket) && !(event.packet instanceof PlayerMoveC2SPacket) && event.packet instanceof ChunkDataS2CPacket packet && mc.world != null) {
             ChunkPos oldpos = new ChunkPos(packet.getChunkX(), packet.getChunkZ());
 
             if (mc.world.getChunkManager().getChunk(packet.getChunkX(), packet.getChunkZ()) == null) {
@@ -684,7 +695,8 @@ public class NewerNewChunks extends Module {
                                 packet.getChunkData().getBlockEntities(packet.getChunkX(), packet.getChunkZ()));
                     }, taskExecutor);
                     future.join();
-                } catch (CompletionException e) {}
+                } catch (CompletionException e) {
+                }
 
                 boolean isNewChunk = false;
                 boolean isOldGeneration = false;
@@ -701,7 +713,8 @@ public class NewerNewChunks extends Module {
                             for (int x = 0; x < 16; x++) {
                                 for (int y = 0; y < 16; y++) {
                                     for (int z = 0; z < 16; z++) {
-                                        if (!foundAnyOre && ORE_BLOCKS.contains(section.getBlockState(x, y, z).getBlock())) foundAnyOre = true; //prevent false flags in flat world
+                                        if (!foundAnyOre && ORE_BLOCKS.contains(section.getBlockState(x, y, z).getBlock()))
+                                            foundAnyOre = true; //prevent false flags in flat world
                                         if (((y >= 5 && i == 4) || i > 4) && !isNewOverworldGeneration && (NEW_OVERWORLD_BLOCKS.contains(section.getBlockState(x, y, z).getBlock()) || DEEPSLATE_BLOCKS.contains(section.getBlockState(x, y, z).getBlock()))) {
                                             isNewOverworldGeneration = true;
                                             break;
@@ -763,7 +776,7 @@ public class NewerNewChunks extends Module {
                                     Palette<BlockState> blockStatePalette = blockStatesContainer.data.palette();
                                     int blockPaletteLength = blockStatePalette.getSize();
 
-                                    if (blockStatePalette instanceof BiMapPalette<BlockState>){
+                                    if (blockStatePalette instanceof BiMapPalette<BlockState>) {
                                         Set<BlockState> bstates = new HashSet<>();
                                         for (int x = 0; x < 16; x++) {
                                             for (int y = 0; y < 16; y++) {
@@ -804,31 +817,31 @@ public class NewerNewChunks extends Module {
                                     if (biomesContainer instanceof PalettedContainer<RegistryEntry<Biome>> biomesPaletteContainer) {
                                         Palette<RegistryEntry<Biome>> biomePalette = biomesPaletteContainer.data.palette();
                                         for (int i3 = 0; i3 < biomePalette.getSize(); i3++) {
-                                            if (i3 == 0 && biomePalette.get(i3).getKey().get() == BiomeKeys.PLAINS) isNewChunk = true;
-                                            if (!isNewChunk && i3 == 0 && biomePalette.get(i3).getKey().get() != BiomeKeys.THE_END) isNewChunk = false;
+                                            if (i3 == 0 && biomePalette.get(i3).getKey().get() == BiomeKeys.PLAINS)
+                                                isNewChunk = true;
+                                            if (!isNewChunk && i3 == 0 && biomePalette.get(i3).getKey().get() != BiomeKeys.THE_END)
+                                                isNewChunk = false;
                                         }
                                     }
                                 }
-                                if (!section.isEmpty())loops++;
+                                if (!section.isEmpty()) loops++;
                             }
                         }
 
                         if (loops > 0) {
-                            if (beingUpdatedDetector.get() && (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END)){
+                            if (beingUpdatedDetector.get() && (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END)) {
                                 double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
                                 if (oldpercentage >= 25) chunkIsBeingUpdated = true;
-                            }
-                            else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
+                            } else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END) {
                                 double percentage = ((double) newChunkQuantifier / loops) * 100;
                                 if (percentage >= 51) isNewChunk = true;
                             }
                         }
                     } catch (Exception e) {
-                        if (beingUpdatedDetector.get() && (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END)){
+                        if (beingUpdatedDetector.get() && (mc.world.getRegistryKey() == World.NETHER || mc.world.getRegistryKey() == World.END)) {
                             double oldpercentage = ((double) oldChunkQuantifier / loops) * 100;
                             if (oldpercentage >= 25) chunkIsBeingUpdated = true;
-                        }
-                        else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END){
+                        } else if (mc.world.getRegistryKey() != World.NETHER && mc.world.getRegistryKey() != World.END) {
                             double percentage = ((double) newChunkQuantifier / loops) * 100;
                             if (percentage >= 51) isNewChunk = true;
                         }
@@ -847,32 +860,29 @@ public class NewerNewChunks extends Module {
                             }
                         } catch (Exception e) {
                         }
-                    }
-                    else if (!isNewChunk && !chunkIsBeingUpdated && isOldGeneration) {
+                    } else if (!isNewChunk && !chunkIsBeingUpdated && isOldGeneration) {
                         try {
                             if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
                                 OldGenerationOldChunks.add(oldpos);
-                                if (save.get()){
+                                if (save.get()) {
                                     saveData(Paths.get("OldGenerationChunkData.txt"), oldpos);
                                 }
                                 return;
                             }
                         } catch (Exception e) {
                         }
-                    }
-                    else if (chunkIsBeingUpdated) {
+                    } else if (chunkIsBeingUpdated) {
                         try {
                             if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
                                 beingUpdatedOldChunks.add(oldpos);
-                                if (save.get()){
+                                if (save.get()) {
                                     saveData(Paths.get("BeingUpdatedChunkData.txt"), oldpos);
                                 }
                                 return;
                             }
                         } catch (Exception e) {
                         }
-                    }
-                    else if (!isNewChunk) {
+                    } else if (!isNewChunk) {
                         try {
                             if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !newChunks.contains(oldpos)) {
                                 oldChunks.add(oldpos);
@@ -893,7 +903,7 @@ public class NewerNewChunks extends Module {
                                 try {
                                     if (!OldGenerationOldChunks.contains(oldpos) && !beingUpdatedOldChunks.contains(oldpos) && !oldChunks.contains(oldpos) && !tickexploitChunks.contains(oldpos) && !newChunks.contains(oldpos) && !fluid.isEmpty() && !fluid.isStill()) {
                                         oldChunks.add(oldpos);
-                                        if (save.get()){
+                                        if (save.get()) {
                                             saveData(Paths.get("OldChunkData.txt"), oldpos);
                                         }
                                         return;
@@ -907,6 +917,7 @@ public class NewerNewChunks extends Module {
             }
         }
     }
+
     private void loadData() {
         loadChunkData(Paths.get("BlockExploitChunkData.txt"), tickexploitChunks);
         loadChunkData(Paths.get("OldChunkData.txt"), oldChunks);
@@ -914,6 +925,7 @@ public class NewerNewChunks extends Module {
         loadChunkData(Paths.get("BeingUpdatedChunkData.txt"), beingUpdatedOldChunks);
         loadChunkData(Paths.get("OldGenerationChunkData.txt"), OldGenerationOldChunks);
     }
+
     private void loadChunkData(Path savedDataLocation, Set<ChunkPos> chunkSet) {
         try {
             Path filePath = Paths.get("TrouserStreak/NewChunks", serverip, world).resolve(savedDataLocation);
@@ -936,6 +948,7 @@ public class NewerNewChunks extends Module {
             e.printStackTrace();
         }
     }
+
     private void saveData(Path savedDataLocation, ChunkPos chunkpos) {
         try {
             Path dirPath = Paths.get("TrouserStreak", "NewChunks", serverip, world);
@@ -951,6 +964,7 @@ public class NewerNewChunks extends Module {
             e.printStackTrace();
         }
     }
+
     private void removeChunksOutsideRenderDistance() {
         if (mc.player == null) return;
         BlockPos playerPos = new BlockPos(mc.player.getBlockX(), renderHeight.get(), mc.player.getBlockZ());
@@ -962,7 +976,14 @@ public class NewerNewChunks extends Module {
         removeChunksOutsideRenderDistance(OldGenerationOldChunks, playerPos, renderDistanceBlocks);
         removeChunksOutsideRenderDistance(tickexploitChunks, playerPos, renderDistanceBlocks);
     }
+
     private void removeChunksOutsideRenderDistance(Set<ChunkPos> chunkSet, BlockPos playerPos, double renderDistanceBlocks) {
         chunkSet.removeIf(c -> !playerPos.isWithinDistance(new BlockPos(c.getCenterX(), renderHeight.get(), c.getCenterZ()), renderDistanceBlocks));
+    }
+
+    public enum DetectMode {
+        Normal,
+        IgnoreBlockExploit,
+        BlockExploitMode
     }
 }

@@ -186,7 +186,8 @@ public class SignHistorian extends Module {
                             )
                     )
                     .build()
-    );    private final Setting<Boolean> openBlacklistFile = sgBlacklist.add(
+    );
+    private final HashSet<String> blacklisted = new HashSet<>();    private final Setting<Boolean> openBlacklistFile = sgBlacklist.add(
             new BoolSetting.Builder()
                     .name("open-blacklist-file")
                     .description("Open the content-blacklist.txt file.")
@@ -200,7 +201,6 @@ public class SignHistorian extends Module {
                     })
                     .build()
     );
-    private final HashSet<String> blacklisted = new HashSet<>();
     private final Setting<Boolean> contentBlacklist = sgBlacklist.add(
             new BoolSetting.Builder()
                     .name("content-blacklist")
@@ -1009,6 +1009,8 @@ public class SignHistorian extends Module {
             }
         }
     }
+
+
 
 
 }

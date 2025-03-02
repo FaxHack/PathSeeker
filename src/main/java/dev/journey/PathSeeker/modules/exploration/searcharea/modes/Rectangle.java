@@ -11,13 +11,13 @@ import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
 
 import static dev.journey.PathSeeker.utils.PathSeekerUtil.setPressed;
 import static meteordevelopment.meteorclient.utils.player.ChatUtils.info;
 
-public class Rectangle extends SearchAreaMode
-{
+public class Rectangle extends SearchAreaMode {
 
     private PathingDataRectangle pd;
     private boolean goingToStart = true;
@@ -28,17 +28,13 @@ public class Rectangle extends SearchAreaMode
     }
 
     @Override
-    public void onActivate()
-    {
+    public void onActivate() {
         goingToStart = true;
         File file = getJsonFile(super.toString());
-        if (file == null || !file.exists())
-        {
+        if (file == null || !file.exists()) {
             // set currPos to startpos if it is not read from file, so that the bot travels to the startpoint and not where the player currently is
-            pd = new PathingDataRectangle(searchArea.startPos.get(), searchArea.targetPos.get(), searchArea.startPos.get(), 90, true, (int)mc.player.getZ());
-        }
-        else
-        {
+            pd = new PathingDataRectangle(searchArea.startPos.get(), searchArea.targetPos.get(), searchArea.startPos.get(), 90, true, (int) mc.player.getZ());
+        } else {
             try {
                 FileReader reader = new FileReader(file);
                 pd = GSON.fromJson(reader, PathingDataRectangle.class);
@@ -50,21 +46,19 @@ public class Rectangle extends SearchAreaMode
     }
 
     @Override
-    public void onDeactivate()
-    {
+    public void onDeactivate() {
         super.onDeactivate();
         super.saveToJson(goingToStart, pd);
     }
 
-    private void printRectangleEstimate()
-    {
+    private void printRectangleEstimate() {
         Class<? extends Module> boatFly = BoatFly.class;
         Module module = Modules.get().get(boatFly);
-        double speedBPS = (double)module.settings.get("speed").get();
+        double speedBPS = (double) module.settings.get("speed").get();
         double rowDistance = Math.abs(pd.initialPos.getX() - pd.targetPos.getX());
         int rowCount = Math.abs(pd.currPos.getZ() - pd.targetPos.getZ()) / 16 / searchArea.rowGap.get();
         double totalBlocks = rowCount * (rowDistance + (searchArea.rowGap.get() * 16));
-        long totalSeconds = (long)(totalBlocks / speedBPS);
+        long totalSeconds = (long) (totalBlocks / speedBPS);
         long hours = totalSeconds / 3600;
         long minutes = (totalSeconds % 3600) / 60;
         long seconds = totalSeconds % 60;
@@ -72,25 +66,19 @@ public class Rectangle extends SearchAreaMode
     }
 
     @Override
-    public void onTick()
-    {
+    public void onTick() {
         // autosave every 10 minutes in case of crashes
-        if (System.nanoTime() - startTime > 6e11)
-        {
+        if (System.nanoTime() - startTime > 6e11) {
             startTime = System.nanoTime();
             super.saveToJson(goingToStart, pd);
         }
 
-        if (goingToStart)
-        {
-            if (Math.sqrt(mc.player.getBlockPos().getSquaredDistance(pd.currPos.getX(), mc.player.getY(), pd.currPos.getZ())) < 5)
-            {
+        if (goingToStart) {
+            if (Math.sqrt(mc.player.getBlockPos().getSquaredDistance(pd.currPos.getX(), mc.player.getY(), pd.currPos.getZ())) < 5) {
                 goingToStart = false;
                 mc.player.setVelocity(0, 0, 0);
                 printRectangleEstimate();
-            }
-            else
-            {
+            } else {
                 mc.player.setYaw((float) Rotations.getYaw(pd.currPos.toCenterPos()));
                 setPressed(mc.options.forwardKey, true);
             }
@@ -102,10 +90,9 @@ public class Rectangle extends SearchAreaMode
         if (Math.sqrt(mc.player.getBlockPos().getSquaredDistance(pd.targetPos.getX(), mc.player.getY(), pd.targetPos.getZ())) < 20) // end of rectangle
         {
             setPressed(mc.options.forwardKey, false);
-        //path complete
+            //path complete
             searchArea.toggle();
-            if (searchArea.disconnectOnCompletion.get())
-            {
+            if (searchArea.disconnectOnCompletion.get()) {
                 var autoReconnect = Modules.get().get(AutoReconnect.class);
                 if (autoReconnect.isActive()) autoReconnect.toggle();
                 mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Text.literal("[Search Area] Path is complete")));
@@ -117,23 +104,20 @@ public class Rectangle extends SearchAreaMode
             pd.yawDirection = (mc.player.getZ() < pd.targetPos.getZ()) ? 0.0f : 180.0f;
             pd.mainPath = false;
             mc.player.setVelocity(0, 0, 0);
-        }
-        else if (!pd.mainPath && Math.abs(mc.player.getZ() - pd.lastCompleteRowZ) >= (16 * searchArea.rowGap.get())) // if the path to go past loaded chunks is done
+        } else if (!pd.mainPath && Math.abs(mc.player.getZ() - pd.lastCompleteRowZ) >= (16 * searchArea.rowGap.get())) // if the path to go past loaded chunks is done
         {
-            pd.lastCompleteRowZ = (int)mc.player.getZ();
+            pd.lastCompleteRowZ = (int) mc.player.getZ();
             pd.yawDirection = (pd.initialPos.getX() > mc.player.getX() ? -90.0f : 90.0f);
             pd.mainPath = true;
             mc.player.setVelocity(0, 0, 0);
         }
     }
 
-    public static class PathingDataRectangle extends PathingData
-    {
+    public static class PathingDataRectangle extends PathingData {
         public BlockPos targetPos;
         public int lastCompleteRowZ;
 
-        public PathingDataRectangle(BlockPos initialPos, BlockPos targetPos, BlockPos currPos, float yawDirection, boolean mainPath, int lastCompleteRowZ)
-        {
+        public PathingDataRectangle(BlockPos initialPos, BlockPos targetPos, BlockPos currPos, float yawDirection, boolean mainPath, int lastCompleteRowZ) {
             this.initialPos = initialPos;
             this.targetPos = targetPos;
             this.currPos = currPos;

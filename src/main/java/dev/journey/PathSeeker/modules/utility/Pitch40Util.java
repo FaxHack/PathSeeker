@@ -8,8 +8,9 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.Hand;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Hand;
+
 import java.util.Optional;
 
 import static dev.journey.PathSeeker.utils.PathSeekerUtil.firework;

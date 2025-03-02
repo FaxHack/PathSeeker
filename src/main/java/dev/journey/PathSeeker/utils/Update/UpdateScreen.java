@@ -54,8 +54,8 @@ public class UpdateScreen extends Screen {
                 Text.literal("A new update (" + latestVersion + ") is available!"),
                 this.width / 2,
                 this.height / 2 - 40,
-                    0xFFFFFF
-            );
+                0xFFFFFF
+        );
 
         super.render(context, mouseX, mouseY, delta);
     }

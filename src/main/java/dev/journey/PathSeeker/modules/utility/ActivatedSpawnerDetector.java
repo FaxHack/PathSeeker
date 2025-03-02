@@ -33,6 +33,16 @@ import net.minecraft.world.chunk.WorldChunk;
 import java.util.*;
 
 public class ActivatedSpawnerDetector extends Module {
+    private static final Set<Block> GEODE_BLOCKS = Set.of(
+            Blocks.AMETHYST_BLOCK,
+            Blocks.BUDDING_AMETHYST,
+            Blocks.CALCITE,
+            Blocks.SMOOTH_BASALT,
+            Blocks.AMETHYST_CLUSTER,
+            Blocks.LARGE_AMETHYST_BUD,
+            Blocks.MEDIUM_AMETHYST_BUD,
+            Blocks.SMALL_AMETHYST_BUD
+    );
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
     public final Setting<Integer> renderDistance = sgRender.add(new IntSetting.Builder()
@@ -302,16 +312,6 @@ public class ActivatedSpawnerDetector extends Module {
         closestSpawnerZ = 2000000000;
         SpawnerDistance = 2000000000;
     }
-    private static final Set<Block> GEODE_BLOCKS = Set.of(
-            Blocks.AMETHYST_BLOCK,
-            Blocks.BUDDING_AMETHYST,
-            Blocks.CALCITE,
-            Blocks.SMOOTH_BASALT,
-            Blocks.AMETHYST_CLUSTER,
-            Blocks.LARGE_AMETHYST_BUD,
-            Blocks.MEDIUM_AMETHYST_BUD,
-            Blocks.SMALL_AMETHYST_BUD
-    );
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {

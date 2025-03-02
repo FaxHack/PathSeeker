@@ -3,6 +3,8 @@ package dev.journey.PathSeeker.modules.utility;
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalBlock;
 import dev.journey.PathSeeker.PathSeeker;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.world.PlaySoundEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -13,12 +15,10 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.*;
+import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
-
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -107,7 +107,7 @@ public class GrimEfly extends Module {
     private final Setting<BlockPos> baritoneOffset = sgGeneral.add(new BlockPosSetting.Builder()
             .name("Baritone Offset")
             .description("The offset in blocks from where goals should be set.")
-            .defaultValue(new BlockPos(0,0,0))
+            .defaultValue(new BlockPos(0, 0, 0))
             .visible(() -> bounce.get() && highwayObstaclePasser.get())
             .build()
     );
@@ -119,7 +119,8 @@ public class GrimEfly extends Module {
             .visible(() -> false)
             .build()
     );
-
+    private boolean startSprinting;
+    private boolean startForwards;
     public GrimEfly() {
         super(
                 PathSeeker.Utility,
@@ -128,30 +129,23 @@ public class GrimEfly extends Module {
         );
     }
 
-    private boolean startSprinting;
-    private boolean startForwards;
-
     @Override
-    public void onActivate()
-    {
+    public void onActivate() {
         if (mc.player == null) return;
         startSprinting = mc.player.isSprinting();
         startForwards = Input.isPressed(mc.options.forwardKey);
         paused.set(false);
 
-        if (bounce.get())
-        {
+        if (bounce.get()) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoal(null);
         }
     }
 
     @Override
-    public void onDeactivate()
-    {
+    public void onDeactivate() {
         if (mc.player == null) return;
 
-        if (bounce.get())
-        {
+        if (bounce.get()) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoal(null);
         }
 
@@ -161,71 +155,58 @@ public class GrimEfly extends Module {
 
 
     @EventHandler
-    private void onTick(TickEvent.Pre event)
-    {
+    private void onTick(TickEvent.Pre event) {
         if (mc.player == null) return;
 
         setPressed(mc.options.forwardKey, true);
         mc.player.setSprinting(true);
 
-        if (bounce.get())
-        {
+        if (bounce.get()) {
             // if still pathing, wait for that to complete
-            if (highwayObstaclePasser.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().getGoal() != null)
-            {
+            if (highwayObstaclePasser.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().getGoal() != null) {
                 paused.set(true);
                 return;
             }
 
             if (highwayObstaclePasser.get() && (mc.player.getY() < targetY.get()
                     || mc.player.getY() > targetY.get() + 2
-                    || mc.player.horizontalCollision))
-            {
+                    || mc.player.horizontalCollision)) {
                 paused.set(true);
                 double targetYaw = lockYaw.get() ? yaw.get() : mc.player.getYaw();
                 Vec3d pos;
-                if (assumeHighwayDirs.get())
-                {
-                    Vec3d playerPos = normalizedPositionOnAxis(mc.player.getPos()).multiply(mc.player.getPos().multiply(1,0,1).length());
+                if (assumeHighwayDirs.get()) {
+                    Vec3d playerPos = normalizedPositionOnAxis(mc.player.getPos()).multiply(mc.player.getPos().multiply(1, 0, 1).length());
                     pos = positionInDirection(playerPos, targetYaw, distance.get());
-                }
-                else
-                {
+                } else {
                     // TODO: Make this better
                     pos = positionInDirection(mc.player.getPos(), targetYaw, distance.get());
                 }
-                BlockPos goal = new BlockPos((int)pos.x + baritoneOffset.get().getX(), targetY.get() + baritoneOffset.get().getY(), (int)pos.z + baritoneOffset.get().getZ());
+                BlockPos goal = new BlockPos((int) pos.x + baritoneOffset.get().getX(), targetY.get() + baritoneOffset.get().getY(), (int) pos.z + baritoneOffset.get().getZ());
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(goal));
-            }
-            else
-            {
+            } else {
                 // keep jumping
                 paused.set(false);
                 if (mc.player.isOnGround()) {
                     mc.player.jump();
-                };
+                }
 
                 // set yaw and pitch
-                if (lockYaw.get())
-                {
+                if (lockYaw.get()) {
                     mc.player.setYaw(yaw.get().floatValue());
                 }
-                if (lockPitch.get())
-                {
+                if (lockPitch.get()) {
                     mc.player.setPitch(pitch.get().floatValue());
                 }
             }
         }
 
-        if (!paused.get())
-        {
+        if (!paused.get()) {
             doGrimEflyStuff();
 
         }
     }
 
-    private void doGrimEflyStuff()
-    {
+    private void doGrimEflyStuff() {
         FindItemResult itemResult = InvUtils.findInHotbar(Items.ELYTRA);
         if (!itemResult.found()) return;
 
@@ -244,12 +225,11 @@ public class GrimEfly extends Module {
 
         double ordinalAngle = Math.round(angleDeg / 45.0f) * 45;
 
-        return positionInDirection(new Vec3d(0,0,0), ordinalAngle, 1);
+        return positionInDirection(new Vec3d(0, 0, 0), ordinalAngle, 1);
     }
 
     @EventHandler
-    private void onPlaySound(PlaySoundEvent event)
-    {
+    private void onPlaySound(PlaySoundEvent event) {
         List<Identifier> armorEquipSounds = List.of(
                 Identifier.of("minecraft:item.armor.equip_generic"),
                 Identifier.of("minecraft:item.armor.equip_netherite"),
@@ -303,7 +283,7 @@ public class GrimEfly extends Module {
     }
 
     private void sendSwapPacket(Int2ObjectMap<ItemStack> changedSlots, int buttonNum) {
-        int syncId  = mc.player.currentScreenHandler.syncId;
+        int syncId = mc.player.currentScreenHandler.syncId;
         int stateId = mc.player.currentScreenHandler.getRevision();
 
         // "slotNum = 6"

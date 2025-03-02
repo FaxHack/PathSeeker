@@ -134,6 +134,7 @@ public class MobGearESP extends Module {
     private final Color baseColor = new Color();
     private final Set<Entity> scannedEntities = Collections.synchronizedSet(new HashSet<>());
     private int count;
+
     public MobGearESP() {
         super(PathSeeker.Render, "MobGearESP", "ESP Module that highlights mobs likely wearing player gear.");
     }

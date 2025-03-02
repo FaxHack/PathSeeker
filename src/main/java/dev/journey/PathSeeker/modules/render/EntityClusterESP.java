@@ -1,15 +1,15 @@
 /**
  * ItemESP
  * =======
- *  - Written by Nataani
- *  - Pulled from the Meteorite module.
- *  This module highlights the center-point of entity clusters.
- *  You can configure a list of entities to consider to highlight,
- *  customize the box appearance (fill opacity, outline, etc.),
- *  and designate a range for the module to consider in its calculations.
- *  The render box method was adapted from Etlian's ActivatedSpawnerDetector.
- *  The list GUI and csv methods were adapted from Meteor's Stashfinder module.g
- *  This module is particularly useful for identifying stacked storage vehicles like Minecart with Chest.
+ * - Written by Nataani
+ * - Pulled from the Meteorite module.
+ * This module highlights the center-point of entity clusters.
+ * You can configure a list of entities to consider to highlight,
+ * customize the box appearance (fill opacity, outline, etc.),
+ * and designate a range for the module to consider in its calculations.
+ * The render box method was adapted from Etlian's ActivatedSpawnerDetector.
+ * The list GUI and csv methods were adapted from Meteor's Stashfinder module.g
+ * This module is particularly useful for identifying stacked storage vehicles like Minecart with Chest.
  */
 
 package dev.journey.PathSeeker.modules.render;
@@ -30,18 +30,19 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.MeteorToast;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 import java.io.*;
 import java.util.*;
@@ -244,29 +245,6 @@ public class EntityClusterESP extends Module {
         }
     }
 
-    private static class Cluster {
-        public int x, y, z, count;
-        public BlockPos centerPos;
-        public Cluster(int x, int y, int z, int count) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.count = count;
-            this.centerPos = new BlockPos(x, y, z);
-        }
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Cluster cluster = (Cluster) o;
-            return x == cluster.x && y == cluster.y && z == cluster.z;
-        }
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y, z);
-        }
-    }
-
     private File getCsvFile() {
         return new File(new File(new File(MeteorClient.FOLDER, "EntityClusterESP"), Utils.getFileWorldName()), "EntityClusterESP.csv");
     }
@@ -280,7 +258,8 @@ public class EntityClusterESP extends Module {
         if (file.exists()) {
             try {
                 FileReader reader = new FileReader(file);
-                List<Cluster> data = GSON.fromJson(reader, new TypeToken<List<Cluster>>(){}.getType());
+                List<Cluster> data = GSON.fromJson(reader, new TypeToken<List<Cluster>>() {
+                }.getType());
                 reader.close();
                 if (data != null) {
                     clusters.addAll(data);
@@ -288,7 +267,8 @@ public class EntityClusterESP extends Module {
                         knownCenters.add(c.centerPos);
                     }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         } else {
             file = getCsvFile();
             if (file.exists()) {
@@ -308,7 +288,8 @@ public class EntityClusterESP extends Module {
                         knownCenters.add(cluster.centerPos);
                     }
                     reader.close();
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
         }
     }
@@ -323,7 +304,8 @@ public class EntityClusterESP extends Module {
                 writer.write(c.x + "," + c.y + "," + c.z + "," + c.count + "\n");
             }
             writer.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
     }
 
     private void saveJson() {
@@ -333,6 +315,33 @@ public class EntityClusterESP extends Module {
             Writer writer = new FileWriter(file);
             GSON.toJson(clusters, writer);
             writer.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
+    }
+
+    private static class Cluster {
+        public int x, y, z, count;
+        public BlockPos centerPos;
+
+        public Cluster(int x, int y, int z, int count) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.count = count;
+            this.centerPos = new BlockPos(x, y, z);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Cluster cluster = (Cluster) o;
+            return x == cluster.x && y == cluster.y && z == cluster.z;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y, z);
+        }
     }
 }
