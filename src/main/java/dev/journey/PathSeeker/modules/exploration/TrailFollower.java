@@ -34,8 +34,7 @@ import xaeroplus.util.ChunkUtils;
 import java.time.Duration;
 import java.util.ArrayDeque;
 
-public class TrailFollower extends Module
-{
+public class TrailFollower extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     // TODO: Set this automatically either by looking at the rate of chunk loads or by using yaw instead of block pos so size doesnt negatively effect result
@@ -170,7 +169,10 @@ public class TrailFollower extends Module
             .sliderRange(0, 10_000_000)
             .build()
     );
-
+    private Cache<Long, Byte> seenChunksCache = Caffeine.newBuilder()
+            .maximumSize(chunkCacheLength.get())
+            .expireAfterWrite(Duration.ofMinutes(5))
+            .build();
     public final Setting<Integer> baritoneUpdateTicks = sgAdvanced.add(new IntSetting.Builder()
             .name("[Baritone] Baritone Path Update Ticks")
             .description("The amount of ticks between updates to the baritone goal. Low values may cause high instability.")
@@ -179,41 +181,31 @@ public class TrailFollower extends Module
             .build()
     );
 
+    // TODO: Auto disconnect at certain chunk load speed
     public final Setting<Boolean> debug = sgAdvanced.add(new BoolSetting.Builder()
             .name("Debug")
             .description("Debug mode.")
             .defaultValue(false)
             .build()
     );
-
-    // TODO: Auto disconnect at certain chunk load speed
-
+    Vec3d posDebug;
     private boolean oldAutoFireworkValue;
-
     private FollowMode followMode;
-
     private boolean followingTrail = false;
-
     private ArrayDeque<Vec3d> trail = new ArrayDeque<>();
     private ArrayDeque<Vec3d> possibleTrail = new ArrayDeque<>();
-
     private long lastFoundTrailTime;
-    private long lastFoundPossibleTrailTime;
-
-    private Cache<Long, Byte> seenChunksCache = Caffeine.newBuilder()
-            .maximumSize(chunkCacheLength.get())
-            .expireAfterWrite(Duration.ofMinutes(5))
-            .build();
 
     // Credit to WarriorLost: https://github.com/WarriorLost/meteor-client/tree/master
+    private long lastFoundPossibleTrailTime;
+    private double targetYaw;
+    private int baritoneSetGoalTicks = 0;
 
-    public TrailFollower()
-    {
+    public TrailFollower() {
         super(PathSeeker.Hunting, "TrailFollower", "Automatically follows trails in all dimensions.");
     }
 
-    void resetTrail()
-    {
+    void resetTrail() {
         baritoneSetGoalTicks = 0;
         followingTrail = false;
         trail = new ArrayDeque<>();
@@ -297,62 +289,43 @@ public class TrailFollower extends Module
         }
     }
 
-    private double targetYaw;
-
-    private int baritoneSetGoalTicks = 0;
-
-    private void circle()
-    {
-        if (followMode == FollowMode.BARITONE && baritoneSetGoalTicks == 0)
-        {
+    private void circle() {
+        if (followMode == FollowMode.BARITONE && baritoneSetGoalTicks == 0) {
             baritoneSetGoalTicks = baritoneUpdateTicks.get();
-        }
-        else if (followMode == FollowMode.BARITONE) return;
+        } else if (followMode == FollowMode.BARITONE) return;
         mc.player.setYaw(getActualYaw((float) (mc.player.getYaw() + circlingDegPerTick.get())));
-        if (mc.player.age % 100 == 0)
-        {
+        if (mc.player.age % 100 == 0) {
             info("Circling to look for new chunks, abandoning trail in " + (trailTimeout.get() - (System.currentTimeMillis() - lastFoundTrailTime)) / 1000 + " seconds.");
         }
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event)
-    {
+    private void onTick(TickEvent.Post event) {
         if (mc.player == null || mc.world == null) return;
-        if (followingTrail && System.currentTimeMillis() - lastFoundTrailTime > trailTimeout.get())
-        {
+        if (followingTrail && System.currentTimeMillis() - lastFoundTrailTime > trailTimeout.get()) {
             resetTrail();
             info("Trail timed out, stopping.");
             // TODO: Add options for what to do next
-            switch (trailEndBehavior.get())
-            {
-                case DISABLE:
-                {
+            switch (trailEndBehavior.get()) {
+                case DISABLE: {
                     this.toggle();
                     break;
                 }
             }
         }
-        if (followingTrail && System.currentTimeMillis() - lastFoundTrailTime > chunkFoundTimeout.get())
-        {
+        if (followingTrail && System.currentTimeMillis() - lastFoundTrailTime > chunkFoundTimeout.get()) {
             circle();
             return;
         }
-        switch (followMode)
-        {
-            case BARITONE:
-            {
-                if (baritoneSetGoalTicks > 0)
-                {
+        switch (followMode) {
+            case BARITONE: {
+                if (baritoneSetGoalTicks > 0) {
                     baritoneSetGoalTicks--;
-                }
-                else if (baritoneSetGoalTicks == 0)
-                {
+                } else if (baritoneSetGoalTicks == 0) {
                     baritoneSetGoalTicks = baritoneUpdateTicks.get();
                     Vec3d targetPos = positionInDirection(mc.player.getPos(), targetYaw, pathDistance.get());
                     BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) targetPos.x, (int) targetPos.z));
-                    if (autoElytra.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getElytraProcess().currentDestination() == null)
-                    {
+                    if (autoElytra.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getElytraProcess().currentDestination() == null) {
                         // TODO: Fix this
                         info("The auto elytra mode is broken right now. If it's not working just turn it off and manually use #elytra to start.");
                         BaritoneAPI.getSettings().elytraTermsAccepted.value = true;
@@ -369,24 +342,20 @@ public class TrailFollower extends Module
 
     }
 
-    Vec3d posDebug;
-
     @EventHandler
-    private void onRender(Render3DEvent event)
-    {
+    private void onRender(Render3DEvent event) {
         if (!debug.get()) return;
         Vec3d targetPos = positionInDirection(mc.player.getPos(), targetYaw, 10);
         // target line
         event.renderer.line(mc.player.getX(), mc.player.getY(), mc.player.getZ(), targetPos.x, targetPos.y, targetPos.z, new Color(255, 0, 0));
         // chunk
-        if (posDebug != null) event.renderer.line(mc.player.getX(), mc.player.getY(), mc.player.getZ(), posDebug.x, targetPos.y, posDebug.z, new Color(0, 0, 255));
+        if (posDebug != null)
+            event.renderer.line(mc.player.getX(), mc.player.getY(), mc.player.getZ(), posDebug.x, targetPos.y, posDebug.z, new Color(0, 0, 255));
     }
 
 
-
     @net.lenni0451.lambdaevents.EventHandler(priority = -1)
-    public void onChunkData(ChunkDataEvent event)
-    {
+    public void onChunkData(ChunkDataEvent event) {
         WorldChunk chunk = event.chunk();
         long chunkLong = chunk.getPos().toLong();
 
@@ -403,37 +372,31 @@ public class TrailFollower extends Module
 
         // TODO: Find a better way to do this bc Xaero is already checking the chunk
         boolean is112OldChunk = false;
-        ReferenceSet<Block> OVERWORLD_BLOCKS = ReferenceOpenHashSet.of(new Block[]{Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.AMETHYST_BLOCK, Blocks.SMOOTH_BASALT, Blocks.TUFF, Blocks.KELP, Blocks.KELP_PLANT, Blocks.POINTED_DRIPSTONE, Blocks.DRIPSTONE_BLOCK, Blocks.DEEPSLATE, Blocks.AZALEA, Blocks.BIG_DRIPLEAF, Blocks.BIG_DRIPLEAF_STEM, Blocks.SMALL_DRIPLEAF, Blocks.MOSS_BLOCK, Blocks.CAVE_VINES, Blocks.CAVE_VINES_PLANT});
-        ReferenceSet<Block> NETHER_BLOCKS = ReferenceOpenHashSet.of(new Block[]{Blocks.ANCIENT_DEBRIS, Blocks.BLACKSTONE, Blocks.BASALT, Blocks.CRIMSON_NYLIUM, Blocks.WARPED_NYLIUM, Blocks.NETHER_GOLD_ORE, Blocks.CHAIN});
+        ReferenceSet<Block> OVERWORLD_BLOCKS = ReferenceOpenHashSet.of(Blocks.COPPER_ORE, Blocks.DEEPSLATE_COPPER_ORE, Blocks.AMETHYST_BLOCK, Blocks.SMOOTH_BASALT, Blocks.TUFF, Blocks.KELP, Blocks.KELP_PLANT, Blocks.POINTED_DRIPSTONE, Blocks.DRIPSTONE_BLOCK, Blocks.DEEPSLATE, Blocks.AZALEA, Blocks.BIG_DRIPLEAF, Blocks.BIG_DRIPLEAF_STEM, Blocks.SMALL_DRIPLEAF, Blocks.MOSS_BLOCK, Blocks.CAVE_VINES, Blocks.CAVE_VINES_PLANT);
+        ReferenceSet<Block> NETHER_BLOCKS = ReferenceOpenHashSet.of(Blocks.ANCIENT_DEBRIS, Blocks.BLACKSTONE, Blocks.BASALT, Blocks.CRIMSON_NYLIUM, Blocks.WARPED_NYLIUM, Blocks.NETHER_GOLD_ORE, Blocks.CHAIN);
         // In the end
-        if (!mc.world.getDimension().hasCeiling() && !mc.world.getDimension().bedWorks())
-        {
+        if (!mc.world.getDimension().hasCeiling() && !mc.world.getDimension().bedWorks()) {
             RegistryEntry<Biome> biomeHolder = this.mc.world.getBiome(new BlockPos(ChunkUtils.chunkCoordToCoord(chunk.getPos().x) + 8, 64, ChunkUtils.chunkCoordToCoord(chunk.getPos().z) + 8));
-            if (biomeHolder.getKey().filter((biome) -> biome.equals(BiomeKeys.THE_END)).isPresent()) is112OldChunk = true;
-        }
-        else
-        {
+            if (biomeHolder.getKey().filter((biome) -> biome.equals(BiomeKeys.THE_END)).isPresent())
+                is112OldChunk = true;
+        } else {
             // Not in the end
             is112OldChunk = !ChunkScanner.chunkContainsBlocks(chunk, !mc.world.getDimension().hasCeiling() ? OVERWORLD_BLOCKS : NETHER_BLOCKS, 5);
         }
 
         // TODO: Add options for following certain types of chunks.
 
-        if (!is119NewChunk || is112OldChunk)
-        {
+        if (!is119NewChunk || is112OldChunk) {
             Vec3d pos = chunk.getPos().getCenterAtY(0).toCenterPos();
             posDebug = pos;
 
-            if (!followingTrail)
-            {
-                if (System.currentTimeMillis() - lastFoundPossibleTrailTime > chunkConsiderationWindow.get() * 1000)
-                {
+            if (!followingTrail) {
+                if (System.currentTimeMillis() - lastFoundPossibleTrailTime > chunkConsiderationWindow.get() * 1000) {
                     possibleTrail.clear();
                 }
                 possibleTrail.add(pos);
                 lastFoundPossibleTrailTime = System.currentTimeMillis();
-                if (possibleTrail.size() > chunksBeforeStarting.get())
-                {
+                if (possibleTrail.size() > chunksBeforeStarting.get()) {
                     followingTrail = true;
                     lastFoundTrailTime = System.currentTimeMillis();
                     trail.addAll(possibleTrail);
@@ -458,33 +421,25 @@ public class TrailFollower extends Module
             lastFoundTrailTime = System.currentTimeMillis();
 
             // free up one spot for a new chunk to be added
-            while(trail.size() >= maxTrailLength.get())
-            {
+            while (trail.size() >= maxTrailLength.get()) {
                 trail.pollFirst();
             }
 
-            if (angleDiff > 0 && angleDiff < 90 && directionWeighting.get() == DirectionWeighting.LEFT)
-            {
+            if (angleDiff > 0 && angleDiff < 90 && directionWeighting.get() == DirectionWeighting.LEFT) {
                 // add extra chunks to increase the weighting
                 // TODO: Maybe redo this to use a map of chunk pos to weights
-                for (int i = 0; i < directionWeightingMultiplier.get() - 1; i++)
-                {
+                for (int i = 0; i < directionWeightingMultiplier.get() - 1; i++) {
                     trail.pollFirst();
                     trail.add(pos);
                 }
                 trail.add(pos);
-            }
-            else if (angleDiff < 0 && angleDiff > -90 && directionWeighting.get() == DirectionWeighting.RIGHT)
-            {
-                for (int i = 0; i < directionWeightingMultiplier.get() - 1; i++)
-                {
+            } else if (angleDiff < 0 && angleDiff > -90 && directionWeighting.get() == DirectionWeighting.RIGHT) {
+                for (int i = 0; i < directionWeightingMultiplier.get() - 1; i++) {
                     trail.pollFirst();
                     trail.add(pos);
                 }
                 trail.add(pos);
-            }
-            else
-            {
+            } else {
                 trail.add(pos);
             }
 
@@ -499,8 +454,7 @@ public class TrailFollower extends Module
         }
     }
 
-    private Vec3d calculateAveragePosition(ArrayDeque<Vec3d> positions)
-    {
+    private Vec3d calculateAveragePosition(ArrayDeque<Vec3d> positions) {
         double sumX = 0, sumZ = 0;
         for (Vec3d pos : positions) {
             sumX += pos.x;
@@ -509,44 +463,37 @@ public class TrailFollower extends Module
         return new Vec3d(sumX / positions.size(), 0, sumZ / positions.size());
     }
 
-    private float getActualYaw(float yaw)
-    {
+    private float getActualYaw(float yaw) {
         return (yaw % 360 + 360) % 360;
     }
 
-    private float smoothRotation(double current, double target)
-    {
+    private float smoothRotation(double current, double target) {
         double difference = angleDifference(target, current);
         return (float) (current + difference * rotateScaling.get());
     }
 
-    private double angleDifference(double target, double current)
-    {
+    private double angleDifference(double target, double current) {
         double diff = (target - current + 180) % 360 - 180;
         return diff < -180 ? diff + 360 : diff;
     }
 
-    private Vec3d positionInDirection(Vec3d pos, double yaw, double distance)
-    {
+    private Vec3d positionInDirection(Vec3d pos, double yaw, double distance) {
         Vec3d offset = (new Vec3d(Math.sin(-yaw * Math.PI / 180), 0, Math.cos(-yaw * Math.PI / 180)).normalize()).multiply(distance);
         return pos.add(offset);
     }
 
-    private enum FollowMode
-    {
+    private enum FollowMode {
         BARITONE,
         YAWLOCK
     }
 
-    public enum DirectionWeighting
-    {
+    public enum DirectionWeighting {
         LEFT,
         NONE,
         RIGHT
     }
 
-    public enum TrailEndBehavior
-    {
+    public enum TrailEndBehavior {
         DISABLE,
     }
 

@@ -201,13 +201,13 @@ public class PathSeekerUtil {
             e.printStackTrace();
         }
     }
-    public static void setPressed(KeyBinding key, boolean pressed)
-    {
+
+    public static void setPressed(KeyBinding key, boolean pressed) {
         key.setPressed(pressed);
         Input.setKeyState(key, pressed);
     }
-    public static Vec3d positionInDirection(Vec3d pos, double yaw, double distance)
-    {
+
+    public static Vec3d positionInDirection(Vec3d pos, double yaw, double distance) {
         Vec3d offset = (new Vec3d(Math.sin(-yaw * Math.PI / 180), 0, Math.cos(-yaw * Math.PI / 180)).normalize()).multiply(distance);
         return pos.add(offset);
     }

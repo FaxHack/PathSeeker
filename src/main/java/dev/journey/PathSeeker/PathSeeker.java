@@ -1,7 +1,8 @@
 package dev.journey.PathSeeker;
 
-import dev.journey.PathSeeker.commands.*;
-//import dev.journey.PathSeeker.modules.automation.AreaLoader;
+import dev.journey.PathSeeker.commands.MeteorFolderCommand;
+import dev.journey.PathSeeker.commands.ScreenshotFolderCommand;
+import dev.journey.PathSeeker.commands.Stats2b2t;
 import dev.journey.PathSeeker.modules.automation.StorageLooter;
 import dev.journey.PathSeeker.modules.automation.TridentDupe;
 import dev.journey.PathSeeker.modules.exploration.*;
@@ -52,19 +53,16 @@ public class PathSeeker extends MeteorAddon {
         //Modules.get().add(new AreaLoader());
         //Modules.get().add(new ChestIndex());
 
-            
+
         //Commands
         Commands.add(new MeteorFolderCommand());
         Commands.add(new ScreenshotFolderCommand());
         Commands.add(new Stats2b2t());
 
-        if (FabricLoader.getInstance().isModLoaded("xaeroplus"))
-        {
+        if (FabricLoader.getInstance().isModLoaded("xaeroplus")) {
             Modules.get().add(new TrailFollower());
             Modules.get().add(new OldChunkNotifier());
-        }
-        else
-        {
+        } else {
             LOG.info("XaeroPlus not found, disabling TrailFollower and OldChunkNotifier");
         }
     }

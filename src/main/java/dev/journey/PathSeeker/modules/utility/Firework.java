@@ -10,34 +10,31 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 public class Firework extends Module {
+    private static final int BOOST_DURATION = 30;
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgVelocity = settings.createGroup("Velocity");
-
     private final Setting<Boolean> onlyWhenHoldingRocket = sgGeneral.add(new BoolSetting.Builder()
             .name("only-when-holding")
             .description("Only auto-fire when holding a rocket.")
             .defaultValue(true)
             .build()
     );
-
     private final Setting<Boolean> checkCooldown = sgGeneral.add(new BoolSetting.Builder()
             .name("check-cooldown")
             .description("Check item use cooldown before firing.")
             .defaultValue(true)
             .build()
     );
-
     private final Setting<Boolean> onlyWhenFlying = sgGeneral.add(new BoolSetting.Builder()
             .name("only-when-flying")
             .description("Only fire rockets when using elytra.")
             .defaultValue(true)
             .build()
     );
-
     private final Setting<Double> useDelay = sgGeneral.add(new DoubleSetting.Builder()
             .name("use-delay")
             .description("Delay in seconds between using rockets.")
@@ -46,7 +43,6 @@ public class Firework extends Module {
             .sliderMax(5.0)
             .build()
     );
-
     private final Setting<Double> minSpeed = sgVelocity.add(new DoubleSetting.Builder()
             .name("minimum-speed")
             .description("Minimum speed threshold before using rockets.")
@@ -55,10 +51,8 @@ public class Firework extends Module {
             .sliderMax(2.0)
             .build()
     );
-
     private boolean isBoostActive = false;
     private int boostTicks = 0;
-    private static final int BOOST_DURATION = 30;
     private Vec3d lastPos = Vec3d.ZERO;
     private int ticksSinceLastUse = 0;
 

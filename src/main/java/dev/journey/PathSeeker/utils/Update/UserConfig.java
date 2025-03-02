@@ -7,7 +7,7 @@ import java.util.Properties;
 
 public class UserConfig {
     private static final String CONFIG_FILE = "pathseeker_config.properties";
-    private static Properties properties = new Properties();
+    private static final Properties properties = new Properties();
 
     static {
         try (FileInputStream fis = new FileInputStream(CONFIG_FILE)) {
