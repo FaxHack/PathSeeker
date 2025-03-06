@@ -195,6 +195,7 @@ public class DroppedItemESP extends Module {
     private final Color baseColor = new Color();
     private final Set<Entity> scannedEntities = Collections.synchronizedSet(new HashSet<>());
     private int count;
+
     public DroppedItemESP() {
         super(PathSeeker.Render, "DroppedItemESP", "ESP Module that highlights only certain items.");
     }

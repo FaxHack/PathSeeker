@@ -70,7 +70,7 @@ import java.util.stream.Stream;
  **/
 public class SignHistorian extends Module {
     private final String ERROR_MESSAGE = "PathSeeker";
-    private final String BLACKLIST_FILE = "meteor-client/sign-historian/content-blacklist.txt";
+    private final String BLACKLIST_FILE = "meteor-client/PathSeeker/content-blacklist.txt";
     private final SettingGroup sgESP = settings.createGroup("ESP Settings");
     private final SettingGroup sgSigns = settings.createGroup("Signs Settings");
     private final SettingGroup sgBlacklist = settings.createGroup("Content Blacklist");
@@ -185,24 +185,11 @@ public class SignHistorian extends Module {
                     )
                     .build()
     );
-    private final HashSet<String> blacklisted = new HashSet<>();    private final Setting<Boolean> openBlacklistFile = sgBlacklist.add(
-            new BoolSetting.Builder()
-                    .name("open-blacklist-file")
-                    .description("Open the content-blacklist.txt file.")
-                    .defaultValue(false)
-                    .onChanged(it -> {
-                        if (it) {
-                            if (PathSeekerUtil.checkOrCreateFile(mc, BLACKLIST_FILE))
-                                PathSeekerUtil.openFile(mc, BLACKLIST_FILE);
-                            resetBlacklistFileSetting();
-                        }
-                    })
-                    .build()
-    );
+    private final HashSet<String> blacklisted = new HashSet<>();
     private final Setting<Boolean> contentBlacklist = sgBlacklist.add(
             new BoolSetting.Builder()
                     .name("content-blacklist")
-                    .description("Ignore signs that contain specific words or phrases (line-separated list in sign-historian/content-blacklist.txt)")
+                    .description("Ignore signs that contain specific words or phrases (line-separated list in PathSeeker/content-blacklist.txt)")
                     .defaultValue(false)
                     .onChanged(it -> {
                         if (it && PathSeekerUtil.checkOrCreateFile(mc, BLACKLIST_FILE)) {
@@ -213,6 +200,19 @@ public class SignHistorian extends Module {
                                 mc.player.sendMessage(Text.of("§8<" + PathSeekerUtil.randomColorCode() + "§o✨§r§8> §7Spaces and other punctuation will be treated literally."));
                                 mc.player.sendMessage(Text.of("§8<" + PathSeekerUtil.randomColorCode() + "§o✨§r§8> §7You must toggle this setting or the module after updating the blacklist's contents."));
                             }
+                        }
+                    })
+                    .build()
+    );    private final Setting<Boolean> openBlacklistFile = sgBlacklist.add(
+            new BoolSetting.Builder()
+                    .name("open-blacklist-file")
+                    .description("Open the content-blacklist.txt file.")
+                    .defaultValue(false)
+                    .onChanged(it -> {
+                        if (it) {
+                            if (PathSeekerUtil.checkOrCreateFile(mc, BLACKLIST_FILE))
+                                PathSeekerUtil.openFile(mc, BLACKLIST_FILE);
+                            resetBlacklistFileSetting();
                         }
                     })
                     .build()
@@ -275,7 +275,7 @@ public class SignHistorian extends Module {
 
     private void initOrLoadFromSignFile() {
         if (mc.world == null || mc.getNetworkHandler() == null) return;
-        Path historianFolder = FabricLoader.getInstance().getGameDir().resolve("meteor-client/sign-historian");
+        Path historianFolder = FabricLoader.getInstance().getGameDir().resolve("meteor-client/PathSeeker");
 
         try {
             //noinspection ResultOfMethodCallIgnored
@@ -292,7 +292,7 @@ public class SignHistorian extends Module {
                 readSignsFromFile(signsFile);
             } else if (signsFile.toFile().createNewFile()) {
                 if (mc.player != null) mc.player.sendMessage(
-                        Text.of("§8<" + PathSeekerUtil.randomColorCode() + "✨§8> [§5SignHistorian§8] §7Sign data will be saved to §2§o" + signsFile.getFileName() + " §7in your §7§ometeor-client/sign-historian folder.")
+                        Text.of("§8<" + PathSeekerUtil.randomColorCode() + "✨§8> [§5SignHistorian§8] §7Sign data will be saved to §2§o" + signsFile.getFileName() + " §7in your §7§ometeor-client/PathSeeker folder.")
                 );
                 readSignsFromFile(signsFile);
             }
@@ -345,7 +345,7 @@ public class SignHistorian extends Module {
 
     private void saveSignToFile(SignBlockEntity sign, BlockState state) {
         if (mc.world == null || mc.getNetworkHandler() == null) return;
-        Path historianFolder = FabricLoader.getInstance().getGameDir().resolve("meteor-client/sign-historian");
+        Path historianFolder = FabricLoader.getInstance().getGameDir().resolve("meteor-client/PathSeeker");
 
         try {
             NbtCompound stateNbt = NbtHelper.fromBlockState(state);

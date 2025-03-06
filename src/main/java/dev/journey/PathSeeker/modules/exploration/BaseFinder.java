@@ -555,7 +555,7 @@ public class BaseFinder extends Module {
                 if (!baseChunks.contains(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z))) {
                     baseChunks.add(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z));
                     try {
-                        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
+                        Path dirPath = Paths.get("PathSeeker", "BaseChunks", serverip, world);
                         Files.createDirectories(dirPath);
 
                         Path filePath = dirPath.resolve("BaseChunkData.txt");
@@ -582,7 +582,7 @@ public class BaseFinder extends Module {
                 if (baseChunks.contains(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z))) {
                     baseChunks.remove(new ChunkPos(mc.player.getChunkPos().x, mc.player.getChunkPos().z));
                     try {
-                        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
+                        Path dirPath = Paths.get("PathSeeker", "BaseChunks", serverip, world);
                         Files.createDirectories(dirPath);
                         Path filePath = dirPath.resolve("BaseChunkData.txt");
                         Files.deleteIfExists(filePath);
@@ -610,7 +610,7 @@ public class BaseFinder extends Module {
                 if (baseChunks.contains(new ChunkPos(LastBaseFound.x, LastBaseFound.z))) {
                     baseChunks.remove(new ChunkPos(LastBaseFound.x, LastBaseFound.z));
                     try {
-                        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
+                        Path dirPath = Paths.get("PathSeeker", "BaseChunks", serverip, world);
                         Files.createDirectories(dirPath);
                         Path filePath = dirPath.resolve("BaseChunkData.txt");
                         Files.deleteIfExists(filePath);
@@ -668,7 +668,7 @@ public class BaseFinder extends Module {
             world = mc.world.getRegistryKey().getValue().toString().replace(':', '_');
             if (save.get()) {
                 try {
-                    Files.createDirectories(Paths.get("TrouserStreak", "BaseChunks", serverip, world));
+                    Files.createDirectories(Paths.get("PathSeeker", "BaseChunks", serverip, world));
                 } catch (IOException e) {
                     //e.printStackTrace();
                 }
@@ -734,7 +734,7 @@ public class BaseFinder extends Module {
             }
             clearChunkData();
             try {
-                Files.deleteIfExists(Paths.get("TrouserStreak", "BaseChunks", serverip, world, "BaseChunkData.txt"));
+                Files.deleteIfExists(Paths.get("PathSeeker", "BaseChunks", serverip, world, "BaseChunkData.txt"));
             } catch (IOException e) {
                 //e.printStackTrace();
             }
@@ -1388,7 +1388,7 @@ public class BaseFinder extends Module {
 
     private void loadData() {
         try {
-            List<String> allLines = Files.readAllLines(Paths.get("TrouserStreak/BaseChunks/" + serverip + "/" + world + "/BaseChunkData.txt"));
+            List<String> allLines = Files.readAllLines(Paths.get("PathSeeker/BaseChunks/" + serverip + "/" + world + "/BaseChunkData.txt"));
 
             for (String line : allLines) {
                 String s = line;
@@ -1404,7 +1404,7 @@ public class BaseFinder extends Module {
     }
 
     private void saveBaseChunkData(ChunkPos basepos) {
-        Path dirPath = Paths.get("TrouserStreak", "BaseChunks", serverip, world);
+        Path dirPath = Paths.get("PathSeeker", "BaseChunks", serverip, world);
         Path filePath = dirPath.resolve("BaseChunkData.txt");
         try {
             Files.createDirectories(dirPath);

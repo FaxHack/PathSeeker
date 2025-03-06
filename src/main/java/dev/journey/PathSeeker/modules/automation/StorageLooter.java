@@ -338,7 +338,7 @@ public class StorageLooter extends Module {
     private float originalPitch;
 
     public StorageLooter() {
-        super(PathSeeker.Utility, "Storage-Looter", "Steals stuff from containers around you.");
+        super(PathSeeker.Automation, "Storage-Looter", "Steals stuff from containers around you.");
     }
 
     @EventHandler

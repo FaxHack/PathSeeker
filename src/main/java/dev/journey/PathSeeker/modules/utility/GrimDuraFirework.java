@@ -34,6 +34,7 @@ public class GrimDuraFirework extends Module {
     int fireworkTickDelay = 0;
     int elytraSwapSlot = -1;
     boolean currentlyFiring = false;
+
     public GrimDuraFirework() {
         super(PathSeeker.Utility, "GrimFirework", "Swaps to your elytra so fireworks actually work.");
     }

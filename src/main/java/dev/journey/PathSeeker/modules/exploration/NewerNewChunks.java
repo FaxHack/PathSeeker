@@ -411,13 +411,13 @@ public class NewerNewChunks extends Module {
         }
         if (save.get()) {
             try {
-                Files.createDirectories(Paths.get("TrouserStreak", "NewChunks", serverip, world));
+                Files.createDirectories(Paths.get("PathSeeker", "NewChunks", serverip, world));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         if (save.get() || load.get()) {
-            Path baseDir = Paths.get("TrouserStreak", "NewChunks", serverip, world);
+            Path baseDir = Paths.get("PathSeeker", "NewChunks", serverip, world);
 
             for (Path fileName : FILE_PATHS) {
                 Path fullPath = baseDir.resolve(fileName);
@@ -486,11 +486,11 @@ public class NewerNewChunks extends Module {
             }
             clearChunkData();
             try {
-                Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "NewChunkData.txt"));
-                Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "OldChunkData.txt"));
-                Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "BeingUpdatedChunkData.txt"));
-                Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "OldGenerationChunkData.txt"));
-                Files.deleteIfExists(Paths.get("TrouserStreak", "NewChunks", serverip, world, "BlockExploitChunkData.txt"));
+                Files.deleteIfExists(Paths.get("PathSeeker", "NewChunks", serverip, world, "NewChunkData.txt"));
+                Files.deleteIfExists(Paths.get("PathSeeker", "NewChunks", serverip, world, "OldChunkData.txt"));
+                Files.deleteIfExists(Paths.get("PathSeeker", "NewChunks", serverip, world, "BeingUpdatedChunkData.txt"));
+                Files.deleteIfExists(Paths.get("PathSeeker", "NewChunks", serverip, world, "OldGenerationChunkData.txt"));
+                Files.deleteIfExists(Paths.get("PathSeeker", "NewChunks", serverip, world, "BlockExploitChunkData.txt"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -929,7 +929,7 @@ public class NewerNewChunks extends Module {
 
     private void loadChunkData(Path savedDataLocation, Set<ChunkPos> chunkSet) {
         try {
-            Path filePath = Paths.get("TrouserStreak/NewChunks", serverip, world).resolve(savedDataLocation);
+            Path filePath = Paths.get("PathSeeker/NewChunks", serverip, world).resolve(savedDataLocation);
             List<String> allLines = Files.readAllLines(filePath);
 
             for (String line : allLines) {
@@ -952,7 +952,7 @@ public class NewerNewChunks extends Module {
 
     private void saveData(Path savedDataLocation, ChunkPos chunkpos) {
         try {
-            Path dirPath = Paths.get("TrouserStreak", "NewChunks", serverip, world);
+            Path dirPath = Paths.get("PathSeeker", "NewChunks", serverip, world);
             Files.createDirectories(dirPath);
 
             Path filePath = dirPath.resolve(savedDataLocation);

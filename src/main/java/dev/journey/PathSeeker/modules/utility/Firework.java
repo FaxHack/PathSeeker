@@ -57,7 +57,7 @@ public class Firework extends Module {
     private int ticksSinceLastUse = 0;
 
     public Firework() {
-        super(PathSeeker.Utility, "auto-rocket", "Automatically fires rockets when boost ends.");
+        super(PathSeeker.Automation, "Firework", "Automatically fires rockets when boost ends.");
     }
 
     @EventHandler
