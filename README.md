@@ -36,6 +36,16 @@ Follows trails in all dimensions using either pitch40 or baritone. May break on 
 - **NoJumpDelay**
   Removes delay between jumps.
 
+- **BetterStashFinder:** An upgraded stash finder with enhanced filtering options.
+
+- **AutoEnchanter:** Automates enchanting at anvils, saving time and effort.
+
+- **GrimEfly:** Vanilla efly uses a chestplate to ensure that elytra does not consume durability.
+
+- **Trident Dupe:** Facilitates trident duplication (note: patched on most servers).
+
+- **AutoFirework:** Automatically activates firework use for added flair.
+
 > [!TIP]  
 > Use Base Finder with NewerNewChunks to drastically improve your chances of locating uncharted bases.
 
@@ -58,7 +68,7 @@ Follows trails in all dimensions using either pitch40 or baritone. May break on 
   Take control of chunk tracing! Manage chunk data across servers and dimensions with crash-resilient saving, easy sharing options, and pinpoint accuracy.  
 
 > [!IMPORTANT]  
-> To share your chunk data with friends, copy the `TrouserStreak/NewChunks` folder and send it directly.
+> To share your chunk data with friends, copy the `PathSeeker/NewChunks` folder and send it directly.
 
 - **Hole/Tunnel/StairsESP**  
   Spot 1x1 holes, horizontal tunnels, and staircase tunnels like a pro. By default, it skips passable blocks like torches or water but can be configured to detect only air. (Credits to Meteor Client and etianl)  
@@ -106,7 +116,7 @@ Getting started is simple:
 PathSeeker is always evolving! Here's what's planned:  
 - [x] Core features for the initial release.  
 - [x] New hunting modules for advanced gameplay.  
-- [ ] Enhanced automation tools for loot and base management.  
+- [x] Enhanced automation tools for loot and base management.  
 
 ---
 
