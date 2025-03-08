@@ -32,3 +32,4 @@ bin/
 
 run/
 src/main/java/dev/journey/PathSeeker/modules/automation/ChestIndex.java
+src/main/java/dev/journey/PathSeeker/modules/automation/AreaLoader.java
