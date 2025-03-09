@@ -2,7 +2,7 @@
 *A Minecraft utility mod built on the foundation of TrouserStreak, reimagined and enhanced for advanced anarchy server gameplay. Whether you're hunting bases, exploring new lands, or managing your resources, PathSeeker provides the tools to stay ahead.*  
 
 > [!IMPORTANT]  
-> Make sure to install Baritone, [1.21.1](https://maven.meteordev.org/snapshots/meteordevelopment/baritone/1.21.1-SNAPSHOT/baritone-1.21.1-20240826.213754-1.jar) [1.21.4](https://maven.meteordev.org/#/snapshots/meteordevelopment/baritone/1.21.4-SNAPSHOT) else it will crash.
+> Make sure to install Baritone, [1.21.1](https://maven.meteordev.org/snapshots/meteordevelopment/baritone/1.21.1-SNAPSHOT/baritone-1.21.1-20240826.213754-1.jar) [1.21.4](https://maven.meteordev.org/snapshots/meteordevelopment/baritone/1.21.4-SNAPSHOT/baritone-1.21.4-20250105.184728-1.jar) else it will crash.
 
 ---
 
