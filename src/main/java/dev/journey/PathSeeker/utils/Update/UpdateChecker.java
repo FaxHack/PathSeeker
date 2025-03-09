@@ -23,7 +23,7 @@ public class UpdateChecker {
         CompletableFuture.runAsync(() -> {
             try {
                 String latestVersion = fetchLatestVersion();
-                if (latestVersion != null && isNewerVersion(latestVersion, CURRENT_VERSION)) {
+                if (latestVersion != null && isNewerVersion(latestVersion)) {
                     MinecraftClient.getInstance().execute(() ->
                             MinecraftClient.getInstance().setScreen(new UpdateScreen(latestVersion))
                     );
@@ -59,10 +59,10 @@ public class UpdateChecker {
         }
     }
 
-    private static boolean isNewerVersion(String latest, String current) {
+    private static boolean isNewerVersion(String latest) {
         try {
             String[] latestParts = latest.replaceAll("[^0-9.]", "").split("\\.");
-            String[] currentParts = current.replaceAll("[^0-9.]", "").split("\\.");
+            String[] currentParts = UpdateChecker.CURRENT_VERSION.replaceAll("[^0-9.]", "").split("\\.");
 
             int length = Math.max(latestParts.length, currentParts.length);
             for (int i = 0; i < length; i++) {
