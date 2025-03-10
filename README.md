@@ -53,7 +53,7 @@ Follows trails in all dimensions using either pitch40 or baritone. May break on 
 > Use Base Finder with NewerNewChunks to drastically improve your chances of locating uncharted bases.
 
 - **Storage Looter**  
-  Automate container looting with customizable item lists because time is treasure in the anarchy world!  
+  Automate container looting with customizable item lists because time is treasure in anarchy!  
 
 > [!WARNING]  
 > Make sure your predefined item lists are accurate. Incorrect configurations may result in missing valuable loot.
@@ -110,8 +110,12 @@ Getting started is simple:
 ---
 
 ## Requirements  
-- **Minecraft 1.21.x** or compatible versions.  
-- [**ViaFabricPlus**](https://modrinth.com/mod/viafabricplus/versions?g=1.21.1&l=fabric&c=release) *(optional for cross-version compatibility)*.  
+- **Minecraft 1.21.x** or compatible versions.
+- [**Baritone**](https://modrinth.com/mod/xaeros-minimap/versions) --> [1.21.1](https://maven.meteordev.org/snapshots/meteordevelopment/baritone/1.21.1-SNAPSHOT/baritone-1.21.1-20240826.213754-1.jar), [1.21.4](https://maven.meteordev.org/snapshots/meteordevelopment/baritone/1.21.4-SNAPSHOT/baritone-1.21.4-20250105.184728-1.jar)
+- [**ViaFabricPlus**](https://modrinth.com/mod/viafabricplus/versions?g=1.21.1&l=fabric&c=release) *(optional for cross-version compatibility)*.
+- [**XearosPlus**](https://modrinth.com/mod/xaeroplus/versions)
+- [**XearosWorldMap**](https://modrinth.com/mod/xaeros-world-map/versions)
+- [**XearosMiniMap**](https://modrinth.com/mod/xaeros-minimap/versions)
 
 ---
 
@@ -126,7 +130,8 @@ PathSeeker is always evolving! Here's what's planned:
 ## Credits  
 A big shoutout to the creators and projects that inspired PathSeeker:  
 - [**TrouserStreak**](https://github.com/etianl/Trouser-Streak) for laying the groundwork.  
-- [**meteor-mod**](https://github.com/miles352/meteor-stashhunting-addon) & [**Stardust**](https://github.com/0xTas/stardust) for additional features.
+- [**meteor-mod**](https://github.com/miles352/meteor-stashhunting-addon)
+- [**Stardust**](https://github.com/0xTas/stardust) for additional features.
 
 ---
 
@@ -134,7 +139,7 @@ A big shoutout to the creators and projects that inspired PathSeeker:
 We welcome contributions! If you have ideas, fixes, or new features to share, feel free to open issues or submit pull requests.  
 
 > [!TIP]  
-> Before submitting a pull request, review our coding guidelines for smoother collaboration.  
+> Review our coding guidelines for smoother collaboration before submitting a pull request.  
 
 ---
 
