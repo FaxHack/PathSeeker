@@ -55,10 +55,12 @@ public class PathSeeker extends MeteorAddon {
         Commands.add(new ScreenshotFolderCommand());
         Commands.add(new Stats2b2t());
 
-        if (FabricLoader.getInstance().isModLoaded("xaeroplus")) {
+        if (FabricLoader.getInstance().isModLoaded("xaeroworldmap") && FabricLoader.getInstance().isModLoaded("xaerominimap")) {
+
+            Modules.get().add(new OldChunkNotifier());
             Modules.get().add(new TrailFollower());
         } else {
-            LOG.info("XaeroPlus not found, disabling TrailFollower and OldChunkNotifier");
+            LOG.info("Xaeros minimap and world map not found, disabling modules that require it.");
         }
     }
 
@@ -73,5 +75,4 @@ public class PathSeeker extends MeteorAddon {
     public String getPackage() {
         return "dev.journey.PathSeeker";
     }
-
 }
