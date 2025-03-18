@@ -62,7 +62,7 @@ public class TridentDupe extends Module {
     private boolean cancel = true;
 
     public TridentDupe() {
-        super(PathSeeker.Utility, "trident-dupe", "Dupes tridents in first hotbar slot.");
+        super(PathSeeker.Automation, "trident-dupe", "Dupes tridents in first hotbar slot.");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)

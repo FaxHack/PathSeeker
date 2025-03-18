@@ -80,7 +80,7 @@ public class TrailFollower extends Module {
             .name("Auto Firework")
             .description("Uses a firework automatically if your velocity is too low.")
             .defaultValue(true)
-            .visible(() -> pitch40.get())
+            .visible(pitch40::get)
             .build()
     );
 

@@ -9,7 +9,6 @@
   },
   "mixins": [
     "PlayerEntityMixin",
-    "LivingEntityMixin",
     "accessor.ClientConnectionAccessor"
   ]
 }

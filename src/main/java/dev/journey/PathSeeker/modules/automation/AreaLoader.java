@@ -9,10 +9,11 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.dimension.DimensionType;
 
 
 public class AreaLoader extends Module {
@@ -40,6 +41,9 @@ public class AreaLoader extends Module {
     private int sideDistance = 0;
     private int multiIndex = 0;
     private BlockPos lastDest = null;
+    private RegistryEntry<DimensionType> dimension;
+    private boolean dimensionChanged = false;
+
     public AreaLoader() {
         super(PathSeeker.Hunting, "area-loader", "Spiral out from your position to load chunks in an area");
     }
@@ -47,24 +51,36 @@ public class AreaLoader extends Module {
     private void reset() {
         multiIndex = 0;
         sideDistance = 16 * gapDistance.get();
-
         efly = BaritoneAPI.getProvider().getPrimaryBaritone().getElytraProcess();
     }
 
     @EventHandler
     public void onTick(TickEvent.Post event) {
-        if (efly == null || !efly.isActive()) {
+        if (efly == null || !efly.isLoaded()) {
             this.toggle();
             return;
         }
 
+        if (mc.world.getDimensionEntry() != dimension) {
+            if (dimensionChanged) return;
+
+            dimensionChanged = true;
+            ChatUtils.sendMsg("area-loader", Text.literal("Dimension changed, pausing."));
+            return;
+        } else if (dimensionChanged) {
+            dimensionChanged = false;
+            ChatUtils.sendMsg("area-loader", Text.literal("Resuming."));
+            efly.pathTo(lastDest);
+        }
+
         var pos = mc.player.getBlockPos();
         var dest = efly.currentDestination();
+        if (dest == null) return;
 
         var deltaX = Math.abs(pos.getX() - dest.getX());
         var deltaY = Math.abs(pos.getZ() - dest.getZ());
 
-        if (deltaX < 50 && deltaY < 50) {
+        if (deltaX < 60 && deltaY < 60) {
             lastDest = getNextDestination(dest);
             efly.pathTo(lastDest);
         }
@@ -91,18 +107,12 @@ public class AreaLoader extends Module {
         BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
     }
 
+
     @Override
     public void onActivate() {
-        if (PlayerUtils.getDimension() == Dimension.Nether) {
-            ChatUtils.errorPrefix("area-loader", "This module is not supported in the nether");
-            this.toggle();
-            return;
-        }
-
         this.reset();
-
+        dimension = mc.world.getDimensionEntry();
         lastDest = getNextDestination(mc.player.getBlockPos());
         efly.pathTo(lastDest);
     }
-
 }
