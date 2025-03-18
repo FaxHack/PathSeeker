@@ -8,19 +8,14 @@
 
 ## Features    
 PathSeeker comes packed with powerful features designed for Minecraft explorers and thrill-seekers:  
-
-- **Advanced Chunk Detection**  
-  Pinpoint new chunks, old generation chunks, and more with near-perfect accuracy to keep your exploration one step ahead.  
-
 - **Base Finder**  
   Uncover hidden bases and dungeons effortlessly, giving you the edge in anarchy gameplay.
 
 - **Pitch40Util**
-  Used alongside Meteor's pitch40. Auto sets min and max bounds so that you continue to gain height. Also has an auto firework mode for when you lose velocity.
+  Used alongside Meteor's pitch 40. Auto sets min and max bounds so that you continue to gain height. It also has an auto firework mode for when you lose velocity.
 
 - **TrailFollower** (Requires XaeroPlus)
-Follows trails in all dimensions using either pitch40 or baritone. May break on path splits or other cases.
-
+Follows trails in all dimensions using either pitch40 or baritone. It may break on path splits or other cases.
 - **StackedMinecartDetector**
   Detects if a stacked spawner is in the area.
   
@@ -30,30 +25,23 @@ Follows trails in all dimensions using either pitch40 or baritone. May break on 
 - **DroppedItemESP**
   Highlights important dropped items.
   
-- **ScreenshotFolderCommand**
-   Open the Minecraft screenshot folder.
-  
-- **MeteorFolderCommand**
-   Open meteor-client folder.
-
-- **NoJumpDelay**
-  Removes delay between jumps.
-
 - **BetterStashFinder:** An upgraded stash finder with enhanced filtering options.
 
 - **AutoEnchanter:** Automates enchanting at anvils, saving time and effort.
 
-- **GrimEfly:** Vanilla efly uses a chestplate to ensure that elytra does not consume durability.
+- **GrimEfly:** Vanilla efly uses a chest-plate to ensure that elytra do not consume durability.
 
 - **Trident Dupe:** Facilitates trident duplication (note: patched on most servers).
 
 - **AutoFirework:** Automatically activates firework use for added flair.
 
+- **ScreenshotFolderCommand**
+   Open the Minecraft screenshot folder.
+  
+- **MeteorFolderCommand**
+   Open meteor-client folder.
 > [!TIP]  
 > Use Base Finder with NewerNewChunks to drastically improve your chances of locating uncharted bases.
-
-- **Storage Looter**  
-  Automate container looting with customizable item lists because time is treasure in anarchy!  
 
 > [!WARNING]  
 > Make sure your predefined item lists are accurate. Incorrect configurations may result in missing valuable loot.
