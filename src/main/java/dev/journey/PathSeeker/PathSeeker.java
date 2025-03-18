@@ -3,8 +3,8 @@ package dev.journey.PathSeeker;
 import dev.journey.PathSeeker.commands.MeteorFolderCommand;
 import dev.journey.PathSeeker.commands.ScreenshotFolderCommand;
 import dev.journey.PathSeeker.commands.Stats2b2t;
+import dev.journey.PathSeeker.modules.automation.AreaLoader;
 import dev.journey.PathSeeker.modules.automation.AutoEnchant;
-import dev.journey.PathSeeker.modules.automation.StorageLooter;
 import dev.journey.PathSeeker.modules.automation.TridentDupe;
 import dev.journey.PathSeeker.modules.exploration.*;
 import dev.journey.PathSeeker.modules.render.*;
@@ -44,7 +44,6 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new GrimDuraFirework());
         Modules.get().add(new SignHistorian());
         Modules.get().add(new Pitch40Util());
-        Modules.get().add(new NOJumpDelay());
         Modules.get().add(new GrimEfly());
 
         //Render
@@ -55,15 +54,14 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new EntityClusterESP());
 
         //Automation
-        Modules.get().add(new StorageLooter());
         Modules.get().add(new ElytraSwap());
         Modules.get().add(new TridentDupe());
         Modules.get().add(new Firework());
         Modules.get().add(new AutoEnchant());
+        Modules.get().add(new AreaLoader());
 
         /* To Release
 
-        Modules.get().add(new AreaLoader());
         Modules.get().add(new ChestIndex());
 
          */
