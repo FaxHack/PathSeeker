@@ -16,6 +16,7 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
 
 - **TrailFollower** (Requires XaeroPlus)
 Follows trails in all dimensions using either pitch40 or baritone. It may break on path splits or other cases.
+
 - **StackedMinecartDetector**
   Detects if a stacked spawner is in the area.
   
@@ -25,11 +26,11 @@ Follows trails in all dimensions using either pitch40 or baritone. It may break 
 - **DroppedItemESP**
   Highlights important dropped items.
   
-- **BetterStashFinder:** An upgraded stash finder with enhanced filtering options.
+- **BetterStashFinder:** An upgraded stash finder with enhanced filtering options. [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/BetterStashFinder.java)
 
 - **AutoEnchanter:** Automates enchanting at anvils, saving time and effort.
 
-- **GrimEfly:** Vanilla efly uses a chest-plate to ensure that elytra do not consume durability.
+- **GrimEfly:** Vanilla efly uses a chest-plate to ensure that elytra do not consume durability. [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/GrimEfly.java)
 
 - **Trident Dupe:** Facilitates trident duplication (note: patched on most servers).
 
