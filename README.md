@@ -12,10 +12,10 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
   Uncover hidden bases and dungeons effortlessly, giving you the edge in anarchy gameplay.
 
 - **Pitch40Util**
-  Used alongside Meteor's pitch 40. Auto sets min and max bounds so that you continue to gain height. It also has an auto firework mode for when you lose velocity.
+  Used alongside Meteor's pitch 40. Auto sets min and max bounds so that you continue to gain height. It also has an auto firework mode for when you lose velocity. [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/Pitch40Util.java)
 
 - **TrailFollower** (Requires XaeroPlus)
-Follows trails in all dimensions using either pitch40 or baritone. It may break on path splits or other cases.
+Follows trails in all dimensions using either pitch40 or baritone. It may break on path splits or other cases. [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/TrailFollower.java)
 
 - **StackedMinecartDetector**
   Detects if a stacked spawner is in the area.
@@ -83,7 +83,7 @@ Follows trails in all dimensions using either pitch40 or baritone. It may break 
 ---
 
 ## Why Choose This Mod?  
-PathSeeker takes the legendary TrouserStreak to the next level. With cutting-edge features, optimizations, and a redesigned codebase for unmatched stability and performance, this mod is your ultimate companion for anarchy server gameplay. Whether you’re a base raider, chunk tracer, or treasure hunter, PathSeeker empowers your journey.  
+PathSeeker brings the famed TrouserStreak to entirely new heights. With innovative features, refined optimisations and an emphasis on unmatched stability and performance, this mod is the ideal companion for anarchy server gameplay. Whether you're base raiding, chunk tracing or treasure hunting, PathSeeker empowers your journey.
 
 ---
 
@@ -119,7 +119,7 @@ PathSeeker is always evolving! Here's what's planned:
 ## Credits  
 A big shoutout to the creators and projects that inspired PathSeeker:  
 - [**TrouserStreak**](https://github.com/etianl/Trouser-Streak) for laying the groundwork.  
-- [**meteor-mod**](https://github.com/miles352/meteor-stashhunting-addon)
+- [**meteor-mod**](https://github.com/miles352/meteor-stashhunting-addon) for hunting modules.
 - [**Stardust**](https://github.com/0xTas/stardust) for additional features.
 
 ---
