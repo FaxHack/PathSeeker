@@ -52,6 +52,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new MobGearESP());
         Modules.get().add(new DroppedItemESP());
         Modules.get().add(new EntityClusterESP());
+        Modules.get().add(new CollectorESP());
 
         //Automation
         Modules.get().add(new ElytraSwap());
