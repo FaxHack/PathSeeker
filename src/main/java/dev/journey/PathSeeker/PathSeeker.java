@@ -3,10 +3,7 @@ package dev.journey.PathSeeker;
 import dev.journey.PathSeeker.commands.MeteorFolderCommand;
 import dev.journey.PathSeeker.commands.ScreenshotFolderCommand;
 import dev.journey.PathSeeker.commands.Stats2b2t;
-import dev.journey.PathSeeker.modules.automation.AFKVanillaFly;
-import dev.journey.PathSeeker.modules.automation.AreaLoader;
-import dev.journey.PathSeeker.modules.automation.AutoEnchant;
-import dev.journey.PathSeeker.modules.automation.TridentDupe;
+import dev.journey.PathSeeker.modules.automation.*;
 import dev.journey.PathSeeker.modules.exploration.*;
 import dev.journey.PathSeeker.modules.render.*;
 import dev.journey.PathSeeker.modules.utility.*;
@@ -62,6 +59,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new AutoEnchant());
         Modules.get().add(new AreaLoader());
         Modules.get().add(new AFKVanillaFly());
+        Modules.get().add(new TridentAura());
 
         /* To Release
 
