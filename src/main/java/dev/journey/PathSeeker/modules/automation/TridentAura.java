@@ -21,7 +21,7 @@ public class TridentAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> onlyHostile = sgGeneral.add(new BoolSetting.Builder()
-            .name("Debug")
+            .name("Hostile Only Debug")
             .description("only targets hostile mobs.")
             .defaultValue(true)
             .build()
