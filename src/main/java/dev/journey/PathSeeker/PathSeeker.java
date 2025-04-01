@@ -3,6 +3,7 @@ package dev.journey.PathSeeker;
 import dev.journey.PathSeeker.commands.MeteorFolderCommand;
 import dev.journey.PathSeeker.commands.ScreenshotFolderCommand;
 import dev.journey.PathSeeker.commands.Stats2b2t;
+import dev.journey.PathSeeker.modules.automation.AFKVanillaFly;
 import dev.journey.PathSeeker.modules.automation.AreaLoader;
 import dev.journey.PathSeeker.modules.automation.AutoEnchant;
 import dev.journey.PathSeeker.modules.automation.TridentDupe;
@@ -52,7 +53,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new MobGearESP());
         Modules.get().add(new DroppedItemESP());
         Modules.get().add(new EntityClusterESP());
-        Modules.get().add(new CollectorESP());
+        Modules.get().add(new VanityESP());
 
         //Automation
         Modules.get().add(new ElytraSwap());
@@ -60,6 +61,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new Firework());
         Modules.get().add(new AutoEnchant());
         Modules.get().add(new AreaLoader());
+        Modules.get().add(new AFKVanillaFly());
 
         /* To Release
 

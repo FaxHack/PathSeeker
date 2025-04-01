@@ -6,6 +6,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import dev.journey.PathSeeker.PathSeeker;
 import dev.journey.PathSeeker.modules.utility.Pitch40Util;
+import dev.journey.PathSeeker.modules.automation.AFKVanillaFly;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -14,13 +15,10 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.player.Rotations;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.item.Items;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -36,6 +34,7 @@ import xaeroplus.util.ChunkUtils;
 
 import java.time.Duration;
 import java.util.ArrayDeque;
+// removed the no loner needed imports since I seperated my AFKVanilla logic into a different module so it looks cleaner
 
 public class TrailFollower extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -207,7 +206,6 @@ public class TrailFollower extends Module {
 
     // Credit to WarriorLost: https://github.com/WarriorLost/meteor-client/tree/master
     private long lastFoundPossibleTrailTime;
-    private long vanillaFlyStartTime = 0;
     private double targetYaw;
     private int baritoneSetGoalTicks = 0;
 
@@ -225,9 +223,9 @@ public class TrailFollower extends Module {
     @Override
     public void onActivate() {
         resetTrail();
-        yTarget = -1;
-        targetPitch = 0;
-        vanillaFlyStartTime = System.currentTimeMillis();
+        if (flightMode.get() == FlightMode.VANILLA) {
+            Modules.get().get(AFKVanillaFly.class).toggle();
+        }
         XaeroPlus.EVENT_BUS.register(this);
         if (mc.player != null && mc.world != null) {
             if (!mc.world.getDimension().hasCeiling()) {
@@ -282,7 +280,10 @@ public class TrailFollower extends Module {
         XaeroPlus.EVENT_BUS.unregister(this);
         trail.clear();
         // If follow mode was never set due to baritone not being present, etc.
-        if (followMode == null) return;
+        if (flightMode.get() == FlightMode.VANILLA) {
+            AFKVanillaFly afkFly = Modules.get().get(AFKVanillaFly.class);
+            if (afkFly.isActive()) afkFly.toggle();
+        }
         switch (followMode) {
             case BARITONE: {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("cancel");
@@ -312,9 +313,6 @@ public class TrailFollower extends Module {
         }
     }
 
-    private long lastRocketUse = 0;
-    private double targetPitch = 0;
-    private double yTarget = -1;
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -353,9 +351,6 @@ public class TrailFollower extends Module {
             }
             case YAWLOCK: {
                 mc.player.setYaw(smoothRotation(getActualYaw(mc.player.getYaw()), targetYaw));
-                if (flightMode.get() == FlightMode.VANILLA) {
-                    handleVanillaFly();
-                }
                 break;
             }
 
@@ -517,72 +512,4 @@ public class TrailFollower extends Module {
     public enum TrailEndBehavior {
         DISABLE,
     }
-
-    // Vanilla fly logic to maintain y-level and auto rocket and rocket inventory replenish
-    private void handleVanillaFly() {
-        // Delay pitch control for 2 seconds to stabilize after starting
-        if (System.currentTimeMillis() - vanillaFlyStartTime < 2000) return;
-
-        if (!mc.player.isFallFlying()) {
-            mc.player.jump();
-            return;
-        }
-
-        double currentY = mc.player.getY();
-        if (yTarget == -1) yTarget = currentY;
-        double yDiff = currentY - yTarget;
-
-        if (Math.abs(yDiff) > 10.0) {
-            targetPitch = -Math.atan2(yDiff, 100) * (180 / Math.PI);
-        } else if (yDiff > 2.0) {
-            targetPitch = 10f;
-        } else if (yDiff < -2.0) {
-            targetPitch = -10f;
-        } else {
-            targetPitch = 0f;
-        }
-
-        float currentPitch = mc.player.getPitch();
-        float pitchDiff = (float) targetPitch - currentPitch;
-        mc.player.setPitch(currentPitch + pitchDiff * 0.1f);
-
-        if (System.currentTimeMillis() - lastRocketUse > 3000) {
-            tryUseFirework();
-        }
-    }
-
-    private void log(String message) {
-        info(message);
-    }
-
-
-    private void tryUseFirework() {
-        FindItemResult hotbar = InvUtils.findInHotbar(Items.FIREWORK_ROCKET);
-        if (!hotbar.found()) {
-            FindItemResult inv = InvUtils.find(Items.FIREWORK_ROCKET);
-            if (inv.found()) {
-                int hotbarSlot = findEmptyHotbarSlot();
-                if (hotbarSlot != -1) {
-                    InvUtils.move().from(inv.slot()).to(hotbarSlot);
-                } else {
-                    log("No empty hotbar slot available to move fireworks.");
-                    return;
-                }
-            } else {
-                log("No fireworks found in hotbar or inventory.");
-                return;
-            }
-        }
-        mc.interactionManager.interactItem(mc.player, mc.player.getActiveHand());
-        mc.player.swingHand(mc.player.getActiveHand());
-        lastRocketUse = System.currentTimeMillis();
-    }
-
-    private int findEmptyHotbarSlot() {
-        for (int i = 0; i < 9; i++) {
-            if (mc.player.getInventory().getStack(i).isEmpty()) return i;
-        }
-        return -1;
-    }
-
 }

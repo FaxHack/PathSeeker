@@ -53,6 +53,15 @@ public class PathSeekerUtil {
         }
     }
 
+    public static void firework(MinecraftClient mc, boolean requireElytra) {
+        if (mc.player == null) return;
+
+        if (requireElytra && !mc.player.isFallFlying()) return;
+
+        mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+
+    }
+
     public static void logError(String message) {
         System.err.println("[PathSeeker] " + message);
     }
