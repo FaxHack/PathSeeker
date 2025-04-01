@@ -34,6 +34,7 @@ import xaeroplus.util.ChunkUtils;
 
 import java.time.Duration;
 import java.util.ArrayDeque;
+// removed the no loner needed imports since I seperated my AFKVanilla logic into a different module so it looks cleaner
 
 public class TrailFollower extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -222,7 +223,6 @@ public class TrailFollower extends Module {
     @Override
     public void onActivate() {
         resetTrail();
-
         if (flightMode.get() == FlightMode.VANILLA) {
             Modules.get().get(AFKVanillaFly.class).toggle();
         }

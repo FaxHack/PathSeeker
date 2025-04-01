@@ -41,7 +41,6 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new NewerNewChunks());
         Modules.get().add(new BaseFinder());
 
-
         //Utility
         Modules.get().add(new GrimDuraFirework());
         Modules.get().add(new SignHistorian());

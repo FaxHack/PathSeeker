@@ -18,7 +18,7 @@ import net.minecraft.block.BannerBlock;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.chunk.WorldChunk;
-
+// refactored to VanityESP
 public class VanityESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
@@ -29,7 +29,7 @@ public class VanityESP extends Module {
             .defaultValue(true)
             .build()
     );
-
+    // Added mapOutline
     private final Setting<SettingColor> mapOutlineColor = sgColors.add(new ColorSetting.Builder()
             .name("map-outline-color")
             .description("Outline color for item frames containing maps.")
@@ -72,7 +72,7 @@ public class VanityESP extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (mc.world == null || mc.player == null) return;
-
+        // fix for MapartESP depending on wall/floor angle
         if (highlightItemFrames.get()) {
             for (ItemFrameEntity frame : mc.world.getEntitiesByClass(ItemFrameEntity.class, mc.player.getBoundingBox().expand(64), e ->
                     e.getHeldItemStack().getItem().getTranslationKey().equals("item.minecraft.filled_map"))) {
@@ -90,7 +90,7 @@ public class VanityESP extends Module {
                 event.renderer.box(box, fill, outline, ShapeMode.Both, 0);
             }
         }
-
+        // redid some of my bannerESP logic to fit all wall-mounts and also added my positional logic for standing banners
         if (highlightBanners.get()) {
             int radius = 8;
             BlockPos playerPos = mc.player.getBlockPos();
