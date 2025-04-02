@@ -25,6 +25,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.World;
 import xaeroplus.XaeroPlus;
 import xaeroplus.event.ChunkDataEvent;
 import xaeroplus.module.ModuleManager;
@@ -170,6 +171,16 @@ public class TrailFollower extends Module {
             .build()
     );
 
+    // added trail deviation slider now that baritone is locked to trail pathing
+    public final Setting<Double> maxTrailDeviation = sgAdvanced.add(new DoubleSetting.Builder()
+            .name("Max Trail Deviation")
+            .description("Maximum allowed angle (in degrees) from the original trail direction. Helps avoid switching to intersecting trails.")
+            .defaultValue(180.0)
+            .min(1.0)
+            .sliderMax(270.0)
+            .build()
+    );
+
     public final Setting<Integer> chunkCacheLength = sgAdvanced.add(new IntSetting.Builder()
             .name("Chunk Cache Length")
             .description("The amount of chunks to keep in the cache. (Won't be applied until deactivating)")
@@ -223,7 +234,7 @@ public class TrailFollower extends Module {
     @Override
     public void onActivate() {
         resetTrail();
-        if (flightMode.get() == FlightMode.VANILLA) {
+        if (followMode == FollowMode.YAWLOCK && flightMode.get() == FlightMode.VANILLA) {
             Modules.get().get(AFKVanillaFly.class).toggle();
         }
         XaeroPlus.EVENT_BUS.register(this);
@@ -337,9 +348,39 @@ public class TrailFollower extends Module {
                 if (baritoneSetGoalTicks > 0) {
                     baritoneSetGoalTicks--;
                 } else if (baritoneSetGoalTicks == 0) {
-                    baritoneSetGoalTicks = baritoneUpdateTicks.get();
-                    Vec3d targetPos = positionInDirection(mc.player.getPos(), targetYaw, pathDistance.get());
-                    BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) targetPos.x, (int) targetPos.z));
+                    //instead of flying to a calculated offset from the player using pathDistanceActual, will directly set the last trail chunk detected
+                    if (mc.world.getRegistryKey().equals(World.NETHER)) {
+                        if (!trail.isEmpty()) {
+                            Vec3d lastTrailPoint = trail.getLast();
+                            int x = (int) lastTrailPoint.x;
+                            int z = (int) lastTrailPoint.z;
+
+                            if (autoElytra.get()) {
+                                BaritoneAPI.getSettings().elytraTermsAccepted.value = true;
+                                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("cancel");
+
+                                mc.execute(() -> {
+                                    BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager()
+                                            .execute("elytra " + x + " " + z);
+                                    info("Started Baritone Elytra to " + x + ", " + z);
+                                });
+                            } else {
+                                BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess()
+                                        .setGoalAndPath(new GoalXZ(x, z));
+                            }
+                            baritoneSetGoalTicks = baritoneUpdateTicks.get();
+                        }
+
+                } else {
+                        // use average path for overworld
+                        Vec3d averagePos = calculateAveragePosition(trail);
+                        Vec3d positionVec = averagePos.subtract(mc.player.getPos()).normalize();
+                        Vec3d targetPos = mc.player.getPos().add(positionVec.multiply(pathDistanceActual));
+                        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess()
+                                .setGoalAndPath(new GoalXZ((int) targetPos.x, (int) targetPos.z));
+
+                        targetYaw = Rotations.getYaw(targetPos);
+                    }
                     if (autoElytra.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getElytraProcess().currentDestination() == null) {
                         // TODO: Fix this
                         info("The auto elytra mode is broken right now. If it's not working just turn it off and manually use #elytra to start.");
@@ -429,11 +470,10 @@ public class TrailFollower extends Module {
 
             // Ignore chunks not in the direction of the target
             // This shouldn't be needed assuming the chunk cache works
-//            if (Math.abs(angleDiff) > 90)
-//            {
-//                info("Greater than 90!");
-//                return;
-//            }
+            // was not able to add this before, but now can successfully filter out most other trails using the most recent chunk for pathing
+            if (followingTrail && Math.abs(angleDiff) > maxTrailDeviation.get()) {
+                return;
+            }
             lastFoundTrailTime = System.currentTimeMillis();
 
             // free up one spot for a new chunk to be added
@@ -460,13 +500,11 @@ public class TrailFollower extends Module {
             }
 
 
-            // get average pos
-            Vec3d averagePos = calculateAveragePosition(trail);
-
-            Vec3d positionVec = averagePos.subtract(mc.player.getPos()).normalize();
-
-            Vec3d targetPos = mc.player.getPos().add(positionVec.multiply(pathDistance.get()));
-            targetYaw = Rotations.getYaw(targetPos);
+            // instead of a calculated average coordinate, will use latest chunk added to trail
+            if (!trail.isEmpty()) {
+                Vec3d lastTrailPoint = trail.getLast(); // get the most recent trail chunk center
+                targetYaw = Rotations.getYaw(lastTrailPoint);
+            }
         }
     }
 
@@ -492,6 +530,8 @@ public class TrailFollower extends Module {
         double diff = (target - current + 180) % 360 - 180;
         return diff < -180 ? diff + 360 : diff;
     }
+
+    private double pathDistanceActual;
 
     private Vec3d positionInDirection(Vec3d pos, double yaw, double distance) {
         Vec3d offset = (new Vec3d(Math.sin(-yaw * Math.PI / 180), 0, Math.cos(-yaw * Math.PI / 180)).normalize()).multiply(distance);
