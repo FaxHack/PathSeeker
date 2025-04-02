@@ -38,7 +38,7 @@ public class BaritonePathing extends Module {
     );
 
     public BaritonePathing() {
-        super(PathSeeker.Automation, "BaritonePathing", "Baritone Elytra Pathing macro with ease-of-use auto activating of the TrailFollower module. Must be in the air to deploy!");
+        super(PathSeeker.Automation, "BaritonePathing", "Macro for Baritone Elytra pathing. Enables TrailFollower. Use in air.");
         BaritoneAPI.getSettings().logger.value = (s) -> {};  // No-op logger
     }
 
