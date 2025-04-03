@@ -234,8 +234,12 @@ public class TrailFollower extends Module {
     @Override
     public void onActivate() {
         resetTrail();
+        pathDistanceActual = pathDistance.get();
         if (followMode == FollowMode.YAWLOCK && flightMode.get() == FlightMode.VANILLA) {
-            Modules.get().get(AFKVanillaFly.class).toggle();
+            // *fixed, should only activate in overworld or end
+            if (!mc.world.getDimension().hasCeiling()) {
+                Modules.get().get(AFKVanillaFly.class).toggle();
+            }
         }
         XaeroPlus.EVENT_BUS.register(this);
         if (mc.player != null && mc.world != null) {
@@ -375,9 +379,13 @@ public class TrailFollower extends Module {
                         // use average path for overworld
                         Vec3d averagePos = calculateAveragePosition(trail);
                         Vec3d positionVec = averagePos.subtract(mc.player.getPos()).normalize();
-                        Vec3d targetPos = mc.player.getPos().add(positionVec.multiply(pathDistanceActual));
+                        Vec3d targetPos = mc.player.getPos().add(positionVec.multiply(10));
+                        targetYaw = Rotations.getYaw(targetPos);
+
+                        // set Baritone goal in that direction
+                        Vec3d baritoneTarget = positionInDirection(mc.player.getPos(), targetYaw, pathDistanceActual);
                         BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess()
-                                .setGoalAndPath(new GoalXZ((int) targetPos.x, (int) targetPos.z));
+                                .setGoalAndPath(new GoalXZ((int) baritoneTarget.x, (int) baritoneTarget.z));
 
                         targetYaw = Rotations.getYaw(targetPos);
                     }
@@ -501,9 +509,19 @@ public class TrailFollower extends Module {
 
 
             // instead of a calculated average coordinate, will use latest chunk added to trail
+            // *fix for overworld smoothing
             if (!trail.isEmpty()) {
-                Vec3d lastTrailPoint = trail.getLast(); // get the most recent trail chunk center
-                targetYaw = Rotations.getYaw(lastTrailPoint);
+                if (!trail.isEmpty()) {
+                    if (followMode == FollowMode.YAWLOCK) {
+                        Vec3d averagePos = calculateAveragePosition(trail);
+                        Vec3d positionVec = averagePos.subtract(mc.player.getPos()).normalize();
+                        Vec3d targetPos = mc.player.getPos().add(positionVec.multiply(10));
+                        targetYaw = Rotations.getYaw(targetPos);
+                    } else {
+                        Vec3d lastTrailPoint = trail.getLast();
+                        targetYaw = Rotations.getYaw(lastTrailPoint);
+                    }
+                }
             }
         }
     }

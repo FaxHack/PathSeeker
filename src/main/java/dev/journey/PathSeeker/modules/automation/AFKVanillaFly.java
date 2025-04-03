@@ -1,6 +1,8 @@
 package dev.journey.PathSeeker.modules.automation;
 
 import dev.journey.PathSeeker.PathSeeker;
+import dev.journey.PathSeeker.modules.exploration.TrailFollower;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -104,6 +106,12 @@ public class AFKVanillaFly extends Module {
                 }
             }
         } else {
+            // Just jumped or crashed out of flight
+            TrailFollower trailFollower = Modules.get().get(TrailFollower.class);
+            if (trailFollower.isActive() && trailFollower.flightMode.get() == TrailFollower.FlightMode.VANILLA) {
+                trailFollower.toggle();
+                info("You stopped flying. TrailFollower was disabled.");
+            }
             if (!launched) {
                 mc.player.jump();
                 launched = true;
