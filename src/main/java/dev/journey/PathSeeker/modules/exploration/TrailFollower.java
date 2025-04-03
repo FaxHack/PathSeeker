@@ -44,7 +44,7 @@ public class TrailFollower extends Module {
     public final Setting<Integer> maxTrailLength = sgGeneral.add(new IntSetting.Builder()
             .name("Max Trail Length")
             .description("The number of trail points to keep for the average. Adjust to change how quickly the average will change. More does not necessarily equal better because if the list is too long it will contain chunks behind you.")
-            .defaultValue(20* 10) // fix freezing issue
+            .defaultValue(20)
             .sliderRange(1, 100)
             .build()
     );
@@ -327,7 +327,7 @@ public class TrailFollower extends Module {
             info("Circling to look for new chunks, abandoning trail in " + (trailTimeout.get() - (System.currentTimeMillis() - lastFoundTrailTime)) / 1000 + " seconds.");
         }
     }
-
+    // add a Nether minimum chunk distance threshold (seperate from maxTrailLength) to decrease number of waypoints in the future if needed
     private void optimizeBaritoneForNether() {
         if (mc.world.getRegistryKey().equals(World.NETHER)) {
             var baritoneSettings = BaritoneAPI.getSettings();
