@@ -28,30 +28,6 @@ public class PathSeekerUtil {
         this.playtime = 0;
     }
 
-    public String getLastSeen() {
-        return lastSeen;
-    }
-
-    public void setLastSeen(String lastSeen) {
-        this.lastSeen = lastSeen;
-    }
-
-    public String getFirstSeen() {
-        return firstSeen;
-    }
-
-    public void setFirstSeen(String firstSeen) {
-        this.firstSeen = firstSeen;
-    }
-
-    public long getPlaytime() {
-        return playtime;
-    }
-
-    public void setPlaytime(long playtime) {
-        this.playtime = playtime;
-    }
-
     public static String randomColorCode() {
         String[] colorCodes = {"§4", "§c", "§6", "§e", "§2", "§a", "§b", "§3", "§1", "§9", "§d", "§5", "§7", "§8", "§0"};
         return colorCodes[(int) (Math.random() * colorCodes.length)];
@@ -101,35 +77,15 @@ public class PathSeekerUtil {
         }
     }
 
-    public String getFormattedLastSeen() {
-        return formatDate(this.lastSeen);
-    }
-
-    public String getFormattedFirstSeen() {
-        return formatDate(this.firstSeen);
-    }
-
-    public String getFormattedPlaytime() {
-        return formatPlaytime(this.playtime);
-    }
-
-    public void updateTimeInfo(String lastSeen, String firstSeen, long playtime) {
-        this.lastSeen = lastSeen;
-        this.firstSeen = firstSeen;
-        this.playtime = playtime;
-    }
     public static int firework(MinecraftClient mc) {
 
         // cant use a rocket if not wearing an elytra
         int elytraSwapSlot = -1;
-        if (!mc.player.getInventory().getArmorStack(2).isOf(Items.ELYTRA))
-        {
+        if (!mc.player.getInventory().getArmorStack(2).isOf(Items.ELYTRA)) {
             FindItemResult itemResult = InvUtils.findInHotbar(Items.ELYTRA);
             if (!itemResult.found()) {
                 return -1;
-            }
-            else
-            {
+            } else {
                 elytraSwapSlot = itemResult.slot();
                 InvUtils.swap(itemResult.slot(), true);
                 mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
@@ -150,10 +106,51 @@ public class PathSeekerUtil {
             mc.player.swingHand(Hand.MAIN_HAND);
             InvUtils.swapBack();
         }
-        if (elytraSwapSlot != -1)
-        {
+        if (elytraSwapSlot != -1) {
             return elytraSwapSlot;
         }
         return 200;
+    }
+
+    public String getLastSeen() {
+        return lastSeen;
+    }
+
+    public void setLastSeen(String lastSeen) {
+        this.lastSeen = lastSeen;
+    }
+
+    public String getFirstSeen() {
+        return firstSeen;
+    }
+
+    public void setFirstSeen(String firstSeen) {
+        this.firstSeen = firstSeen;
+    }
+
+    public long getPlaytime() {
+        return playtime;
+    }
+
+    public void setPlaytime(long playtime) {
+        this.playtime = playtime;
+    }
+
+    public String getFormattedLastSeen() {
+        return formatDate(this.lastSeen);
+    }
+
+    public String getFormattedFirstSeen() {
+        return formatDate(this.firstSeen);
+    }
+
+    public String getFormattedPlaytime() {
+        return formatPlaytime(this.playtime);
+    }
+
+    public void updateTimeInfo(String lastSeen, String firstSeen, long playtime) {
+        this.lastSeen = lastSeen;
+        this.firstSeen = firstSeen;
+        this.playtime = playtime;
     }
 }

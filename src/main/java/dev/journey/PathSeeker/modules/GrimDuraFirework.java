@@ -21,8 +21,7 @@ import net.minecraft.util.Hand;
 import static dev.journey.PathSeeker.utils.PathSeekerUtil.firework;
 
 
-public class GrimDuraFirework extends Module
-{
+public class GrimDuraFirework extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -32,22 +31,17 @@ public class GrimDuraFirework extends Module
             .defaultValue(10)
             .build()
     );
-
-    public GrimDuraFirework()
-    {
-        super(PathSeeker.Main, "GrimDuraFirework", "Swaps to your elytra so fireworks actually work.");
-    }
-
     int fireworkTickDelay = 0;
     int elytraSwapSlot = -1;
     boolean currentlyFiring = false;
+    public GrimDuraFirework() {
+        super(PathSeeker.Main, "GrimDuraFirework", "Swaps to your elytra so fireworks actually work.");
+    }
 
     @EventHandler
-    private void onTick(TickEvent.Post event)
-    {
+    private void onTick(TickEvent.Post event) {
         if (fireworkTickDelay > 0) fireworkTickDelay--;
-        if (elytraSwapSlot != -1)
-        {
+        if (elytraSwapSlot != -1) {
             InvUtils.swap(elytraSwapSlot, true);
             mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
             InvUtils.swapBack();
@@ -62,18 +56,15 @@ public class GrimDuraFirework extends Module
         ItemStack itemStack = mc.player.getStackInHand(event.hand);
 
         if (itemStack.getItem() instanceof FireworkRocketItem) {
-            if (!currentlyFiring && fireworkTickDelay <= 0)
-            {
+            if (!currentlyFiring && fireworkTickDelay <= 0) {
                 currentlyFiring = true;
                 int result = firework(mc);
-                if (result != 200 && result != -1)
-                {
+                if (result != 200 && result != -1) {
                     elytraSwapSlot = result;
                 }
             }
             // let the firework through if its a valid one
-            else if (currentlyFiring)
-            {
+            else if (currentlyFiring) {
                 currentlyFiring = false;
                 fireworkTickDelay = fireworkDelay.get();
                 return;
