@@ -2,6 +2,7 @@ package dev.journey.PathSeeker.modules.automation;
 
 import baritone.api.BaritoneAPI;
 import dev.journey.PathSeeker.PathSeeker;
+import baritone.api.BaritoneAPI; // may use
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -15,7 +16,7 @@ public class BaritonePathing extends Module {
     private final SettingGroup sgSettings = settings.getDefaultGroup();
 
     private final Setting<Keybind> flyKeybind = sgSettings.add(new KeybindSetting.Builder()
-            .name("PathMacro")
+            .name("Baritone Path Macro")
             .description("Sends #thisway <distance> and #elytra.")
             .defaultValue(Keybind.none())
             .build()
@@ -24,7 +25,7 @@ public class BaritonePathing extends Module {
     private final Setting<Integer> distance = sgSettings.add(new IntSetting.Builder()
             .name("Distance")
             .description("The distance to fly using Baritone Elytra.")
-            .defaultValue(1000)
+            .defaultValue(500)
             .min(1)
             .sliderMax(10000)
             .build()
@@ -38,9 +39,11 @@ public class BaritonePathing extends Module {
     );
 
     public BaritonePathing() {
-        super(PathSeeker.Automation, "BaritonePathing", "Macro for Baritone Elytra pathing. Enables TrailFollower. Use in air.");
+        super(PathSeeker.Automation, "BaritonePathMacro", "Easy macro to activate TrailFollower in the nether. Must deploy in air.");
         BaritoneAPI.getSettings().logger.value = (s) -> {};  // No-op logger
     }
+
+    private boolean trailFollowerWasActive = false;
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -52,10 +55,10 @@ public class BaritonePathing extends Module {
         if (abortKeybind.get().isPressed()) {
             sendBaritoneCommand("stop");
 
-            // Disable TrailFollower if active
             Module trailFollower = Modules.get().get("TrailFollower");
             if (trailFollower != null && trailFollower.isActive()) {
-                trailFollower.toggle();
+                trailFollower.toggle();  // <-- ACTUALLY DISABLE IT
+                info("TrailFollower was active. Disabling it due to abort.");
             }
         }
     }
@@ -73,7 +76,6 @@ public class BaritonePathing extends Module {
         Text text = event.getMessage();
         String msg = text.getString();
 
-        // Suppress Baritone messages
         if (msg.contains("[Baritone] Goal:") || msg.contains("ok canceled")) {
             event.setCancelled(true);
         }
