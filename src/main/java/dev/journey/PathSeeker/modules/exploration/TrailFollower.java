@@ -354,24 +354,22 @@ public class TrailFollower extends Module {
                 } else if (baritoneSetGoalTicks == 0) {
                     //instead of flying to a calculated offset from the player using pathDistanceActual, will directly set the last trail chunk detected
                     if (mc.world.getRegistryKey().equals(World.NETHER)) {
+                        // will reduce waypoint frequency
+                        if (baritoneSetGoalTicks > 0) {
+                            baritoneSetGoalTicks--;
+                            return;
+                        }
+
                         if (!trail.isEmpty()) {
                             Vec3d lastTrailPoint = trail.getLast();
                             int x = (int) lastTrailPoint.x;
                             int z = (int) lastTrailPoint.z;
 
-                            if (autoElytra.get()) {
-                                BaritoneAPI.getSettings().elytraTermsAccepted.value = true;
-                                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("cancel");
+                            // directly sets a pathfinding goal in Baritone using the internal Java API, rather than having it continuously cancel and re-execute commands, which caused a lot of stuttering.
+                            var baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
+                            // continuous path updates by using the existing method
+                            baritone.getCustomGoalProcess().setGoalAndPath(new GoalXZ(x, z));
 
-                                mc.execute(() -> {
-                                    BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager()
-                                            .execute("elytra " + x + " " + z);
-                                    info("Started Baritone Elytra to " + x + ", " + z);
-                                });
-                            } else {
-                                BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess()
-                                        .setGoalAndPath(new GoalXZ(x, z));
-                            }
                             baritoneSetGoalTicks = baritoneUpdateTicks.get();
                         }
 
