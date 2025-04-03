@@ -45,7 +45,7 @@ public class AreaLoader extends Module {
     private boolean dimensionChanged = false;
 
     public AreaLoader() {
-        super(PathSeeker.Hunting, "area-loader", "Spiral out from your position to load chunks in an area");
+        super(PathSeeker.Automation, "area-loader", "Spiral out from your position to load chunks in an area");
     }
 
     private void reset() {
