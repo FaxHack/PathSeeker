@@ -44,7 +44,7 @@ public class TrailFollower extends Module {
     public final Setting<Integer> maxTrailLength = sgGeneral.add(new IntSetting.Builder()
             .name("Max Trail Length")
             .description("The number of trail points to keep for the average. Adjust to change how quickly the average will change. More does not necessarily equal better because if the list is too long it will contain chunks behind you.")
-            .defaultValue(20)
+            .defaultValue(20*10) // temporary until nether logic separated
             .sliderRange(1, 100)
             .build()
     );
