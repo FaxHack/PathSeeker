@@ -92,7 +92,7 @@ public class AutoPortal extends Module {
     private int placeDelay = 0;
 
     public AutoPortal() {
-        super(PathSeeker.Automation, "AutoPortal", "Advanced portal creation with air placement support.");
+        super(PathSeeker.Automation, "AutoPortal", "For the basehunter with places to be.");
     }
 
     @Override
