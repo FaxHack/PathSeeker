@@ -322,7 +322,7 @@ public class AutoPortal extends Module {
     }
 
     private BlockPos getBlockForStage(int stage) {
-        if (base == null) return null;  // Safety check
+        if (base == null) return null;
 
         return switch (stage) {
             case -1 -> base.down();
