@@ -44,7 +44,7 @@ public class TrailFollower extends Module {
     public final Setting<Integer> maxTrailLength = sgGeneral.add(new IntSetting.Builder()
             .name("Max Trail Length")
             .description("The number of trail points to keep for the average. Adjust to change how quickly the average will change. More does not necessarily equal better because if the list is too long it will contain chunks behind you.")
-            .defaultValue(10 * 20) // this fixed the freezing issue
+            .defaultValue(20* 10) // fix freezing issue
             .sliderRange(1, 100)
             .build()
     );
@@ -358,46 +358,54 @@ public class TrailFollower extends Module {
             case BARITONE: {
                 if (baritoneSetGoalTicks > 0) {
                     baritoneSetGoalTicks--;
-                    return;
-                }
-
-                if (mc.world.getRegistryKey().equals(World.NETHER)) {
+                } else if (baritoneSetGoalTicks == 0) {
                     optimizeBaritoneForNether();
+                    //instead of flying to a calculated offset from the player using pathDistanceActual, will directly set the last trail chunk detected
+                    if (mc.world.getRegistryKey().equals(World.NETHER)) {
+                        optimizeBaritoneForNether();
+                        // reduce waypoint frequency
+                        if (baritoneSetGoalTicks > 0)
+                        {
+                            baritoneSetGoalTicks--;
+                            return;
+                        }
 
-                    if (!trail.isEmpty()) {
-                        Vec3d lastTrailPoint = trail.getLast();
-                        int x = (int) lastTrailPoint.x;
-                        int z = (int) lastTrailPoint.z;
+                        if (!trail.isEmpty()) {
+                            Vec3d lastTrailPoint = trail.getLast();
+                            int x = (int) lastTrailPoint.x;
+                            int z = (int) lastTrailPoint.z;
 
-                        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess()
-                                .setGoalAndPath(new GoalXZ(x, z));
+                            // directly sets a pathfinding goal in Baritone using the internal Java API, rather than having it continuously cancel and re-execute commands, which caused a lot of stuttering. No more freezing!
+                            var baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
+                            // will still set continuous path updates using the existing method
+                            baritone.getCustomGoalProcess().setGoalAndPath(new GoalXZ(x, z));
 
-                        baritoneSetGoalTicks = baritoneUpdateTicks.get();  // reset timer
-                    }
+                            baritoneSetGoalTicks = baritoneUpdateTicks.get();
+                        }
+
                 } else {
-                    // use average path for overworld
-                    Vec3d averagePos = calculateAveragePosition(trail);
-                    Vec3d positionVec = averagePos.subtract(mc.player.getPos()).normalize();
-                    Vec3d targetPos = mc.player.getPos().add(positionVec.multiply(10));
-                    targetYaw = Rotations.getYaw(targetPos);
+                        // use average path for overworld
+                        Vec3d averagePos = calculateAveragePosition(trail);
+                        Vec3d positionVec = averagePos.subtract(mc.player.getPos()).normalize();
+                        Vec3d targetPos = mc.player.getPos().add(positionVec.multiply(10));
+                        targetYaw = Rotations.getYaw(targetPos);
 
-                    Vec3d baritoneTarget = positionInDirection(mc.player.getPos(), targetYaw, pathDistanceActual);
-                    BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess()
-                            .setGoalAndPath(new GoalXZ((int) baritoneTarget.x, (int) baritoneTarget.z));
+                        // set Baritone goal in that direction
+                        Vec3d baritoneTarget = positionInDirection(mc.player.getPos(), targetYaw, pathDistanceActual);
+                        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess()
+                                .setGoalAndPath(new GoalXZ((int) baritoneTarget.x, (int) baritoneTarget.z));
 
-                    targetYaw = Rotations.getYaw(targetPos);
-                    baritoneSetGoalTicks = baritoneUpdateTicks.get();  // reset timer
+                        targetYaw = Rotations.getYaw(targetPos);
+                    }
+                    if (autoElytra.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getElytraProcess().currentDestination() == null) {
+                        // TODO: Fix this
+                        info("The auto elytra mode is broken right now. If it's not working just turn it off and manually use #elytra to start.");
+                        BaritoneAPI.getSettings().elytraTermsAccepted.value = true;
+                        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("elytra");
+                    }
                 }
-
-                if (autoElytra.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getElytraProcess().currentDestination() == null) {
-                    info("The auto elytra mode is broken right now. If it's not working just turn it off and manually use #elytra to start.");
-                    BaritoneAPI.getSettings().elytraTermsAccepted.value = true;
-                    BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("elytra");
-                }
-
                 break;
             }
-
             case YAWLOCK: {
                 mc.player.setYaw(smoothRotation(getActualYaw(mc.player.getYaw()), targetYaw));
                 break;
