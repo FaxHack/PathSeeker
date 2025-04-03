@@ -2,9 +2,9 @@ package dev.journey.PathSeeker.modules.automation;
 
 import baritone.api.BaritoneAPI;
 import dev.journey.PathSeeker.PathSeeker;
-import baritone.api.BaritoneAPI; // may use
-import meteordevelopment.meteorclient.events.world.TickEvent;
+import dev.journey.PathSeeker.modules.exploration.TrailFollower;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
@@ -40,10 +40,8 @@ public class BaritonePathing extends Module {
 
     public BaritonePathing() {
         super(PathSeeker.Automation, "BaritonePathMacro", "Easy macro to activate TrailFollower in the nether. Must deploy in air.");
-        BaritoneAPI.getSettings().logger.value = (s) -> {};  // No-op logger
+        BaritoneAPI.getSettings().logger.value = (s) -> {}; // Disable baritone chat spam
     }
-
-    private boolean trailFollowerWasActive = false;
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -55,15 +53,13 @@ public class BaritonePathing extends Module {
         if (abortKeybind.get().isPressed()) {
             sendBaritoneCommand("stop");
 
-            Module trailFollower = Modules.get().get("TrailFollower");
-            if (trailFollower != null && trailFollower.isActive()) {
-                trailFollower.toggle();  // <-- ACTUALLY DISABLE IT
+            TrailFollower trailFollower = Modules.get().get(TrailFollower.class);
+            if (trailFollower.isActive()) {
+                trailFollower.toggle();
                 info("TrailFollower was active. Disabling it due to abort.");
             }
         }
     }
-
-
 
     private void sendBaritoneCommand(String command) {
         if (command != null && !command.isEmpty()) {
@@ -73,9 +69,7 @@ public class BaritonePathing extends Module {
 
     @EventHandler
     private void onReceiveMessage(ReceiveMessageEvent event) {
-        Text text = event.getMessage();
-        String msg = text.getString();
-
+        String msg = event.getMessage().getString();
         if (msg.contains("[Baritone] Goal:") || msg.contains("ok canceled")) {
             event.setCancelled(true);
         }
