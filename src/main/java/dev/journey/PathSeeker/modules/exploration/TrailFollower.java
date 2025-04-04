@@ -35,7 +35,7 @@ import xaeroplus.util.ChunkUtils;
 
 import java.time.Duration;
 import java.util.ArrayDeque;
-// removed the no loner needed imports since I seperated my AFKVanilla logic into a different module so it looks cleaner
+
 
 public class TrailFollower extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -76,14 +76,26 @@ public class TrailFollower extends Module {
         PITCH40,
         VANILLA
     }
+    // using enum dropdown for nether pathfinding mode
+    public enum NetherPathMode {
+        AVERAGE,
+        CHUNK
+    }
+
 
     public final Setting<FlightMode> flightMode = sgGeneral.add(new EnumSetting.Builder<FlightMode>()
-            .name("Flight Mode")
+            .name("Overworld Flight Mode")
             .description("Choose how TrailFollower flies.")
             .defaultValue(FlightMode.PITCH40)
             .build()
     );
 
+    public final Setting<NetherPathMode> netherPathMode = sgGeneral.add(new EnumSetting.Builder<NetherPathMode>()
+            .name("Nether Path Mode")
+            .description("Controls how trail is followed in Nether.")
+            .defaultValue(NetherPathMode.CHUNK)
+            .build()
+    );
 
     public final Setting<Boolean> pitch40Firework = sgGeneral.add(new BoolSetting.Builder()
             .name("Auto Firework")
@@ -280,6 +292,18 @@ public class TrailFollower extends Module {
                 trail.add(targetPos);
             }
             targetYaw = getActualYaw(mc.player.getYaw());
+
+            // auto jump
+            if (followMode == FollowMode.BARITONE && mc.world.getRegistryKey().equals(World.NETHER)) {
+                if (mc.player.isOnGround()) {
+                    mc.player.jump();
+                    mc.execute(() -> {
+                        if (!mc.player.isFallFlying()) {
+                            mc.player.startFallFlying();
+                        }
+                    });
+                }
+            }
         } else {
             this.toggle();
         }
@@ -363,23 +387,27 @@ public class TrailFollower extends Module {
                     //instead of flying to a calculated offset from the player using pathDistanceActual, will directly set the last trail chunk detected
                     if (mc.world.getRegistryKey().equals(World.NETHER)) {
                         optimizeBaritoneForNether();
-                        // reduce waypoint frequency
-                        if (baritoneSetGoalTicks > 0)
-                        {
+
+                        if (baritoneSetGoalTicks > 0) {
                             baritoneSetGoalTicks--;
                             return;
                         }
 
                         if (!trail.isEmpty()) {
-                            Vec3d lastTrailPoint = trail.getLast();
-                            int x = (int) lastTrailPoint.x;
-                            int z = (int) lastTrailPoint.z;
+                            Vec3d baritoneTarget;
 
-                            // directly sets a pathfinding goal in Baritone using the internal Java API, rather than having it continuously cancel and re-execute commands, which caused a lot of stuttering. No more freezing!
-                            var baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
-                            // will still set continuous path updates using the existing method
-                            baritone.getCustomGoalProcess().setGoalAndPath(new GoalXZ(x, z));
+                            if (netherPathMode.get() == NetherPathMode.AVERAGE) {
+                                Vec3d averagePos = calculateAveragePosition(trail);
+                                Vec3d directionVec = averagePos.subtract(mc.player.getPos()).normalize();
+                                Vec3d predictedPos = mc.player.getPos().add(directionVec.multiply(10)); // short prediction
+                                targetYaw = Rotations.getYaw(predictedPos); // smooth yaw transition
+                                baritoneTarget = positionInDirection(mc.player.getPos(), targetYaw, pathDistanceActual); // full distance pathing
+                            } else {
+                                Vec3d lastPos = trail.getLast();
+                                baritoneTarget = lastPos;
+                            }
 
+                            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) baritoneTarget.x, (int) baritoneTarget.z));
                             baritoneSetGoalTicks = baritoneUpdateTicks.get();
                         }
 
