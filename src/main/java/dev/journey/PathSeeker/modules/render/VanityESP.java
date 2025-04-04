@@ -77,14 +77,14 @@ public class VanityESP extends Module {
     private final Setting<SettingColor> signColor = sgColors.add(new ColorSetting.Builder()
             .name("sign-color")
             .description("Fill color for signs.")
-            .defaultValue(new SettingColor(255, 165, 0, 50)) // orange with transparency
+            .defaultValue(new SettingColor(255, 165, 0, 50))
             .build()
     );
 
     private final Setting<SettingColor> signOutlineColor = sgColors.add(new ColorSetting.Builder()
             .name("sign-outline-color")
             .description("Outline color for signs.")
-            .defaultValue(new SettingColor(255, 165, 0, 255)) // solid orange
+            .defaultValue(new SettingColor(255, 165, 0, 255))
             .build()
     );
 

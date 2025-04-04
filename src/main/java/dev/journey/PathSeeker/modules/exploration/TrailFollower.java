@@ -384,13 +384,13 @@ public class TrailFollower extends Module {
 
                         if (!trail.isEmpty()) {
                             Vec3d baritoneTarget;
-
+                        // for OG average path
                             if (netherPathMode.get() == NetherPathMode.AVERAGE) {
                                 Vec3d averagePos = calculateAveragePosition(trail);
                                 Vec3d directionVec = averagePos.subtract(mc.player.getPos()).normalize();
-                                Vec3d predictedPos = mc.player.getPos().add(directionVec.multiply(10)); // short prediction
-                                targetYaw = Rotations.getYaw(predictedPos); // smooth yaw transition
-                                baritoneTarget = positionInDirection(mc.player.getPos(), targetYaw, pathDistanceActual); // full distance pathing
+                                Vec3d predictedPos = mc.player.getPos().add(directionVec.multiply(10));
+                                targetYaw = Rotations.getYaw(predictedPos);
+                                baritoneTarget = positionInDirection(mc.player.getPos(), targetYaw, pathDistanceActual);
                             } else {
                                 Vec3d lastPos = trail.getLast();
                                 baritoneTarget = lastPos;
