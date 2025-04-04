@@ -140,19 +140,10 @@ public class AutoPortal extends Module {
 
         if (stage == 5) {
             BlockPos target = getBlockForStage(stage);
-            Vec3d targetPos = Vec3d.ofCenter(base).add(0, 0, 0);
-            double dx = targetPos.x - mc.player.getX();
-            double dz = targetPos.z - mc.player.getZ();
-
-            if (Math.sqrt(dx*dx + dz*dz) > 0.1) {
-                mc.player.setVelocity(dx * 0.1, mc.player.getVelocity().y, dz * 0.1);
-                lastPlaceTime = now + 50;
-                return;
-            }
-
             handlePreciseJumpPlacement(now, target, stage + 1);
             return;
         }
+
 
         if (stage == -1 || stage == 6) {
             BlockPos target = getBlockForStage(stage);
