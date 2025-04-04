@@ -18,6 +18,7 @@ import net.minecraft.block.BannerBlock;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.block.entity.SignBlockEntity; // adding for signs to add soon
 // refactored to VanityESP
 public class VanityESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -44,6 +45,13 @@ public class VanityESP extends Module {
             .build()
     );
 
+    private final Setting<Boolean> highlightSigns = sgGeneral.add(new BoolSetting.Builder()
+            .name("signs")
+            .description("Highlights signs.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<SettingColor> mapartColor = sgColors.add(new ColorSetting.Builder()
             .name("mapart-frame-color")
             .description("Color for item frames containing maps.")
@@ -62,6 +70,20 @@ public class VanityESP extends Module {
             .name("banner-outline")
             .description("Outline color for banners.")
             .defaultValue(new SettingColor(255, 0, 0, 255))  // Red outline
+            .build()
+    );
+
+    private final Setting<SettingColor> signColor = sgColors.add(new ColorSetting.Builder()
+            .name("sign-color")
+            .description("Fill color for signs.")
+            .defaultValue(new SettingColor(255, 165, 0, 50))
+            .build()
+    );
+
+    private final Setting<SettingColor> signOutlineColor = sgColors.add(new ColorSetting.Builder()
+            .name("sign-outline-color")
+            .description("Outline color for signs.")
+            .defaultValue(new SettingColor(255, 165, 0, 255))
             .build()
     );
 
@@ -159,6 +181,7 @@ public class VanityESP extends Module {
                             }
 
                             event.renderer.box(box, fill, outline, ShapeMode.Both, 0);
+
                         }
                     }
                 }
@@ -166,3 +189,4 @@ public class VanityESP extends Module {
         }
     }
 }
+

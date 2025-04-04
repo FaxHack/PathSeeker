@@ -35,7 +35,7 @@ import xaeroplus.util.ChunkUtils;
 
 import java.time.Duration;
 import java.util.ArrayDeque;
-// removed the no loner needed imports since I seperated my AFKVanilla logic into a different module so it looks cleaner
+
 
 public class TrailFollower extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -44,7 +44,7 @@ public class TrailFollower extends Module {
     public final Setting<Integer> maxTrailLength = sgGeneral.add(new IntSetting.Builder()
             .name("Max Trail Length")
             .description("The number of trail points to keep for the average. Adjust to change how quickly the average will change. More does not necessarily equal better because if the list is too long it will contain chunks behind you.")
-            .defaultValue(20)
+            .defaultValue(20) // temporary until nether logic separated
             .sliderRange(1, 100)
             .build()
     );
@@ -76,14 +76,26 @@ public class TrailFollower extends Module {
         PITCH40,
         VANILLA
     }
+    // using enum dropdown for nether pathfinding mode
+    public enum NetherPathMode {
+        AVERAGE,
+        CHUNK
+    }
+
 
     public final Setting<FlightMode> flightMode = sgGeneral.add(new EnumSetting.Builder<FlightMode>()
-            .name("Flight Mode")
+            .name("Overworld Flight Mode")
             .description("Choose how TrailFollower flies.")
             .defaultValue(FlightMode.PITCH40)
             .build()
     );
 
+    public final Setting<NetherPathMode> netherPathMode = sgGeneral.add(new EnumSetting.Builder<NetherPathMode>()
+            .name("Nether Path Mode")
+            .description("Controls how trail is followed in Nether.")
+            .defaultValue(NetherPathMode.CHUNK)
+            .build()
+    );
 
     public final Setting<Boolean> pitch40Firework = sgGeneral.add(new BoolSetting.Builder()
             .name("Auto Firework")
@@ -280,6 +292,7 @@ public class TrailFollower extends Module {
                 trail.add(targetPos);
             }
             targetYaw = getActualYaw(mc.player.getYaw());
+
         } else {
             this.toggle();
         }
@@ -327,7 +340,14 @@ public class TrailFollower extends Module {
             info("Circling to look for new chunks, abandoning trail in " + (trailTimeout.get() - (System.currentTimeMillis() - lastFoundTrailTime)) / 1000 + " seconds.");
         }
     }
-
+    // add a Nether minimum chunk distance threshold (seperate from maxTrailLength) to decrease number of waypoints in the future if needed
+    private void optimizeBaritoneForNether() {
+        if (mc.world.getRegistryKey().equals(World.NETHER)) {
+            var baritoneSettings = BaritoneAPI.getSettings();
+            baritoneSettings.primaryTimeoutMS.value = 500L;
+            baritoneSettings.failureTimeoutMS.value = 1000L;
+        }
+    }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -352,30 +372,35 @@ public class TrailFollower extends Module {
                 if (baritoneSetGoalTicks > 0) {
                     baritoneSetGoalTicks--;
                 } else if (baritoneSetGoalTicks == 0) {
+                    optimizeBaritoneForNether();
                     //instead of flying to a calculated offset from the player using pathDistanceActual, will directly set the last trail chunk detected
                     if (mc.world.getRegistryKey().equals(World.NETHER)) {
+                        optimizeBaritoneForNether();
+
+                        if (baritoneSetGoalTicks > 0) {
+                            baritoneSetGoalTicks--;
+                            return;
+                        }
+
                         if (!trail.isEmpty()) {
-                            Vec3d lastTrailPoint = trail.getLast();
-                            int x = (int) lastTrailPoint.x;
-                            int z = (int) lastTrailPoint.z;
-
-                            if (autoElytra.get()) {
-                                BaritoneAPI.getSettings().elytraTermsAccepted.value = true;
-                                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("cancel");
-
-                                mc.execute(() -> {
-                                    BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager()
-                                            .execute("elytra " + x + " " + z);
-                                    info("Started Baritone Elytra to " + x + ", " + z);
-                                });
+                            Vec3d baritoneTarget;
+                        // for OG average path
+                            if (netherPathMode.get() == NetherPathMode.AVERAGE) {
+                                Vec3d averagePos = calculateAveragePosition(trail);
+                                Vec3d directionVec = averagePos.subtract(mc.player.getPos()).normalize();
+                                Vec3d predictedPos = mc.player.getPos().add(directionVec.multiply(10));
+                                targetYaw = Rotations.getYaw(predictedPos);
+                                baritoneTarget = positionInDirection(mc.player.getPos(), targetYaw, pathDistanceActual);
                             } else {
-                                BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess()
-                                        .setGoalAndPath(new GoalXZ(x, z));
+                                Vec3d lastPos = trail.getLast();
+                                baritoneTarget = lastPos;
                             }
+
+                            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) baritoneTarget.x, (int) baritoneTarget.z));
                             baritoneSetGoalTicks = baritoneUpdateTicks.get();
                         }
 
-                } else {
+                    } else {
                         // use average path for overworld
                         Vec3d averagePos = calculateAveragePosition(trail);
                         Vec3d positionVec = averagePos.subtract(mc.player.getPos()).normalize();
