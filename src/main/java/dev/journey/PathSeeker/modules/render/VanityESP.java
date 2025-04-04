@@ -188,4 +188,5 @@ public class VanityESP extends Module {
             }
         }
     }
+}
 
