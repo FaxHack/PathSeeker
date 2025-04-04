@@ -111,7 +111,7 @@ public class AutoPortal extends Module {
     public void onDeactivate() {
         waitingForJumpPeak = false;
         mc.options.useKey.setPressed(false);
-        info("Toggled " + name + " off.");
+        info("Toggled " + name + " §coff§r.");
     }
 
 
