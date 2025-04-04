@@ -293,17 +293,6 @@ public class TrailFollower extends Module {
             }
             targetYaw = getActualYaw(mc.player.getYaw());
 
-            // auto jump
-            if (followMode == FollowMode.BARITONE && mc.world.getRegistryKey().equals(World.NETHER)) {
-                if (mc.player.isOnGround()) {
-                    mc.player.jump();
-                    mc.execute(() -> {
-                        if (!mc.player.isFallFlying()) {
-                            mc.player.startFallFlying();
-                        }
-                    });
-                }
-            }
         } else {
             this.toggle();
         }
