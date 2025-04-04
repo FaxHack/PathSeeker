@@ -19,7 +19,6 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.chunk.WorldChunk;
 import net.minecraft.block.entity.SignBlockEntity; // adding for signs to add soon
-
 // refactored to VanityESP
 public class VanityESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -188,31 +187,5 @@ public class VanityESP extends Module {
                 }
             }
         }
-
-        if (highlightSigns.get()) {
-            int radius = 8;
-            BlockPos playerPos = mc.player.getBlockPos();
-
-            for (int dx = -radius; dx <= radius; dx++) {
-                for (int dz = -radius; dz <= radius; dz++) {
-                    WorldChunk chunk = mc.world.getChunk(playerPos.getX() / 16 + dx, playerPos.getZ() / 16 + dz);
-                    if (chunk == null) continue;
-
-                    for (BlockEntity be : chunk.getBlockEntities().values()) {
-                        String id = be.getType().toString();
-                        if (!id.contains("sign")) continue;
-
-                        BlockPos pos = be.getPos();
-                        Box box = new Box(pos).expand(0.05);
-
-                        Color fill = new Color(signColor.get());
-                        Color outline = new Color(signOutlineColor.get());
-
-                        event.renderer.box(box, fill, outline, ShapeMode.Both, 0);
-                    }
-                }
-            }
-        }
     }
-}
 
