@@ -2,6 +2,8 @@ package dev.journey.PathSeeker.modules.automation;
 
 import dev.journey.PathSeeker.PathSeeker;
 import dev.journey.PathSeeker.modules.exploration.TrailFollower;
+import dev.journey.PathSeeker.modules.utility.Firework;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -49,11 +51,16 @@ public class AFKVanillaFly extends Module {
     public void onActivate() {
         launched = false;
         yTarget = -1;
-
+        // fix for firework hanging
+        Firework firework = Modules.get().get(Firework.class);
+        if (firework.isActive()) {
+            firework.toggle();
+            info("Disabled Firework module to prevent conflict.");
+        }
         if (mc.player == null || !mc.player.isFallFlying()) {
             info("You must be flying before enabling AFKVanillaFly.");
+            }
         }
-    }
 
     public void tickFlyLogic() {
         if (mc.player == null) return;
@@ -117,6 +124,7 @@ public class AFKVanillaFly extends Module {
     private void onTick(TickEvent.Pre event) {
         tickFlyLogic();
     }
+
 
     public void resetYLock() {
         yTarget = -1;
