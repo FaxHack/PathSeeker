@@ -1,12 +1,14 @@
 package dev.journey.PathSeeker.modules.utility;
 
 import dev.journey.PathSeeker.PathSeeker;
+import dev.journey.PathSeeker.modules.automation.AFKVanillaFly;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
@@ -63,6 +65,9 @@ public class Firework extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.player == null) return;
+        // guard auto fw logic to exit early if vanillafly is activated
+        AFKVanillaFly afk = Modules.get().get(AFKVanillaFly.class);
+        if (afk.isActive()) return;
 
         ticksSinceLastUse++;
 
