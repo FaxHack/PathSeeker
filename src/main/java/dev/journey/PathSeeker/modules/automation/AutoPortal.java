@@ -171,6 +171,7 @@ public class AutoPortal extends Module {
             toggle();
         }
     }
+
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (!render.get()) return;

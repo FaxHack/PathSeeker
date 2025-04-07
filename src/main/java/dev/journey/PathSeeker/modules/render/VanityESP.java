@@ -3,22 +3,25 @@ package dev.journey.PathSeeker.modules.render;
 import dev.journey.PathSeeker.PathSeeker;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.ColorSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.BannerBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.WallBannerBlock;
 import net.minecraft.block.entity.BannerBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.block.BannerBlock;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.chunk.WorldChunk;
-import net.minecraft.block.entity.SignBlockEntity; // adding for signs to add soon
+
 // refactored to VanityESP
 public class VanityESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

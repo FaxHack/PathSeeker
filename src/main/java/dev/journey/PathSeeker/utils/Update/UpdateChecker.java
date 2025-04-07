@@ -1,6 +1,8 @@
 package dev.journey.PathSeeker.utils.Update;
 
 import dev.journey.PathSeeker.PathSeeker;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
 import org.json.JSONObject;
 
@@ -12,14 +14,39 @@ import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import static meteordevelopment.meteorclient.MeteorClient.EVENT_BUS;
+
 public class UpdateChecker {
     private static final String GITHUB_URL = "https://api.github.com/repos/FaxHack/PathSeeker/releases/latest";
-    private static final String CURRENT_VERSION = "1.0.6";
+    private static final String CURRENT_VERSION = "1.0.7";
     private static final String USER_AGENT = "Mozilla/5.0";
+    private static boolean hasCheckedThisSession = false;
+    private static boolean isRegistered = false;
 
     public static void checkForUpdate() {
         if (UserConfig.isUpdateCheckDisabled()) return;
+        
+        // Register the tick handler if not already registered
+        if (!isRegistered) {
+            EVENT_BUS.subscribe(UpdateChecker.class);
+            isRegistered = true;
+        }
+
+        // Also do an immediate check
+        doUpdateCheck();
+    }
     
+    @EventHandler
+    private static void onClientTick(TickEvent.Post event) {
+        // Check for updates once when the client is fully loaded and player is in-game
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (!hasCheckedThisSession && mc.world != null && mc.player != null) {
+            doUpdateCheck();
+            hasCheckedThisSession = true;
+        }
+    }
+    
+    private static void doUpdateCheck() {
         CompletableFuture.runAsync(() -> {
             try {
                 String latestVersion = fetchLatestVersion();
@@ -76,5 +103,10 @@ public class UpdateChecker {
             PathSeeker.LOG.error("Failed to parse version numbers", e);
             return false;
         }
+    }
+    
+    // Reset the check status when game exits
+    public static void resetCheckedStatus() {
+        hasCheckedThisSession = false;
     }
 }

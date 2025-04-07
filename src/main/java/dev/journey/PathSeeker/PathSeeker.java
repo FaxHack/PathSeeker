@@ -3,10 +3,6 @@ package dev.journey.PathSeeker;
 import dev.journey.PathSeeker.commands.MeteorFolderCommand;
 import dev.journey.PathSeeker.commands.ScreenshotFolderCommand;
 import dev.journey.PathSeeker.commands.Stats2b2t;
-import dev.journey.PathSeeker.modules.automation.AFKVanillaFly;
-import dev.journey.PathSeeker.modules.automation.AreaLoader;
-import dev.journey.PathSeeker.modules.automation.AutoEnchant;
-import dev.journey.PathSeeker.modules.automation.TridentDupe;
 import dev.journey.PathSeeker.modules.automation.*;
 import dev.journey.PathSeeker.modules.exploration.*;
 import dev.journey.PathSeeker.modules.render.*;
@@ -85,7 +81,7 @@ public class PathSeeker extends MeteorAddon {
             Modules.get().add(new BetterStashFinder());
             Modules.get().add(new OldChunkNotifier());
             Modules.get().add(new TrailFollower());
-            
+
         } else {
             LOG.info("Xaeros minimap and world map not found, disabling modules that require it.");
         }

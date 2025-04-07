@@ -61,9 +61,9 @@ dependencies {
 processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version, "mc_version": project.minecraft_version,
-        "xp_version": project.property("xaeroplus_version"),
-        "xwm_version": project.property("xaeros_worldmap_version"),
-        "xmm_version": project.property("xaeros_minimap_version")
+                "xp_version": project.property("xaeroplus_version"),
+                "xwm_version": project.property("xaeros_worldmap_version"),
+                "xmm_version": project.property("xaeros_minimap_version")
     }
 }
 
