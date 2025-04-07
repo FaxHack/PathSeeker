@@ -5,8 +5,8 @@ import baritone.api.pathing.goals.GoalXZ;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import dev.journey.PathSeeker.PathSeeker;
-import dev.journey.PathSeeker.modules.utility.Pitch40Util;
 import dev.journey.PathSeeker.modules.automation.AFKVanillaFly;
+import dev.journey.PathSeeker.modules.utility.Pitch40Util;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -22,10 +22,10 @@ import net.minecraft.block.Blocks;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.chunk.WorldChunk;
-import net.minecraft.world.World;
 import xaeroplus.XaeroPlus;
 import xaeroplus.event.ChunkDataEvent;
 import xaeroplus.module.ModuleManager;
@@ -71,32 +71,12 @@ public class TrailFollower extends Module {
             .defaultValue(TrailEndBehavior.DISABLE)
             .build()
     );
-    // using enum dropdown item instead of boolean
-    public enum FlightMode {
-        PITCH40,
-        VANILLA
-    }
-    // using enum dropdown for nether pathfinding mode
-    public enum NetherPathMode {
-        AVERAGE,
-        CHUNK
-    }
-
-
     public final Setting<FlightMode> flightMode = sgGeneral.add(new EnumSetting.Builder<FlightMode>()
             .name("Overworld Flight Mode")
             .description("Choose how TrailFollower flies.")
             .defaultValue(FlightMode.PITCH40)
             .build()
     );
-
-    public final Setting<NetherPathMode> netherPathMode = sgGeneral.add(new EnumSetting.Builder<NetherPathMode>()
-            .name("Nether Path Mode")
-            .description("Controls how trail is followed in Nether.")
-            .defaultValue(NetherPathMode.CHUNK)
-            .build()
-    );
-
     public final Setting<Boolean> pitch40Firework = sgGeneral.add(new BoolSetting.Builder()
             .name("Auto Firework")
             .description("Uses a firework automatically if your velocity is too low.")
@@ -104,7 +84,12 @@ public class TrailFollower extends Module {
             .visible(() -> flightMode.get() == FlightMode.PITCH40)
             .build()
     );
-
+    public final Setting<NetherPathMode> netherPathMode = sgGeneral.add(new EnumSetting.Builder<NetherPathMode>()
+            .name("Nether Path Mode")
+            .description("Controls how trail is followed in Nether.")
+            .defaultValue(NetherPathMode.CHUNK)
+            .build()
+    );
     public final Setting<Double> rotateScaling = sgGeneral.add(new DoubleSetting.Builder()
             .name("Rotate Scaling")
             .description("Scaling of how fast the yaw changes. 1 = instant, 0 = doesn't change")
@@ -112,16 +97,13 @@ public class TrailFollower extends Module {
             .sliderRange(0.0, 1.0)
             .build()
     );
-
     public final Setting<Boolean> autoElytra = sgGeneral.add(new BoolSetting.Builder()
             .name("[Baritone] Auto Start Baritone Elytra")
             .description("Starts baritone elytra for you.")
             .defaultValue(false)
             .build()
     );
-
     private final SettingGroup sgAdvanced = settings.createGroup("Advanced", false);
-
     public final Setting<Double> pathDistance = sgAdvanced.add(new DoubleSetting.Builder()
             .name("Path Distance")
             .description("The distance to add trail positions in the direction the player is facing.")
@@ -129,7 +111,6 @@ public class TrailFollower extends Module {
             .sliderRange(100, 2000)
             .build()
     );
-
     public final Setting<Double> startDirectionWeighting = sgAdvanced.add(new DoubleSetting.Builder()
             .name("Start Direction Weight")
             .description("The weighting of the direction the player is facing when starting the trail. 0 for no weighting (not recommended) 1 for max weighting (will take a bit for direction to change)")
@@ -138,14 +119,12 @@ public class TrailFollower extends Module {
             .sliderMax(1)
             .build()
     );
-
     public final Setting<DirectionWeighting> directionWeighting = sgAdvanced.add(new EnumSetting.Builder<DirectionWeighting>()
             .name("Direction Weighting")
             .description("How the chunks found should be weighted. Useful for path splits. Left will weight chunks to the left of the player higher, right will weigh chunks to the right higher, and none will be in the middle/random. ")
             .defaultValue(DirectionWeighting.NONE)
             .build()
     );
-
     public final Setting<Integer> directionWeightingMultiplier = sgAdvanced.add(new IntSetting.Builder()
             .name("Direction Weighting Multiplier")
             .description("The multiplier for how much weight should be given to chunks in the direction specified. Values are capped to be in the range [2, maxTrailLength].")
@@ -155,7 +134,6 @@ public class TrailFollower extends Module {
             .visible(() -> directionWeighting.get() != DirectionWeighting.NONE)
             .build()
     );
-
     public final Setting<Double> chunkFoundTimeout = sgAdvanced.add(new DoubleSetting.Builder()
             .name("Chunk Found Timeout")
             .description("The amount of MS without a chunk found to trigger circling.")
@@ -164,7 +142,6 @@ public class TrailFollower extends Module {
             .sliderMax(1000 * 10)
             .build()
     );
-
     public final Setting<Double> circlingDegPerTick = sgAdvanced.add(new DoubleSetting.Builder()
             .name("Circling Degrees Per Tick")
             .description("The amount of degrees to change per tick while circling.")
@@ -173,7 +150,6 @@ public class TrailFollower extends Module {
             .sliderMax(20.0)
             .build()
     );
-
     public final Setting<Double> trailTimeout = sgAdvanced.add(new DoubleSetting.Builder()
             .name("Trail Timeout")
             .description("The amount of MS without a chunk found to stop following the trail.")
@@ -182,7 +158,6 @@ public class TrailFollower extends Module {
             .sliderMax(1000 * 60)
             .build()
     );
-
     // added trail deviation slider now that baritone is locked to trail pathing
     public final Setting<Double> maxTrailDeviation = sgAdvanced.add(new DoubleSetting.Builder()
             .name("Max Trail Deviation")
@@ -192,7 +167,6 @@ public class TrailFollower extends Module {
             .sliderMax(270.0)
             .build()
     );
-
     public final Setting<Integer> chunkCacheLength = sgAdvanced.add(new IntSetting.Builder()
             .name("Chunk Cache Length")
             .description("The amount of chunks to keep in the cache. (Won't be applied until deactivating)")
@@ -211,7 +185,6 @@ public class TrailFollower extends Module {
             .sliderRange(20, 30 * 20)
             .build()
     );
-
     // TODO: Auto disconnect at certain chunk load speed
     public final Setting<Boolean> debug = sgAdvanced.add(new BoolSetting.Builder()
             .name("Debug")
@@ -226,12 +199,11 @@ public class TrailFollower extends Module {
     private ArrayDeque<Vec3d> trail = new ArrayDeque<>();
     private ArrayDeque<Vec3d> possibleTrail = new ArrayDeque<>();
     private long lastFoundTrailTime;
-
     // Credit to WarriorLost: https://github.com/WarriorLost/meteor-client/tree/master
     private long lastFoundPossibleTrailTime;
     private double targetYaw;
     private int baritoneSetGoalTicks = 0;
-
+    private double pathDistanceActual;
     public TrailFollower() {
         super(PathSeeker.Hunting, "TrailFollower", "Automatically follows trails in all dimensions.");
     }
@@ -340,6 +312,7 @@ public class TrailFollower extends Module {
             info("Circling to look for new chunks, abandoning trail in " + (trailTimeout.get() - (System.currentTimeMillis() - lastFoundTrailTime)) / 1000 + " seconds.");
         }
     }
+
     // add a Nether minimum chunk distance threshold (seperate from maxTrailLength) to decrease number of waypoints in the future if needed
     private void optimizeBaritoneForNether() {
         if (mc.world.getRegistryKey().equals(World.NETHER)) {
@@ -384,7 +357,7 @@ public class TrailFollower extends Module {
 
                         if (!trail.isEmpty()) {
                             Vec3d baritoneTarget;
-                        // for OG average path
+                            // for OG average path
                             if (netherPathMode.get() == NetherPathMode.AVERAGE) {
                                 Vec3d averagePos = calculateAveragePosition(trail);
                                 Vec3d directionVec = averagePos.subtract(mc.player.getPos()).normalize();
@@ -442,7 +415,6 @@ public class TrailFollower extends Module {
         if (posDebug != null)
             event.renderer.line(mc.player.getX(), mc.player.getY(), mc.player.getZ(), posDebug.x, targetPos.y, posDebug.z, new Color(0, 0, 255));
     }
-
 
     @net.lenni0451.lambdaevents.EventHandler(priority = -1)
     public void onChunkData(ChunkDataEvent event) {
@@ -574,11 +546,21 @@ public class TrailFollower extends Module {
         return diff < -180 ? diff + 360 : diff;
     }
 
-    private double pathDistanceActual;
-
     private Vec3d positionInDirection(Vec3d pos, double yaw, double distance) {
         Vec3d offset = (new Vec3d(Math.sin(-yaw * Math.PI / 180), 0, Math.cos(-yaw * Math.PI / 180)).normalize()).multiply(distance);
         return pos.add(offset);
+    }
+
+    // using enum dropdown item instead of boolean
+    public enum FlightMode {
+        PITCH40,
+        VANILLA
+    }
+
+    // using enum dropdown for nether pathfinding mode
+    public enum NetherPathMode {
+        AVERAGE,
+        CHUNK
     }
 
     private enum FollowMode {

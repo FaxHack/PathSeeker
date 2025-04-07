@@ -2,20 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>PathSeeker - Minecraft Utility Mod</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
         }
 
         @keyframes starTwinkle {
-            0% { opacity: 0.4; }
-            50% { opacity: 1; }
-            100% { opacity: 0.4; }
+            0% {
+                opacity: 0.4;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.4;
+            }
         }
 
         .minecraft-btn {
@@ -68,7 +80,7 @@
             font-size: 0.9em;
             display: inline-block;
         }
-        
+
         .changelog-item {
             border-left: 2px solid #4CAF50;
             padding-left: 1rem;
@@ -77,301 +89,323 @@
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100">
-    <!-- Navigation -->
-    <nav class="bg-gray-800 border-b border-green-600 fixed w-full z-50">
-        <div class="container mx-auto px-6 py-3">
-            <div class="flex justify-between items-center">
-                <div class="text-2xl font-bold text-green-500">PathSeeker</div>
-                <div class="hidden md:flex space-x-8">
-                    <a href="#" class="hover:text-green-500 transition-colors">Home</a>
-                    <a href="#features" class="hover:text-green-500 transition-colors">Features</a>
-                    <a href="#releases" class="hover:text-green-500 transition-colors">Releases</a>
-                    <a href="#installation" class="hover:text-green-500 transition-colors">Installation</a>
-                    <a href="#support" class="hover:text-green-500 transition-colors">Support</a>
-                    <a href="https://github.com/FaxHack/PathSeeker" class="hover:text-green-500 transition-colors">GitHub</a>
-                </div>
+<!-- Navigation -->
+<nav class="bg-gray-800 border-b border-green-600 fixed w-full z-50">
+    <div class="container mx-auto px-6 py-3">
+        <div class="flex justify-between items-center">
+            <div class="text-2xl font-bold text-green-500">PathSeeker</div>
+            <div class="hidden md:flex space-x-8">
+                <a class="hover:text-green-500 transition-colors" href="#">Home</a>
+                <a class="hover:text-green-500 transition-colors" href="#features">Features</a>
+                <a class="hover:text-green-500 transition-colors" href="#releases">Releases</a>
+                <a class="hover:text-green-500 transition-colors" href="#installation">Installation</a>
+                <a class="hover:text-green-500 transition-colors" href="#support">Support</a>
+                <a class="hover:text-green-500 transition-colors"
+                   href="https://github.com/FaxHack/PathSeeker">GitHub</a>
             </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <div class="relative min-h-screen flex items-center justify-center pt-16">
-        <div id="stars-container"></div>
-        <div class="text-center px-6">
-            <h1 class="text-6xl font-bold mb-4 floating">PathSeeker</h1>
-            <p class="text-xl mb-8 text-green-400">Your Ultimate Tool for Anarchy Gameplay</p>
-            <p class="max-w-2xl mx-auto mb-8 text-gray-300">
-                Enhance your Minecraft experience with powerful features designed specifically for anarchy servers. 
-                Find bases, detect patterns, and dominate the game with advanced utilities.
-            </p>
-            <a href="https://github.com/FaxHack/PathSeeker/releases/latest" class="minecraft-btn inline-block">
-                Download Latest Version
-            </a>
         </div>
     </div>
+</nav>
 
-    <!-- Features Section -->
-    <section id="features" class="py-20 bg-gray-800">
-        <div class="container mx-auto px-6">
-            <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Features</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="feature-card p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 text-green-400">Advanced Chunk Detection</h3>
-                    <p class="text-gray-300">Identify new and modified chunks with precision, perfect for base hunting.</p>
-                </div>
-                <div class="feature-card p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 text-green-400">Base Finder</h3>
-                    <p class="text-gray-300">Sophisticated algorithms to detect potential base locations and player activity.</p>
-                </div>
-                <div class="feature-card p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 text-green-400">Storage Looter</h3>
-                    <p class="text-gray-300">Efficiently manage and search through storage systems with enhanced visibility.</p>
-                </div>
-                <div class="feature-card p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 text-green-400">StackedMinecartDetector</h3>
-                    <p class="text-gray-300">Detects for hidden stacked spawner is in the area.</p>
-                </div>
-                <div class="feature-card p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 text-green-400">GrimDuraFirework</h3>
-                    <p class="text-gray-300">A clever fix for fireworks issues on the Mio client when using Grim Durability ElytraFly with a chestplate. Fly smoothly without a hitch!</p>
-                </div>
-                <div class="feature-card p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 text-green-400">ESP Features</h3>
-                    <p class="text-gray-300">Comprehensive ESP system including PotESP, HoleESP, and MobGearESP.</p>
-                </div>
+<!-- Hero Section -->
+<div class="relative min-h-screen flex items-center justify-center pt-16">
+    <div id="stars-container"></div>
+    <div class="text-center px-6">
+        <h1 class="text-6xl font-bold mb-4 floating">PathSeeker</h1>
+        <p class="text-xl mb-8 text-green-400">Your Ultimate Tool for Anarchy Gameplay</p>
+        <p class="max-w-2xl mx-auto mb-8 text-gray-300">
+            Enhance your Minecraft experience with powerful features designed specifically for anarchy servers.
+            Find bases, detect patterns, and dominate the game with advanced utilities.
+        </p>
+        <a class="minecraft-btn inline-block" href="https://github.com/FaxHack/PathSeeker/releases/latest">
+            Download Latest Version
+        </a>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section class="py-20 bg-gray-800" id="features">
+    <div class="container mx-auto px-6">
+        <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Features</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="feature-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">Advanced Chunk Detection</h3>
+                <p class="text-gray-300">Identify new and modified chunks with precision, perfect for base hunting.</p>
+            </div>
+            <div class="feature-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">Base Finder</h3>
+                <p class="text-gray-300">Sophisticated algorithms to detect potential base locations and player
+                    activity.</p>
+            </div>
+            <div class="feature-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">Storage Looter</h3>
+                <p class="text-gray-300">Efficiently manage and search through storage systems with enhanced
+                    visibility.</p>
+            </div>
+            <div class="feature-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">StackedMinecartDetector</h3>
+                <p class="text-gray-300">Detects for hidden stacked spawner is in the area.</p>
+            </div>
+            <div class="feature-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">GrimDuraFirework</h3>
+                <p class="text-gray-300">A clever fix for fireworks issues on the Mio client when using Grim Durability
+                    ElytraFly with a chestplate. Fly smoothly without a hitch!</p>
+            </div>
+            <div class="feature-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">ESP Features</h3>
+                <p class="text-gray-300">Comprehensive ESP system including PotESP, HoleESP, and MobGearESP.</p>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Releases Section -->
-    <section id="releases" class="py-20">
-        <div class="container mx-auto px-6">
-            <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Latest Releases</h2>
+<!-- Releases Section -->
+<section class="py-20" id="releases">
+    <div class="container mx-auto px-6">
+        <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Latest Releases</h2>
 
-            <!-- Latest Release -->
-            <div class="max-w-4xl mx-auto mb-12">
-                <div class="feature-card p-6 rounded-lg">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-2xl font-bold text-green-400">Latest Release</h3>
-                        <span class="version-tag">v1.0.6</span>
-                    </div>
-                    <div class="changelog-item">
-                        <h4 class="font-bold mb-2">What's New:</h4>
-                        <ul class="list-disc ml-4 mb-4">
-                            <li><strong>BetterStashFinder:</strong> An upgraded stash finder with additional filtering options.</li>
-                            <li><strong>AutoEnchanter:</strong> Automates enchanting at anvils, saving time.</li>
-                            <li><strong>GrimEfly:</strong> Vanilla efly using a chestplate so that elytra does not use durability.</li>
-                            <li><strong>Trident Dupe:</strong> Enables trident duplication (note: patched on most servers).</li>
-                            <li><strong>AutoFirework:</strong> Automatically triggers firework use for extra flair.</li>
-                        </ul>
-                    </div>
-                    <div class="changelog-item">
-                        <h4 class="font-bold mb-2">Current Features:</h4>
-                        <ul class="list-disc ml-4 mb-4">
-                            <h5 class="font-semibold mt-2">Utility:</h5>
-                            <li>ActivatedSpawnerDetector: Detects activated spawners nearby</li>
-                            <li>SignHistorian: Record and restore broken or modified signs</li>
-                            <li>ElytraSwap: Automatic elytra management</li>
-                            <li>NoJumpDelay: Removes delay between jumps</li>
-                            <li><strong>GrimEfly:</strong> Vanilla efly using a chestplate so that elytra does not use durability.</li>
-
-                            <h5 class="font-semibold mt-2">Exploration:</h5>
-                            <li>Base Finder: Advanced base detection for anarchy servers</li>
-                            <li>NewChunks: Identify newly generated chunks</li>
-                            <li>PortalPatternFinder: Locate broken/removed Nether Portals</li>
-                            <li>CaveDisturbanceDetector: Detect minor cave disruptions</li>
-                            <li>TrailFollower: Follows trails using pitch40 or baritone (Requires XaeroPlus)</li>
-                            <li>Pitch40Util: Height gain and velocity management</li>
-
-                            <h5 class="font-semibold mt-2">Renders:</h5>
-                            <li>Hole, Tunnel, and Stair ESP</li>
-                            <li>PotESP: Decorated Pot tracking</li>
-                            <li>MobGearESP: Player equipment detection on mobs</li>
-                            <li>StackedMinecartDetector: Stacked spawner detection</li>
-                            <li>EntityClusterESP: Entity cluster center point highlighting</li>
-                            <li>DroppedItemESP: Important item highlighting</li>
-
-                            <h5 class="font-semibold mt-2">Automation:</h5>
-                            <li>StorageLooter: Automatically loots containers and organizes items</li>
-                            <li><strong>Trident Dupe:</strong> Enables trident duplication (note: patched on most servers).</li>
-                            <li><strong>AutoFirework:</strong> Automatically triggers firework use for extra flair.</li>
-                            <li><strong>AutoEnchanter:</strong> Automates enchanting at anvils, saving time.</li>
-                        </ul>
-                    </div>
-                    <div class="changelog-item">
-                        <h4 class="font-bold mb-2">Known Issues:</h4>
-                        <ul class="list-disc ml-4 mb-4">
-                            <li>Minor rendering glitches during dimension transitions</li>
-                            <li>Rare server-side compatibility issues with certain chunk detection methods</li>
-                        </ul>
-                    </div>
-                    <div class="mt-6">
-                        <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.6" class="minecraft-btn inline-block">
-                            Download v1.0.6
-                        </a>
-                    </div>
+        <!-- Latest Release -->
+        <div class="max-w-4xl mx-auto mb-12">
+            <div class="feature-card p-6 rounded-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-green-400">Latest Release</h3>
+                    <span class="version-tag">v1.0.6</span>
                 </div>
-            </div>
-
-            <!-- Previous Releases -->
-            <div class="max-w-4xl mx-auto">
-                <h3 class="text-xl font-bold mb-6 text-green-400">Previous Releases</h3>
-                <div class="grid grid-cols-1 gap-6">
-                    <div class="feature-card p-6 rounded-lg">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="text-lg font-bold">Version 1.0.4</h4>
-                            <span class="version-tag">v1.0.4</span>
-                        </div>
-                        <ul class="list-disc ml-4 mb-4">
-                            <li><strong>StackedMinecartDetector:</strong> Detects if stacked spawner is in the area</li>
-                            <li><strong>EntityClusterESP:</strong> Highlights the centre point of entity clusters</li>
-                            <li><strong>DroppedItemESP:</strong> Highlights important dropped items</li>
-                            <li><strong>ScreenshotFolderCommand:</strong> Open Minecraft screenshot folder</li>
-                            <li><strong>MeteorFolderCommand:</strong> Open meteor-client folder</li>
-                        </ul>
-                        <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.5" class="text-green-400 hover:text-green-500">View Release →</a>
-                    </div>
-
-                    <div class="feature-card p-6 rounded-lg">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="text-lg font-bold">Version 1.0.4</h4>
-                            <span class="version-tag">v1.0.4</span>
-                        </div>
-                        <ul class="list-disc ml-4 mb-4">
-                            <li><strong>TrailFollower:</strong> New trail following system</li>
-                            <li><strong>Pitch40Util:</strong> Advanced height gain management</li>
-                            <li><strong>NoJumpDelay:</strong> Jump delay removal system</li>
-                        </ul>
-                        <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.4" class="text-green-400 hover:text-green-500">View Release →</a>
-                    </div>
-
-                    <div class="feature-card p-6 rounded-lg">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="text-lg font-bold">Version 1.0.3</h4>
-                            <span class="version-tag">v1.0.3</span>
-                        </div>
-                        <ul class="list-disc ml-4 mb-4">
-                            <li><strong>SignHistorian:</strong> Record and restore broken or modified signs</li>
-                            <li><strong>ElytraSwap:</strong> Automatic elytra swapping</li>
-                            <li><strong>ActivatedSpawnerDetector:</strong> New configuration options</li>
-                            <li><strong>PathSeekerUtils:</strong> Code refactoring and API fixes</li>
-                        </ul>
-                        <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.3" class="text-green-400 hover:text-green-500">View Release →</a>
-                    </div>
-
-                    <div class="feature-card p-6 rounded-lg">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="text-lg font-bold">Version 1.0.2</h4>
-                            <span class="version-tag">v1.0.2</span>
-                        </div>
-                        <ul class="list-disc ml-4 mb-4">
-                            <li>Added NewChunks detection system</li>
-                            <li>Improved Base Finder algorithm</li>
-                            <li>Added MobGearESP feature</li>
-                        </ul>
-                        <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.2" class="text-green-400 hover:text-green-500">View Release →</a>
-                    </div>
-
-                    <div class="feature-card p-6 rounded-lg">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="text-lg font-bold">Version 1.0.1</h4>
-                            <span class="version-tag">v1.0.1</span>
-                        </div>
-                        <ul class="list-disc ml-4 mb-4">
-                            <li>Added PotESP feature</li>
-                            <li>Improved tunnel detection</li>
-                            <li>Fixed compatibility issues</li>
-                        </ul>
-                        <a href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.1" class="text-green-400 hover:text-green-500">View Release →</a>
-                    </div>
+                <div class="changelog-item">
+                    <h4 class="font-bold mb-2">What's New:</h4>
+                    <ul class="list-disc ml-4 mb-4">
+                        <li><strong>BetterStashFinder:</strong> An upgraded stash finder with additional filtering
+                            options.
+                        </li>
+                        <li><strong>AutoEnchanter:</strong> Automates enchanting at anvils, saving time.</li>
+                        <li><strong>GrimEfly:</strong> Vanilla efly using a chestplate so that elytra does not use
+                            durability.
+                        </li>
+                        <li><strong>Trident Dupe:</strong> Enables trident duplication (note: patched on most servers).
+                        </li>
+                        <li><strong>AutoFirework:</strong> Automatically triggers firework use for extra flair.</li>
+                    </ul>
                 </div>
-            </div>
-        </div>
-    </section>
+                <div class="changelog-item">
+                    <h4 class="font-bold mb-2">Current Features:</h4>
+                    <ul class="list-disc ml-4 mb-4">
+                        <h5 class="font-semibold mt-2">Utility:</h5>
+                        <li>ActivatedSpawnerDetector: Detects activated spawners nearby</li>
+                        <li>SignHistorian: Record and restore broken or modified signs</li>
+                        <li>ElytraSwap: Automatic elytra management</li>
+                        <li>NoJumpDelay: Removes delay between jumps</li>
+                        <li><strong>GrimEfly:</strong> Vanilla efly using a chestplate so that elytra does not use
+                            durability.
+                        </li>
 
-    <!-- Installation Section -->
-    <section id="installation" class="py-20 bg-gray-800">
-        <div class="container mx-auto px-6">
-            <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Installation</h2>
-            <div class="max-w-3xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <a href="https://github.com/FaxHack/PathSeeker/releases/latest" class="text-center p-6 feature-card rounded-lg">
-                        <div class="text-3xl mb-4">1</div>
-                        <p>Download the mod from GitHub Releases</p>
+                        <h5 class="font-semibold mt-2">Exploration:</h5>
+                        <li>Base Finder: Advanced base detection for anarchy servers</li>
+                        <li>NewChunks: Identify newly generated chunks</li>
+                        <li>PortalPatternFinder: Locate broken/removed Nether Portals</li>
+                        <li>CaveDisturbanceDetector: Detect minor cave disruptions</li>
+                        <li>TrailFollower: Follows trails using pitch40 or baritone (Requires XaeroPlus)</li>
+                        <li>Pitch40Util: Height gain and velocity management</li>
+
+                        <h5 class="font-semibold mt-2">Renders:</h5>
+                        <li>Hole, Tunnel, and Stair ESP</li>
+                        <li>PotESP: Decorated Pot tracking</li>
+                        <li>MobGearESP: Player equipment detection on mobs</li>
+                        <li>StackedMinecartDetector: Stacked spawner detection</li>
+                        <li>EntityClusterESP: Entity cluster center point highlighting</li>
+                        <li>DroppedItemESP: Important item highlighting</li>
+
+                        <h5 class="font-semibold mt-2">Automation:</h5>
+                        <li>StorageLooter: Automatically loots containers and organizes items</li>
+                        <li><strong>Trident Dupe:</strong> Enables trident duplication (note: patched on most servers).
+                        </li>
+                        <li><strong>AutoFirework:</strong> Automatically triggers firework use for extra flair.</li>
+                        <li><strong>AutoEnchanter:</strong> Automates enchanting at anvils, saving time.</li>
+                    </ul>
+                </div>
+                <div class="changelog-item">
+                    <h4 class="font-bold mb-2">Known Issues:</h4>
+                    <ul class="list-disc ml-4 mb-4">
+                        <li>Minor rendering glitches during dimension transitions</li>
+                        <li>Rare server-side compatibility issues with certain chunk detection methods</li>
+                    </ul>
+                </div>
+                <div class="mt-6">
+                    <a class="minecraft-btn inline-block"
+                       href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.6">
+                        Download v1.0.6
                     </a>
-                    <div class="text-center p-6 feature-card rounded-lg">
-                        <div class="text-3xl mb-4">2</div>
-                        <p>Place the .jar file in your mods folder</p>
-                    </div>
-                    <div class="text-center p-6 feature-card rounded-lg">
-                        <div class="text-3xl mb-4">3</div>
-                        <p>Launch Minecraft and enjoy!</p>
-                    </div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- Support Section -->
-    <section id="support" class="py-20">
-        <div class="container mx-auto px-6">
-            <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Support</h2>
-            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Previous Releases -->
+        <div class="max-w-4xl mx-auto">
+            <h3 class="text-xl font-bold mb-6 text-green-400">Previous Releases</h3>
+            <div class="grid grid-cols-1 gap-6">
                 <div class="feature-card p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 text-green-400">Community</h3>
-                    <p class="mb-4">Join our Discord community for help and updates:</p>
-                    <a href="https://discord.gg/kjjqEgghxj" class="minecraft-btn inline-block">Join Discord</a>
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-bold">Version 1.0.4</h4>
+                        <span class="version-tag">v1.0.4</span>
+                    </div>
+                    <ul class="list-disc ml-4 mb-4">
+                        <li><strong>StackedMinecartDetector:</strong> Detects if stacked spawner is in the area</li>
+                        <li><strong>EntityClusterESP:</strong> Highlights the centre point of entity clusters</li>
+                        <li><strong>DroppedItemESP:</strong> Highlights important dropped items</li>
+                        <li><strong>ScreenshotFolderCommand:</strong> Open Minecraft screenshot folder</li>
+                        <li><strong>MeteorFolderCommand:</strong> Open meteor-client folder</li>
+                    </ul>
+                    <a class="text-green-400 hover:text-green-500"
+                       href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.5">View Release →</a>
                 </div>
+
                 <div class="feature-card p-6 rounded-lg">
-                    <h3 class="text-xl font-bold mb-4 text-green-400">Issues & Bugs</h3>
-                    <p class="mb-4">Report issues on our GitHub page:</p>
-                    <a href="https://github.com/FaxHack/PathSeeker/issues" class="minecraft-btn inline-block">GitHub Issues</a>
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-bold">Version 1.0.4</h4>
+                        <span class="version-tag">v1.0.4</span>
+                    </div>
+                    <ul class="list-disc ml-4 mb-4">
+                        <li><strong>TrailFollower:</strong> New trail following system</li>
+                        <li><strong>Pitch40Util:</strong> Advanced height gain management</li>
+                        <li><strong>NoJumpDelay:</strong> Jump delay removal system</li>
+                    </ul>
+                    <a class="text-green-400 hover:text-green-500"
+                       href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.4">View Release →</a>
+                </div>
+
+                <div class="feature-card p-6 rounded-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-bold">Version 1.0.3</h4>
+                        <span class="version-tag">v1.0.3</span>
+                    </div>
+                    <ul class="list-disc ml-4 mb-4">
+                        <li><strong>SignHistorian:</strong> Record and restore broken or modified signs</li>
+                        <li><strong>ElytraSwap:</strong> Automatic elytra swapping</li>
+                        <li><strong>ActivatedSpawnerDetector:</strong> New configuration options</li>
+                        <li><strong>PathSeekerUtils:</strong> Code refactoring and API fixes</li>
+                    </ul>
+                    <a class="text-green-400 hover:text-green-500"
+                       href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.3">View Release →</a>
+                </div>
+
+                <div class="feature-card p-6 rounded-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-bold">Version 1.0.2</h4>
+                        <span class="version-tag">v1.0.2</span>
+                    </div>
+                    <ul class="list-disc ml-4 mb-4">
+                        <li>Added NewChunks detection system</li>
+                        <li>Improved Base Finder algorithm</li>
+                        <li>Added MobGearESP feature</li>
+                    </ul>
+                    <a class="text-green-400 hover:text-green-500"
+                       href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.2">View Release →</a>
+                </div>
+
+                <div class="feature-card p-6 rounded-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-bold">Version 1.0.1</h4>
+                        <span class="version-tag">v1.0.1</span>
+                    </div>
+                    <ul class="list-disc ml-4 mb-4">
+                        <li>Added PotESP feature</li>
+                        <li>Improved tunnel detection</li>
+                        <li>Fixed compatibility issues</li>
+                    </ul>
+                    <a class="text-green-400 hover:text-green-500"
+                       href="https://github.com/FaxHack/PathSeeker/releases/tag/v1.0.1">View Release →</a>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 border-t border-green-600 py-8">
-        <div class="container mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <p>&copy; 2025 PathSeeker. All rights reserved.</p>
+<!-- Installation Section -->
+<section class="py-20 bg-gray-800" id="installation">
+    <div class="container mx-auto px-6">
+        <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Installation</h2>
+        <div class="max-w-3xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <a class="text-center p-6 feature-card rounded-lg"
+                   href="https://github.com/FaxHack/PathSeeker/releases/latest">
+                    <div class="text-3xl mb-4">1</div>
+                    <p>Download the mod from GitHub Releases</p>
+                </a>
+                <div class="text-center p-6 feature-card rounded-lg">
+                    <div class="text-3xl mb-4">2</div>
+                    <p>Place the .jar file in your mods folder</p>
                 </div>
-                <div class="flex space-x-6">
-                    <a href="https://github.com/FaxHack/PathSeeker" class="hover:text-green-500 transition-colors">GitHub</a>
-                    <a href="https://discord.gg/kjjqEgghxj" class="hover:text-green-500 transition-colors">Discord</a>
-                    <a href="https://github.com/FaxHack/PathSeeker/graphs/contributors" class="hover:text-green-500 transition-colors">Contributors</a>
+                <div class="text-center p-6 feature-card rounded-lg">
+                    <div class="text-3xl mb-4">3</div>
+                    <p>Launch Minecraft and enjoy!</p>
                 </div>
             </div>
         </div>
-    </footer>
+    </div>
+</section>
 
-    <script>
-        // Add animated stars to the background
-        const starsContainer = document.getElementById('stars-container');
-        for (let i = 0; i < 50; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = Math.random() * 100 + 'vw';
-            star.style.top = Math.random() * 100 + 'vh';
-            star.style.animationDelay = Math.random() * 2 + 's';
-            starsContainer.appendChild(star);
-        }
+<!-- Support Section -->
+<section class="py-20" id="support">
+    <div class="container mx-auto px-6">
+        <h2 class="text-4xl font-bold text-center mb-16 text-green-500">Support</h2>
+        <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="feature-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">Community</h3>
+                <p class="mb-4">Join our Discord community for help and updates:</p>
+                <a class="minecraft-btn inline-block" href="https://discord.gg/kjjqEgghxj">Join Discord</a>
+            </div>
+            <div class="feature-card p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4 text-green-400">Issues & Bugs</h3>
+                <p class="mb-4">Report issues on our GitHub page:</p>
+                <a class="minecraft-btn inline-block" href="https://github.com/FaxHack/PathSeeker/issues">GitHub
+                    Issues</a>
+            </div>
+        </div>
+    </div>
+</section>
 
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
+<!-- Footer -->
+<footer class="bg-gray-900 border-t border-green-600 py-8">
+    <div class="container mx-auto px-6">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <p>&copy; 2025 PathSeeker. All rights reserved.</p>
+            </div>
+            <div class="flex space-x-6">
+                <a class="hover:text-green-500 transition-colors"
+                   href="https://github.com/FaxHack/PathSeeker">GitHub</a>
+                <a class="hover:text-green-500 transition-colors" href="https://discord.gg/kjjqEgghxj">Discord</a>
+                <a class="hover:text-green-500 transition-colors"
+                   href="https://github.com/FaxHack/PathSeeker/graphs/contributors">Contributors</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Add animated stars to the background
+    const starsContainer = document.getElementById('stars-container');
+    for (let i = 0; i < 50; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + 'vw';
+        star.style.top = Math.random() * 100 + 'vh';
+        star.style.animationDelay = Math.random() * 2 + 's';
+        starsContainer.appendChild(star);
+    }
+
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
         });
-    </script>
+    });
+</script>
 </body>
 </html>
