@@ -40,7 +40,7 @@ public class Firework extends Module {
     private final Setting<Double> useDelay = sgGeneral.add(new DoubleSetting.Builder()
             .name("use-delay")
             .description("Delay in seconds between using rockets.")
-            .defaultValue(1.0)
+            .defaultValue(.1)
             .min(0.1)
             .sliderMax(5.0)
             .build()
@@ -48,7 +48,7 @@ public class Firework extends Module {
     private final Setting<Double> minSpeed = sgVelocity.add(new DoubleSetting.Builder()
             .name("minimum-speed")
             .description("Minimum speed threshold before using rockets.")
-            .defaultValue(0.6)
+            .defaultValue(1.35)
             .min(0.1)
             .sliderMax(2.0)
             .build()
@@ -65,9 +65,6 @@ public class Firework extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.player == null) return;
-        // guard auto fw logic to exit early if vanillafly is activated
-        AFKVanillaFly afk = Modules.get().get(AFKVanillaFly.class);
-        if (afk.isActive()) return;
 
         ticksSinceLastUse++;
 
@@ -93,22 +90,48 @@ public class Firework extends Module {
         Vec3d lookVec = getLookVector(yaw, pitch);
 
         double forwardSpeed = velocity.dotProduct(lookVec);
-
         int delayTicks = (int) (useDelay.get() * 20);
 
         if (!isBoostActive && forwardSpeed < minSpeed.get() && ticksSinceLastUse >= delayTicks) {
-            // Check if player is holding a rocket
             boolean holdingRocket = mc.player.getMainHandStack().getItem() == Items.FIREWORK_ROCKET ||
                     mc.player.getOffHandStack().getItem() == Items.FIREWORK_ROCKET;
 
-            if (onlyWhenHoldingRocket.get() && !holdingRocket) return;
+            if (!holdingRocket) {
+                int slot = -1;
+                for (int i = 0; i < 9; i++) {
+                    if (mc.player.getInventory().getStack(i).getItem() == Items.FIREWORK_ROCKET) {
+                        slot = i;
+                        break;
+                    }
+                }
+                if (slot == -1) {
+                    for (int i = 9; i < mc.player.getInventory().size(); i++) {
+                        if (mc.player.getInventory().getStack(i).getItem() == Items.FIREWORK_ROCKET) {
+                            for (int j = 0; j < 9; j++) {
+                                if (mc.player.getInventory().getStack(j).isEmpty()) {
+                                    mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, i + 36, j,
+                                            net.minecraft.screen.slot.SlotActionType.SWAP, mc.player);
+                                    slot = j;
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
 
+                holdingRocket = mc.player.getMainHandStack().getItem() == Items.FIREWORK_ROCKET ||
+                        mc.player.getOffHandStack().getItem() == Items.FIREWORK_ROCKET;
+                if (!holdingRocket && onlyWhenHoldingRocket.get()) return;
+            }
             if (checkCooldown.get() && mc.player.getItemCooldownManager().isCoolingDown(Items.FIREWORK_ROCKET)) return;
 
-            Hand hand = mc.player.getMainHandStack().getItem() == Items.FIREWORK_ROCKET ?
-                    Hand.MAIN_HAND : Hand.OFF_HAND;
+            Hand hand = mc.player.getMainHandStack().getItem() == Items.FIREWORK_ROCKET
+                    ? Hand.MAIN_HAND
+                    : Hand.OFF_HAND;
 
             mc.interactionManager.interactItem(mc.player, hand);
+            mc.player.swingHand(hand);
             isBoostActive = true;
             boostTicks = 0;
             ticksSinceLastUse = 0;

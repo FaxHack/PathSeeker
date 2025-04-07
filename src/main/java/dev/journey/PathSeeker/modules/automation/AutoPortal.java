@@ -98,6 +98,27 @@ public class AutoPortal extends Module {
         BlockPos base = mc.player.getBlockPos()
                 .offset(forward, 2)
                 .offset(right, -1);
+        // duplicate check
+        int obsidianCheck = 0;
+
+        List<BlockPos> checkPositions = List.of(
+                base.offset(right, 1), base.offset(right, 2),
+                base.offset(right, 0).up(1), base.offset(right, 0).up(2), base.offset(right, 0).up(3),
+                base.offset(right, 3).up(1), base.offset(right, 3).up(2), base.offset(right, 3).up(3),
+                base.offset(right, 1).up(4), base.offset(right, 2).up(4)
+        );
+
+        for (BlockPos checkPos : checkPositions) {
+            if (mc.world.getBlockState(checkPos).getBlock().asItem() == Items.OBSIDIAN) {
+                obsidianCheck++;
+            }
+        }
+
+        if (obsidianCheck >= checkPositions.size()) {
+            error("A portal already exists here!");
+            toggle();
+            return;
+        }
 
         portalBlocks.add(base.offset(right, 1));
         portalBlocks.add(base.offset(right, 2));
@@ -141,14 +162,29 @@ public class AutoPortal extends Module {
 
         delay++;
         if (delay < placeDelay.get()) return;
-        // loop to place multiple blocks per tick
         for (int i = 0; i < blocksPerTick.get() && index < portalBlocks.size(); i++, index++) {
             BlockPos pos = portalBlocks.get(index);
+            // prevent faulty portal placements
+            if (!mc.world.getBlockState(pos).isReplaceable()) {
+                // stop mining obby
+                if (mc.world.getBlockState(pos).getBlock().asItem() == Items.OBSIDIAN) continue;
+
+                if (mc.interactionManager != null) {
+                    mc.interactionManager.attackBlock(pos, Direction.UP);
+                    mc.player.swingHand(Hand.MAIN_HAND);
+                }
+                return;
+            }
+
+
             BlockHitResult bhr = new BlockHitResult(Vec3d.ofCenter(pos), Direction.UP, pos, false);
 
-            mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN));
-            mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.OFF_HAND, bhr, mc.player.currentScreenHandler.getRevision() + 2));
-            mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN));
+            mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(
+                    PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN));
+            mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(
+                    Hand.OFF_HAND, bhr, mc.player.currentScreenHandler.getRevision() + 2));
+            mc.player.networkHandler.sendPacket(new PlayerActionC2SPacket(
+                    PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, BlockPos.ORIGIN, Direction.DOWN));
             mc.player.swingHand(Hand.MAIN_HAND);
         }
         delay = 0;
