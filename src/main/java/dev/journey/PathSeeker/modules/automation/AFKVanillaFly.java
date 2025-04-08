@@ -5,11 +5,12 @@ import dev.journey.PathSeeker.modules.exploration.TrailFollower;
 import dev.journey.PathSeeker.modules.utility.Firework;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
@@ -25,6 +26,38 @@ public class AFKVanillaFly extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final Setting<AutoFireworkMode> fireworkMode = sgGeneral.add(new EnumSetting.Builder<AutoFireworkMode>()
+            .name("Auto Firework Mode")
+            .description("Choose between velocity-based or timed firework usage.")
+            .defaultValue(AutoFireworkMode.VELOCITY)
+            .build()
+    );
+    private final Setting<Integer> fireworkDelay = sgGeneral.add(new IntSetting.Builder()
+            .name("Timed Delay (ms)")
+            .description("Delay between fireworks in TIMED mode.")
+            .defaultValue(3000)
+            .sliderRange(0, 6000)
+            .visible(() -> fireworkMode.get() == AutoFireworkMode.TIMED_DELAY)
+            .build()
+    );
+    private final Setting<Double> velocityThreshold = sgGeneral.add(new DoubleSetting.Builder()
+            .name("Velocity Threshold")
+            .description("Use a firework if speed is below this value in VELOCITY mode.")
+            .defaultValue(0.7)
+            .sliderRange(0.1, 2.0)
+            .visible(() -> fireworkMode.get() == AutoFireworkMode.VELOCITY)
+            .build()
+    );
+    private long lastRocketUse = 0;
+    private boolean launched = false;
+    private double yTarget = -1;
+    private float targetPitch = 0;
+
+    public AFKVanillaFly() {
+        super(PathSeeker.Automation, "AFKVanillaFly", "Maintains a level Y-flight with fireworks and smooth pitch control.");
+    }
 
     @Override
     public void onActivate() {
@@ -117,5 +150,10 @@ public class AFKVanillaFly extends Module {
             if (firework.isActive()) firework.toggle();
         }
         if (this.isActive()) tickFlyLogic();
+    }
+}
+    public enum AutoFireworkMode {
+        VELOCITY,
+        TIMED_DELAY
     }
 }

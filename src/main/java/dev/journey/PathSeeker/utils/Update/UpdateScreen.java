@@ -48,7 +48,6 @@ public class UpdateScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.renderBackground(context, mouseX, mouseY, delta);
 
-        // Draw centered text
         context.drawCenteredTextWithShadow(
                 this.textRenderer,
                 Text.literal("A new update (" + latestVersion + ") is available!"),
