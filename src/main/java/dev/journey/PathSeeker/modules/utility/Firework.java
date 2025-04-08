@@ -93,9 +93,10 @@ public class Firework extends Module {
         int delayTicks = (int) (useDelay.get() * 20);
 
         if (!isBoostActive && forwardSpeed < minSpeed.get() && ticksSinceLastUse >= delayTicks) {
+            // Check if player is holding a rocket
             boolean holdingRocket = mc.player.getMainHandStack().getItem() == Items.FIREWORK_ROCKET ||
                     mc.player.getOffHandStack().getItem() == Items.FIREWORK_ROCKET;
-
+            // moving fw inventory pull logic to new module
             if (!holdingRocket) {
                 int slot = -1;
                 for (int i = 0; i < 9; i++) {
