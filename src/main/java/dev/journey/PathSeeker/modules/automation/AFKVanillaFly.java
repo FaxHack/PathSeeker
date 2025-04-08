@@ -39,7 +39,6 @@ public class AFKVanillaFly extends Module {
     private long lastRocketUse = 0;
     private boolean launched = false;
     private double yTarget = -1;
-    private float targetPitch = 0;
 
     public AFKVanillaFly() {
         super(PathSeeker.Automation, "AFKVanillaFly", "Maintains a level Y-flight with fireworks and smooth pitch control.");
@@ -73,6 +72,7 @@ public class AFKVanillaFly extends Module {
                 info("Y-lock reset due to altitude deviation.");
             }
 
+            float targetPitch = 0;
             if (Math.abs(yDiff) > 10.0) {
                 targetPitch = (float) (-Math.atan2(yDiff, 100) * (180 / Math.PI));
             } else if (yDiff > 2.0) {
