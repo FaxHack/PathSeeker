@@ -23,6 +23,8 @@ import java.util.List;
 
 public class AutoPortal extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final List<BlockPos> waitingForBreak = new ArrayList<>();
+
 
     private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
             .name("place-delay")
@@ -107,6 +109,16 @@ public class AutoPortal extends Module {
                 base.offset(right, 3).up(1), base.offset(right, 3).up(2), base.offset(right, 3).up(3),
                 base.offset(right, 1).up(4), base.offset(right, 2).up(4)
         );
+        // block obstruction check (temporary until fixed)
+        boolean obstructed = checkPositions.stream().anyMatch(pos -> !mc.world.getBlockState(pos).isReplaceable());
+        // will remove later once we fix portal block obstruction
+        if (obstructed) {
+            error("Portal area obstructed. Move and try again.");
+            portalBlocks.clear();
+            portalBlocks.addAll(checkPositions); // just render blocked frame
+            index = checkPositions.size(); // skip building
+            return;
+        }
 
         for (BlockPos checkPos : checkPositions) {
             if (mc.world.getBlockState(checkPos).getBlock().asItem() == Items.OBSIDIAN) {
@@ -164,18 +176,20 @@ public class AutoPortal extends Module {
         if (delay < placeDelay.get()) return;
         for (int i = 0; i < blocksPerTick.get() && index < portalBlocks.size(); i++, index++) {
             BlockPos pos = portalBlocks.get(index);
-            // prevent faulty portal placements
+            // prevent faulty portal placements (not being used due to boolean obstruction check above, but will fix in the future)
             if (!mc.world.getBlockState(pos).isReplaceable()) {
-                // stop mining obby
-                if (mc.world.getBlockState(pos).getBlock().asItem() == Items.OBSIDIAN) continue;
-
-                if (mc.interactionManager != null) {
-                    mc.interactionManager.attackBlock(pos, Direction.UP);
-                    mc.player.swingHand(Hand.MAIN_HAND);
+                if (!waitingForBreak.contains(pos) && mc.world.getBlockState(pos).getBlock().asItem() != Items.OBSIDIAN) {
+                    if (mc.interactionManager != null) {
+                        mc.interactionManager.attackBlock(pos, Direction.UP);
+                        mc.player.swingHand(Hand.MAIN_HAND);
+                        waitingForBreak.add(pos);
+                    }
                 }
+                index--; // loop again to finish placing
                 return;
             }
 
+            waitingForBreak.remove(pos);
 
             BlockHitResult bhr = new BlockHitResult(Vec3d.ofCenter(pos), Direction.UP, pos, false);
 
