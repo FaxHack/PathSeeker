@@ -55,18 +55,20 @@ dependencies {
     // Other
     implementation 'org.json:json:20231013'
     modImplementation("net.lenni0451:LambdaEvents:2.4.2")
-    modImplementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    // fix for dependency failure
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 }
 
 processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version, "mc_version": project.minecraft_version,
-        "xp_version": project.property("xaeroplus_version"),
-        "xwm_version": project.property("xaeros_worldmap_version"),
-        "xmm_version": project.property("xaeros_minimap_version")
+                "xp_version": project.property("xaeroplus_version"),
+                "xwm_version": project.property("xaeros_worldmap_version"),
+                "xmm_version": project.property("xaeros_minimap_version")
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.encoding("UTF-8")
+    // updated for compile debug, setEncoding method used
+    it.options.encoding = "UTF-8"
 }
