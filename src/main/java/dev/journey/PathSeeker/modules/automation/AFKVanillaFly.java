@@ -7,13 +7,18 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.meteorclient.utils.player.InvUtils; // delegated to Firework module
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.settings.*;
+import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 
 public class AFKVanillaFly extends Module {
     private long lastRocketUse = 0;
     private boolean launched = false;
     private boolean manuallyEnabled = false;
     private double yTarget = -1;
+    private float targetPitch = 0;
 
     public AFKVanillaFly() {
         super(PathSeeker.Automation, "AFKVanillaFly", "Maintains a level Y-flight with fireworks and smooth pitch control.");
@@ -23,6 +28,12 @@ public class AFKVanillaFly extends Module {
 
     @Override
     public void onActivate() {
+        // will activate every time now
+        TrailFollower trailFollower = Modules.get().get(TrailFollower.class);
+        boolean isAuto = trailFollower.isActive()
+                && trailFollower.flightMode.get() == TrailFollower.FlightMode.VANILLA
+                && mc.world != null
+                && mc.world.getRegistryKey().getValue().getPath().equals("overworld");
         manuallyEnabled = true; // Track manual activation
         launched = false;
         yTarget = -1;
@@ -32,6 +43,7 @@ public class AFKVanillaFly extends Module {
 
         if (mc.player == null || !mc.player.isFallFlying()) {
             info("You must be flying before enabling AFKVanillaFly.");
+
         }
     }
 
@@ -60,7 +72,6 @@ public class AFKVanillaFly extends Module {
                 info("Y-lock reset due to altitude deviation.");
             }
 
-            float targetPitch = 0;
             if (Math.abs(yDiff) > 10.0) {
                 targetPitch = (float) (-Math.atan2(yDiff, 100) * (180 / Math.PI));
             } else if (yDiff > 2.0) {
@@ -97,6 +108,7 @@ public class AFKVanillaFly extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (mc.player == null || mc.world == null) return;
         TrailFollower trailFollower = Modules.get().get(TrailFollower.class);
         Firework firework = Modules.get().get(Firework.class);
 
@@ -113,13 +125,5 @@ public class AFKVanillaFly extends Module {
             if (firework.isActive()) firework.toggle();
         }
         if (this.isActive()) tickFlyLogic();
-    }
-
-    public long getLastRocketUse() {
-        return lastRocketUse;
-    }
-
-    public void setLastRocketUse(long lastRocketUse) {
-        this.lastRocketUse = lastRocketUse;
     }
 }

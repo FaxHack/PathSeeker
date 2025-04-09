@@ -219,10 +219,17 @@ public class TrailFollower extends Module {
     public void onActivate() {
         resetTrail();
         pathDistanceActual = pathDistance.get();
-        if (followMode == FollowMode.YAWLOCK && flightMode.get() == FlightMode.VANILLA) {
+        if (flightMode.get() == FlightMode.VANILLA && !mc.world.getDimension().hasCeiling()) {
+            AFKVanillaFly afkFly = Modules.get().get(AFKVanillaFly.class);
             // *fixed, should only activate in overworld or end
-            if (!mc.world.getDimension().hasCeiling()) {
-                Modules.get().get(AFKVanillaFly.class).toggle();
+            if (!afkFly.isActive()) {
+                afkFly.toggle(); // fix to work every time in overworld now!
+                mc.execute(() -> {
+                    afkFly.toggle();
+                    mc.execute(() -> {
+                        afkFly.toggle();
+                    });
+                });
             }
         }
         XaeroPlus.EVENT_BUS.register(this);
