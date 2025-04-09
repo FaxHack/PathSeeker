@@ -129,8 +129,7 @@ Getting started is simple:
 ## Requirements
 
 - **Minecraft 1.21.x** or compatible versions.
-- [**Baritone
-  **](https://modrinth.com/mod/xaeros-minimap/versions) --> [1.21.1](https://maven.meteordev.org/snapshots/meteordevelopment/baritone/1.21.1-SNAPSHOT/baritone-1.21.1-20240826.213754-1.jar), [1.21.4](https://maven.meteordev.org/snapshots/meteordevelopment/baritone/1.21.4-SNAPSHOT/baritone-1.21.4-20250105.184728-1.jar)
+- [Baritone](https://modrinth.com/mod/xaeros-minimap/versions) --> [1.21.1](https://maven.meteordev.org/snapshots/meteordevelopment/baritone/1.21.1-SNAPSHOT/baritone-1.21.1-20240826.213754-1.jar), [1.21.4](https://maven.meteordev.org/snapshots/meteordevelopment/baritone/1.21.4-SNAPSHOT/baritone-1.21.4-20250105.184728-1.jar)
 - [**ViaFabricPlus**](https://modrinth.com/mod/viafabricplus/versions?g=1.21.1&l=fabric&c=release) *(optional for
   cross-version compatibility)*.
 - [**XearosPlus**](https://modrinth.com/mod/xaeroplus/versions)
