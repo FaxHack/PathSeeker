@@ -21,14 +21,8 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
-    maven {
-        name = "Meteor Dev Releases"
-        url = "https://maven.meteordev.org/releases"
-    }
-    maven {
-        name = "Meteor Dev Snapshots"
-        url = "https://maven.meteordev.org/snapshots"
-    }
+    maven { name = "Meteor Dev Releases"; url = "https://maven.meteordev.org/releases" }
+    maven { name = "Meteor Dev Snapshots"; url = "https://maven.meteordev.org/snapshots" }
 }
 
 loom {
@@ -47,26 +41,24 @@ dependencies {
 
     // XaeroPlus
     modImplementation "maven.modrinth:xaeroplus:${project.xaeroplus_version}"
-    // XaeroWorldMap
     modImplementation "maven.modrinth:xaeros-world-map:${project.xaeros_worldmap_version}"
-    // XaeroMinimap
     modImplementation "maven.modrinth:xaeros-minimap:${project.xaeros_minimap_version}"
 
     // Other
     implementation 'org.json:json:20231013'
     modImplementation("net.lenni0451:LambdaEvents:2.4.2")
-    modImplementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 }
 
 processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version, "mc_version": project.minecraft_version,
-        "xp_version": project.property("xaeroplus_version"),
-        "xwm_version": project.property("xaeros_worldmap_version"),
-        "xmm_version": project.property("xaeros_minimap_version")
+                "xp_version": project.property("xaeroplus_version"),
+                "xwm_version": project.property("xaeros_worldmap_version"),
+                "xmm_version": project.property("xaeros_minimap_version")
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.encoding("UTF-8")
+    it.options.encoding = "UTF-8"
 }

@@ -3,9 +3,7 @@ package dev.journey.PathSeeker;
 import dev.journey.PathSeeker.commands.MeteorFolderCommand;
 import dev.journey.PathSeeker.commands.ScreenshotFolderCommand;
 import dev.journey.PathSeeker.commands.Stats2b2t;
-import dev.journey.PathSeeker.modules.automation.AreaLoader;
-import dev.journey.PathSeeker.modules.automation.AutoEnchant;
-import dev.journey.PathSeeker.modules.automation.TridentDupe;
+import dev.journey.PathSeeker.modules.automation.*;
 import dev.journey.PathSeeker.modules.exploration.*;
 import dev.journey.PathSeeker.modules.render.*;
 import dev.journey.PathSeeker.modules.utility.*;
@@ -40,11 +38,14 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new NewerNewChunks());
         Modules.get().add(new BaseFinder());
 
+
         //Utility
         Modules.get().add(new GrimDuraFirework());
         Modules.get().add(new SignHistorian());
         Modules.get().add(new Pitch40Util());
         Modules.get().add(new GrimEfly());
+        Modules.get().add(new Firework());
+        Modules.get().add(new BaritonePathing());
 
         //Render
         Modules.get().add(new HoleAndTunnelAndStairsESP());
@@ -52,11 +53,15 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new MobGearESP());
         Modules.get().add(new DroppedItemESP());
         Modules.get().add(new EntityClusterESP());
+        Modules.get().add(new VanityESP());
 
         //Automation
         Modules.get().add(new TridentDupe());
         Modules.get().add(new AutoEnchant());
         Modules.get().add(new AreaLoader());
+        Modules.get().add(new AFKVanillaFly());
+        Modules.get().add(new AutoPortal());
+        Modules.get().add(new TridentAura());
 
         /* To Release
 
