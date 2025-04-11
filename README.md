@@ -180,3 +180,6 @@ Need help or have questions?
 
 - Join our **[Discord](https://discord.gg/SdH8ZF96mD)** community.
 - Open an issue directly on **GitHub**.  
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=FaxHack/PathSeeker&type=Date)](https://www.star-history.com/#FaxHack/PathSeeker&Date)
