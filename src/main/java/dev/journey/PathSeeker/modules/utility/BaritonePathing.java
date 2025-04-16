@@ -39,7 +39,7 @@ public class BaritonePathing extends Module {
 
     public BaritonePathing() {
         super(PathSeeker.Automation, "BaritonePathMacro", "Easy macro to activate TrailFollower in the nether. Must deploy in air.");
-        BaritoneAPI.getSettings().logger.value = (s) -> {};  // No-op logger
+        BaritoneAPI.getSettings().logger.value = this::info;  // fix for baritone chat logs
     }
 
     private boolean trailFollowerWasActive = false;
@@ -49,6 +49,7 @@ public class BaritonePathing extends Module {
         if (flyKeybind.get().isPressed()) {
             sendBaritoneCommand("thisway " + distance.get());
             sendBaritoneCommand("elytra");
+            info("Activated Baritone macro: #thisway " + distance.get() + " + #elytra");
         }
 
         if (abortKeybind.get().isPressed()) {
@@ -67,16 +68,6 @@ public class BaritonePathing extends Module {
     private void sendBaritoneCommand(String command) {
         if (command != null && !command.isEmpty()) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(command);
-        }
-    }
-
-    @EventHandler
-    private void onReceiveMessage(ReceiveMessageEvent event) {
-        Text text = event.getMessage();
-        String msg = text.getString();
-
-        if (msg.contains("[Baritone] Goal:") || msg.contains("ok canceled")) {
-            event.setCancelled(true);
         }
     }
 }
