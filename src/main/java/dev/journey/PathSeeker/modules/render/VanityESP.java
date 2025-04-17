@@ -99,8 +99,10 @@ public class VanityESP extends Module {
         if (mc.world == null || mc.player == null) return;
         // fix for MapartESP depending on wall/floor angle
         if (highlightItemFrames.get()) {
-            for (ItemFrameEntity frame : mc.world.getEntitiesByClass(ItemFrameEntity.class, mc.player.getBoundingBox().expand(64), e ->
-                    e.getHeldItemStack().getItem().getTranslationKey().equals("item.minecraft.filled_map"))) {
+            for (ItemFrameEntity frame : mc.world.getEntitiesByClass(ItemFrameEntity.class, mc.player.getBoundingBox().expand(64), e -> {
+                String id = e.getHeldItemStack().getItem().getTranslationKey();
+                return id.equals("item.minecraft.filled_map") || id.contains("shulker_box");
+            })) {
 
                 Box box;
                 float pitch = frame.getPitch();
@@ -112,6 +114,7 @@ public class VanityESP extends Module {
 
                 Color fill = new Color(mapartColor.get());
                 Color outline = new Color(mapOutlineColor.get());
+
                 event.renderer.box(box, fill, outline, ShapeMode.Both, 0);
             }
         }
