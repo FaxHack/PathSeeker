@@ -879,7 +879,7 @@ public class BaseFinder extends Module {
                                         LastBaseFound = new ChunkPos(chunk.getPos().x, chunk.getPos().z);
                                         basefound = true;
                                     }
-                                } else if ((entity instanceof ChestBoatEntity || entity instanceof BoatEntity) && boatFinder.get()) {
+                                } else if ((entity instanceof BoatEntity) && boatFinder.get()) {
                                     baseChunks.add(chunk.getPos());
                                     if (save.get()) {
                                         saveBaseChunkData(chunk.getPos());

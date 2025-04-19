@@ -479,7 +479,7 @@ public class NewerNewChunks extends Module {
         else deletewarning = 0;
         if (deletewarning >= 2) {
             if (mc.isInSingleplayer()) {
-                String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("/|\\\\");
+                String[] array = mc.getServer().getSavePath(WorldSavePath.ROOT).toString().replace(':', '_').split("[/\\\\]");
                 serverip = array[array.length - 2];
             } else {
                 serverip = mc.getCurrentServerEntry().address.replace(':', '_');

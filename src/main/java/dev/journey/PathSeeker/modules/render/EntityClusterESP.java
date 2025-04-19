@@ -37,6 +37,7 @@ import meteordevelopment.meteorclient.utils.render.MeteorToast;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
@@ -48,7 +49,10 @@ import java.io.*;
 import java.util.*;
 
 public class EntityClusterESP extends Module {
+    public static final String MOD_ID = "PathSeeker";
+    public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID).toFile();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
@@ -246,11 +250,11 @@ public class EntityClusterESP extends Module {
     }
 
     private File getCsvFile() {
-        return new File(new File(new File(MeteorClient.FOLDER, "EntityClusterESP"), Utils.getFileWorldName()), "EntityClusterESP.csv");
+        return new File(new File(new File(EntityClusterESP.FOLDER, "EntityClusterESP"), Utils.getFileWorldName()), "EntityClusterESP.csv");
     }
 
     private File getJsonFile() {
-        return new File(new File(new File(MeteorClient.FOLDER, "EntityClusterESP"), Utils.getFileWorldName()), "EntityClusterESP.json");
+        return new File(new File(new File(EntityClusterESP.FOLDER, "EntityClusterESP"), Utils.getFileWorldName()), "EntityClusterESP.json");
     }
 
     private void load() {

@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.MeteorToast;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.*;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKey;
@@ -44,6 +45,8 @@ import java.util.Objects;
 import static dev.journey.PathSeeker.utils.PathSeekerUtil.sendWebhook;
 
 public class BetterStashFinder extends Module {
+    public static final String MOD_ID = "PathSeeker";
+    public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID).toFile();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -376,11 +379,11 @@ public class BetterStashFinder extends Module {
     }
 
     private File getJsonFile() {
-        return new File(new File(new File(MeteorClient.FOLDER, "better-stash-finder"), Utils.getFileWorldName()), "stashes.json");
+        return new File(new File(new File(BetterStashFinder.FOLDER, "better-stash-finder"), Utils.getFileWorldName()), "stashes.json");
     }
 
     private File getCsvFile() {
-        return new File(new File(new File(MeteorClient.FOLDER, "better-stash-finder"), Utils.getFileWorldName()), "stashes.csv");
+        return new File(new File(new File(BetterStashFinder.FOLDER, "better-stash-finder"), Utils.getFileWorldName()), "stashes.csv");
     }
 
     @Override
