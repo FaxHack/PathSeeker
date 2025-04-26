@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "pathseeker-addon",
-  "version": "1.0.7+mc${mc_version}",
+  "version": "1.0.8+mc${mc_version}",
   "name": "PathSeeker",
   "description": "PathSeeker Inspired by Trouser Streak",
   "authors": [
@@ -12,7 +12,7 @@
   },
   "icon": "assets/icon/icon.png",
   "environment": "client",
-  "entrypoints": {
+  "entrypoint": {
     "meteor": [
       "dev.journey.PathSeeker.PathSeeker"
     ]
