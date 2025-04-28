@@ -18,14 +18,17 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
 - **Base Finder**  
   Uncover hidden bases and dungeons effortlessly, giving you the edge in anarchy gameplay.
 
+- **AutoPortal** Made By [xqyet](https://github.com/xqyet)
+  Automatically places and lights a portal.
+
 - **Pitch40Util**
   Used alongside Meteor's pitch 40. Auto sets min and max bounds so that you continue to gain height. It also has an
   auto firework mode for when you lose
-  velocity. [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/Pitch40Util.java)
+  velocity. (Ported From [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/Pitch40Util.java))
 
 - **TrailFollower** (Requires XaeroPlus)
   Follows trails in all dimensions using either pitch40 or baritone. It may break on path splits or other
-  cases. [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/TrailFollower.java)
+  cases. (Ported From [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/TrailFollower.java))
 
 - **StackedMinecartDetector**
   Detects if a stacked spawner is in the area.
@@ -37,12 +40,12 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
   Highlights important dropped items.
 
 - **BetterStashFinder:** An upgraded stash finder with enhanced filtering
-  options. [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/BetterStashFinder.java)
+  options. (Ported From [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/BetterStashFinder.java))
 
 - **AutoEnchanter:** Automates enchanting at anvils, saving time and effort.
 
 - **GrimEfly:** Vanilla efly uses a chest-plate to ensure that elytra do not consume
-  durability. [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/GrimEfly.java)
+  durability. (Ported From [Jeff-Mod](https://github.com/miles352/meteor-stashhunting-addon/blob/1.21.1/src/main/java/com/stash/hunt/modules/GrimEfly.java))
 
 - **Trident Dupe:** Facilitates trident duplication (note: patched on most servers).
 
@@ -60,18 +63,13 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
 > [!WARNING]  
 > Make sure your predefined item lists are accurate. Incorrect configurations may result in missing valuable loot.
 
-- **GrimDuraFirework**  
-  A clever fix for fireworks issues on the Mio client when using Grim Durability ElytraFly with a chestplate. Fly
-  smoothly without a
-  hitch! [Credits to meteor-mod](https://github.com/miles352/meteor-stashhunting-addon/blob/master/src/main/java/com/example/addon/modules/GrimDuraFirework.java)
-
 - **MobGearESP**  
   Detects mobs carrying or wearing player
-  equipment. [Credits to windoid](https://github.com/windoid/MobGearESP/blob/master/src/main/java/com/mobgear/addon/modules/MobGearESP.java)
+  equipment. (Ported From [windoid](https://github.com/windoid/MobGearESP/blob/master/src/main/java/com/mobgear/addon/modules/MobGearESP.java))
 
 - **SignHistorian**  
   Records & restores broken or modified
-  signs. [Credits to Stardust](https://github.com/0xTas/stardust/blob/64cd499c62d30be8e479b084a613e0c05b77c8d9/src/main/java/dev/stardust/modules/SignHistorian.java)
+  signs. (Ported From [Stardust](https://github.com/0xTas/stardust/blob/64cd499c62d30be8e479b084a613e0c05b77c8d9/src/main/java/dev/stardust/modules/SignHistorian.java))
 
 - **NewerNewChunks**  
   Take control of chunk tracing! Manage chunk data across servers and dimensions with crash-resilient saving, easy
@@ -86,19 +84,19 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
 
 - **PotESP**  
   Detect Decorated Pots with unnatural contents and find out what's inside! Easily locate suspicious pots in your
-  environment. [Credits to etianl](https://github.com/etianl/Trouser-Streak/blob/1.21.1/src/main/java/pwn/noobs/trouserstreak/modules/PotESP.java)
+  environment. (Ported From [TrouserStreak](https://github.com/etianl/Trouser-Streak/blob/1.21.1/src/main/java/pwn/noobs/trouserstreak/modules/PotESP.java))
 
 - **PortalPatternFinder**  
   Scan for shapes of broken or removed Nether Portals within cave air blocks. Great for tracking portal skips in the
   Nether for 1.13+
-  chunks. [Credits to etianl](https://github.com/etianl/Trouser-Streak/blob/1.21.1/src/main/java/pwn/noobs/trouserstreak/modules/PortalPatternFinder.java)
+  chunks. (Ported From [TrouserStreak](https://github.com/etianl/Trouser-Streak/blob/1.21.1/src/main/java/pwn/noobs/trouserstreak/modules/PortalPatternFinder.java))
 
 > [!NOTE]  
 > PortalPatternFinder works best when paired with advanced chunk detection tools.
 
 - **CaveDisturbanceDetector**  
   Hunt for single air blocks hidden within cave air, helping you identify disturbances in 1.13+ underground
-  structures. [Credits to etianl](https://github.com/etianl/Trouser-Streak/blob/1.21.1/src/main/java/pwn/noobs/trouserstreak/modules/PortalPatternFinder.java)
+  structures. (Ported From [TrouserTreak](https://github.com/etianl/Trouser-Streak/blob/1.21.1/src/main/java/pwn/noobs/trouserstreak/modules/PortalPatternFinder.java))
 
 > [!CAUTION]  
 > Scanning large areas with CaveDisturbanceDetector may increase resource usage. Adjust your settings accordingly.
@@ -107,9 +105,8 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
 
 ## Why Choose This Mod?
 
-PathSeeker brings the famed TrouserStreak to entirely new heights. With innovative features, refined optimisations and
-an emphasis on unmatched stability and performance, this mod is the ideal companion for anarchy server gameplay. Whether
-you're base raiding, chunk tracing or treasure hunting, PathSeeker empowers your journey.
+PathSeeker brings the famed TrouserStreak to entirely new heights. With innovative features, this mod is the ideal companion for anarchy server gameplay. Whether
+If you're base raiding, chunk tracing, or treasure hunting, PathSeeker empowers your journey.
 
 ---
 
@@ -150,7 +147,7 @@ PathSeeker is always evolving! Here's what's planned:
 
 ## Credits
 
-A big shoutout to the creators and projects that inspired PathSeeker:
+A big shout-out to the creators and projects that inspired PathSeeker:
 
 - [**TrouserStreak**](https://github.com/etianl/Trouser-Streak) for laying the groundwork.
 - [**meteor-mod**](https://github.com/miles352/meteor-stashhunting-addon) for hunting modules.
@@ -160,8 +157,7 @@ A big shoutout to the creators and projects that inspired PathSeeker:
 
 ## Contributing
 
-We welcome contributions! If you have ideas, fixes, or new features to share, feel free to open issues or submit pull
-requests.
+We welcome contributions! If you have ideas, fixes, or new features to share, feel free to open issues or submit pull requests.
 
 > [!TIP]  
 > Review our coding guidelines for smoother collaboration before submitting a pull request.
