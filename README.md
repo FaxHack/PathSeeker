@@ -49,13 +49,19 @@ PathSeeker comes packed with powerful features designed for Minecraft explorers 
 
 - **Trident Dupe:** Facilitates trident duplication (note: patched on most servers).
 
+- **TridentAura**: Spam Tridents. (Made By [xqyet](https://github.com/FaxHack/PathSeeker/commits?author=xqyet))
+
 - **AutoFirework:** Automatically activates firework use for added flair.
+
+- **CollectorsESP**: Highlights maparts and banners. [xqyet](https://github.com/FaxHack/PathSeeker/commits?author=xqyet)
+
+- **BaritonePathMacro**: Easy macro to activate TrailFollower in the nether. Must deploy in the air. [xqyet](https://github.com/FaxHack/PathSeeker/commits?author=xqyet)
 
 - **ScreenshotFolderCommand**
   Open the Minecraft screenshot folder.
 
 - **MeteorFolderCommand**
-  Open meteor-client folder.
+  Open the meteor-client folder.
 
 > [!TIP]  
 > Use Base Finder with NewerNewChunks to drastically improve your chances of locating uncharted bases.
