@@ -12,7 +12,7 @@
   },
   "icon": "assets/icon/icon.png",
   "environment": "client",
-  "entrypoint": {
+  "entrypoints": {
     "meteor": [
       "dev.journey.PathSeeker.PathSeeker"
     ]
