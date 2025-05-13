@@ -4,7 +4,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.journey.PathSeeker.PathSeeker;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;

@@ -3,13 +3,14 @@ package dev.journey.PathSeeker.modules.utility;
 import baritone.api.BaritoneAPI;
 import dev.journey.PathSeeker.PathSeeker;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.KeybindSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.meteorclient.systems.modules.Modules;
-import net.minecraft.text.Text;
 
 public class BaritonePathing extends Module {
     private final SettingGroup sgSettings = settings.getDefaultGroup();
@@ -36,13 +37,12 @@ public class BaritonePathing extends Module {
             .defaultValue(Keybind.none())
             .build()
     );
+    private final boolean trailFollowerWasActive = false;
 
     public BaritonePathing() {
         super(PathSeeker.Automation, "BaritonePathMacro", "Easy macro to activate TrailFollower in the nether. Must deploy in air.");
         BaritoneAPI.getSettings().logger.value = this::info;  // fix for baritone chat logs
     }
-
-    private boolean trailFollowerWasActive = false;
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -62,7 +62,6 @@ public class BaritonePathing extends Module {
             }
         }
     }
-
 
 
     private void sendBaritoneCommand(String command) {

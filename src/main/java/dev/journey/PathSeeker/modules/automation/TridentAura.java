@@ -2,19 +2,19 @@ package dev.journey.PathSeeker.modules.automation;
 
 import dev.journey.PathSeeker.PathSeeker;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.DoubleSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.meteorclient.utils.player.Rotations; // may possibly use
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.player.PlayerEntity; // will use
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
-
 
 
 public class TridentAura extends Module {
@@ -35,20 +35,18 @@ public class TridentAura extends Module {
             .sliderMax(100)
             .build()
     );
+    private final boolean justSwitched = false;
+    private Entity currentTarget = null;
+    private int cooldownTicks = 0;
 
     public TridentAura() {
         super(PathSeeker.Automation, "Trident Aura", "For trident spam");
     }
 
-    private Entity currentTarget = null;
-
     @Override
     public void onDeactivate() {
         currentTarget = null;
     }
-
-    private int cooldownTicks = 0;
-    private boolean justSwitched = false;
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {

@@ -25,7 +25,7 @@ public class UpdateChecker {
 
     public static void checkForUpdate() {
         if (UserConfig.isUpdateCheckDisabled()) return;
-        
+
         // Register the tick handler if not already registered
         if (!isRegistered) {
             EVENT_BUS.subscribe(UpdateChecker.class);
@@ -35,7 +35,7 @@ public class UpdateChecker {
         // Also do an immediate check
         doUpdateCheck();
     }
-    
+
     @EventHandler
     private static void onClientTick(TickEvent.Post event) {
         // Check for updates once when the client is fully loaded and player is in-game
@@ -45,7 +45,7 @@ public class UpdateChecker {
             hasCheckedThisSession = true;
         }
     }
-    
+
     private static void doUpdateCheck() {
         CompletableFuture.runAsync(() -> {
             try {
@@ -104,7 +104,7 @@ public class UpdateChecker {
             return false;
         }
     }
-    
+
     // Reset the check status when game exits
     public static void resetCheckedStatus() {
         hasCheckedThisSession = false;

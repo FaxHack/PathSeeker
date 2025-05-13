@@ -33,7 +33,6 @@ import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 import net.minecraft.entity.vehicle.BoatEntity;
-import net.minecraft.entity.vehicle.ChestBoatEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;

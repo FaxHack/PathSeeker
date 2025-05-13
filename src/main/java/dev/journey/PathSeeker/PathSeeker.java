@@ -10,11 +10,15 @@ import dev.journey.PathSeeker.modules.utility.*;
 import dev.journey.PathSeeker.utils.Update.UpdateChecker;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static meteordevelopment.meteorclient.MeteorClient.EVENT_BUS;
 
 
 public class PathSeeker extends MeteorAddon {
@@ -28,7 +32,8 @@ public class PathSeeker extends MeteorAddon {
     @Override
     public void onInitialize() {
         LOG.info("Initializing Path-Seeker!");
-        UpdateChecker.checkForUpdate();
+
+        EVENT_BUS.subscribe(this);
 
         //Hunting
         Modules.get().add(new ActivatedSpawnerDetector());
@@ -63,13 +68,11 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new TridentAura());
         Modules.get().add(new AutoPortal());
 
-
         /* To Release
 
         Modules.get().add(new ChestIndex());
 
-         */
-
+        */
 
         //Commands
         Commands.add(new MeteorFolderCommand());
@@ -87,6 +90,11 @@ public class PathSeeker extends MeteorAddon {
         }
     }
 
+    @EventHandler
+    private void onGameLeft(GameLeftEvent event) {
+        UpdateChecker.resetCheckedStatus();
+    }
+
     @Override
     public void onRegisterCategories() {
         Modules.registerCategory(Hunting);
@@ -98,5 +106,4 @@ public class PathSeeker extends MeteorAddon {
     public String getPackage() {
         return "dev.journey.PathSeeker";
     }
-
 }

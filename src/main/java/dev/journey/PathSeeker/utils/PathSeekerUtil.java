@@ -16,6 +16,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.io.File;
 import java.net.URI;
@@ -193,6 +194,33 @@ public class PathSeekerUtil {
             jsonObject = "{\"content\": \"<@" + pingID + ">\"}";
             sendRequest(webhookURL, jsonObject);
         }
+    }
+
+    public static Vec3d yawToDirection(double yaw) {
+        yaw = yaw * Math.PI / 180;
+        double x = -Math.sin(yaw);
+        double z = Math.cos(yaw);
+        return new Vec3d(x, 0, z);
+    }
+
+    public static double angleOnAxis(double yaw) {
+        if (yaw < 0) yaw += 360;
+        return Math.round(yaw / 45.0f) * 45;
+    }
+
+    public static double distancePointToDirection(Vec3d point, Vec3d direction, @Nullable Vec3d start) {
+        if (start == null) start = Vec3d.ZERO;
+
+        point = point.multiply(new Vec3d(1, 0, 1));
+        start = start.multiply(new Vec3d(1, 0, 1));
+        direction = direction.multiply(new Vec3d(1, 0, 1));
+
+        Vec3d directionVec = point.subtract(start);
+
+        double projectionLength = directionVec.dotProduct(direction) / direction.lengthSquared();
+        Vec3d projection = direction.multiply(projectionLength);
+        Vec3d perp = directionVec.subtract(projection);
+        return perp.length();
     }
 
     private static void sendRequest(String webhookURL, String json) {
