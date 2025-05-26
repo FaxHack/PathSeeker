@@ -64,9 +64,9 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new AutoEnchant());
         Modules.get().add(new AreaLoader());
         Modules.get().add(new AFKVanillaFly());
-        Modules.get().add(new BaritonePathing());
         Modules.get().add(new TridentAura());
         Modules.get().add(new AutoPortal());
+        Modules.get().add(new AutoSmithingTable());
 
         /* To Release
 
