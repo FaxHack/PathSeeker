@@ -118,14 +118,14 @@ public class AutoSmithingTable extends Module {
     private final Setting<Boolean> trimDiamondArmor = sgTrims.add(new BoolSetting.Builder()
         .name("trim-diamond-armor")
         .description("Apply selected trims to diamond armor.")
-        .defaultValue(Boolean.valueOf(true))
+        .defaultValue(Boolean.TRUE)
         .build()
     );
 
     private final Setting<Boolean> trimNetheriteArmor = sgTrims.add(new BoolSetting.Builder()
         .name("trim-netherite-armor")
         .description("Apply selected trims to netherite armor.")
-        .defaultValue(Boolean.valueOf(true))
+        .defaultValue(Boolean.TRUE)
         .build()
     );
 
@@ -269,14 +269,12 @@ public class AutoSmithingTable extends Module {
         }
 
         actionsThisTick = 0;
-        if (!runActions()) return;
+        if (runActions()) return;
 
         AutoSmithingScreen currentScreen = getCurrentScreen();
 
         if (currentScreen == AutoSmithingScreen.NONE) {
-            if (!actionQueue.isEmpty()) {
-                if (!runActions()) return;
-            } else {
+            if (actionQueue.isEmpty()) {
                 BlockPos smithingTablePos = findNearestSmithingTable(reach.get());
                 if (smithingTablePos == null) {
                     pause(PauseReason.NO_SMITHING_TABLE, "No smithing table found nearby.");
@@ -284,15 +282,13 @@ public class AutoSmithingTable extends Module {
                 }
                 actionQueue.add(() -> {
                     mc.interactionManager.interactBlock(mc.player, mc.player.getActiveHand(), new BlockHitResult(
-                        Vec3d.ofCenter(smithingTablePos), Direction.UP, smithingTablePos, false
+                            Vec3d.ofCenter(smithingTablePos), Direction.UP, smithingTablePos, false
                     ));
                 });
-                if (!runActions()) return;
             }
+            if (runActions()) return;
             return;
         }
-
-        currentScreen = getCurrentScreen();
 
         if (currentScreen == AutoSmithingScreen.SMITHING) {
             if (!(mc.currentScreen instanceof SmithingScreen)) {
@@ -302,7 +298,7 @@ public class AutoSmithingTable extends Module {
             SmithingScreenHandler handler = ((SmithingScreen) mc.currentScreen).getScreenHandler();
 
             if (!actionQueue.isEmpty()) {
-                if (!runActions()) return;
+                if (runActions()) return;
                 return;
             }
 
@@ -322,7 +318,7 @@ public class AutoSmithingTable extends Module {
                         }
                         ChatUtils.info("AutoSmithingTable: Starting Netherite Upgrades.");
                         queueNetheriteUpgradeInputActions(handler, upgradableDiamondItemPlayerSlot, netheriteIngotPlayerSlot, templatePlayerSlot);
-                        if (!runActions()) return;
+                        if (runActions()) return;
                         return;
                     } else {
                         upgradesDone = true;
@@ -333,7 +329,7 @@ public class AutoSmithingTable extends Module {
             }
 
             // Then try to apply trims if upgrades are done
-            if (upgradesDone && applyTrims.get() && (trimDiamondArmor.get() || trimNetheriteArmor.get())) {
+            if (applyTrims.get() && (trimDiamondArmor.get() || trimNetheriteArmor.get())) {
                 TrimmableItemInfo trimmableItemInfo = findNextTrimmableItemSlot(handler);
                 if (trimmableItemInfo != null) {
                     Item armorItem = handler.getSlot(trimmableItemInfo.slot).getStack().getItem();
@@ -355,7 +351,7 @@ public class AutoSmithingTable extends Module {
                         }
                         ChatUtils.info("AutoSmithingTable: Starting armor trims.");
                         queueTrimInputActions(handler, trimmableItemInfo.slot, trimTemplatePlayerSlot, trimMaterialPlayerSlot);
-                        if (!runActions()) return;
+                        if (runActions()) return;
                         return;
                     }
                 }
@@ -385,7 +381,7 @@ public class AutoSmithingTable extends Module {
                 actionsThisTick++;
             }
         }
-        return actionQueue.isEmpty();
+        return !actionQueue.isEmpty();
     }
 
     private AutoSmithingScreen getCurrentScreen() {
@@ -567,13 +563,11 @@ public class AutoSmithingTable extends Module {
         return -1;
     }
 
-    private static class TrimmableItemInfo {
-        public final int slot;
-        public final Item item;
-        public TrimmableItemInfo(int slot, Item item) {
-            this.slot = slot;
-            this.item = item;
-        }
+    public Setting<Boolean> getUseKillAura() {
+        return useKillAura;
+    }
+
+    private record TrimmableItemInfo(int slot, Item item) {
     }
 
     private TrimmableItemInfo findNextTrimmableItemSlot(SmithingScreenHandler handler) {
