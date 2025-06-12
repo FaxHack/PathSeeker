@@ -55,7 +55,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new VanityESP());
 
         //Automation
-        Modules.get().add(new ElytraSwap());
+        //Modules.get().add(new ElytraSwap());
         Modules.get().add(new TridentDupe());
         Modules.get().add(new Firework());
         Modules.get().add(new AutoEnchant());
