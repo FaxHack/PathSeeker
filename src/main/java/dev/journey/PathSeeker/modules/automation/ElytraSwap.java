@@ -1,4 +1,4 @@
-package dev.journey.PathSeeker.modules.utility;
+package dev.journey.PathSeeker.modules.automation;
 
 import dev.journey.PathSeeker.PathSeeker;
 import meteordevelopment.meteorclient.settings.BoolSetting;
