@@ -96,43 +96,30 @@ public class AutoPortal extends Module {
         index = 0;
         delay = 0;
 
-        // directly in front
+        // directly in front + block position check
         Direction forward = mc.player.getHorizontalFacing();
         Direction right = forward.rotateYClockwise();
-        BlockPos base = mc.player.getBlockPos()
+        BlockPos standingPos = mc.player.getBlockPos(); // temp mutable ref
+        BlockPos blockBelow = standingPos.down();
+        double blockHeight = mc.world.getBlockState(blockBelow).getCollisionShape(mc.world, blockBelow).getMax(Direction.Axis.Y);
+        // (height < 1.0)
+        if (blockHeight < 1.0) {
+            standingPos = standingPos.up();
+        }
+        BlockPos base = standingPos
                 .offset(forward, 2)
                 .offset(right, -1);
         // duplicate check
         int obsidianCheck = 0;
-        // check for these base blocks to shift portal up as needed
-        List<Block> softBlocks = List.of(
-                Blocks.SOUL_SAND, Blocks.SOUL_SOIL, Blocks.TALL_GRASS, Blocks.SNOW, Blocks.FERN
-        );
 
-        BlockPos finalBase = base;
-        boolean shiftUp = List.of(
-                base.offset(right, 1),
-                base.offset(right, 2)
-        ).stream().anyMatch(pos -> softBlocks.contains(mc.world.getBlockState(pos).getBlock()));
-
-        if (shiftUp) finalBase = base.up();
-        // redefined finalBase to include block checks in the future
         List<BlockPos> checkPositions = List.of(
-                finalBase.offset(right, 1), finalBase.offset(right, 2),
-                finalBase.offset(right, 0).up(1), finalBase.offset(right, 0).up(2), finalBase.offset(right, 0).up(3),
-                finalBase.offset(right, 3).up(1), finalBase.offset(right, 3).up(2), finalBase.offset(right, 3).up(3),
-                finalBase.offset(right, 1).up(4), finalBase.offset(right, 2).up(4)
+                base.offset(right, 1), base.offset(right, 2),
+                base.offset(right, 0).up(1), base.offset(right, 0).up(2), base.offset(right, 0).up(3),
+                base.offset(right, 3).up(1), base.offset(right, 3).up(2), base.offset(right, 3).up(3),
+                base.offset(right, 1).up(4), base.offset(right, 2).up(4)
         );
-        // block obstruction check (temporary until fixed) - added some common blocks to skip
-        boolean obstructed = checkPositions.stream().anyMatch(pos -> {
-            Block block = mc.world.getBlockState(pos).getBlock();
-            return !mc.world.getBlockState(pos).isAir()
-                    && block != Blocks.SOUL_SAND
-                    && block != Blocks.SOUL_SOIL
-                    && block != Blocks.TALL_GRASS
-                    && block != Blocks.SNOW
-                    && block != Blocks.FERN;
-        });
+        // block obstruction check (temporary until fixed)
+        boolean obstructed = checkPositions.stream().anyMatch(pos -> !mc.world.getBlockState(pos).isReplaceable());
         // will remove later once we fix portal block obstruction
         if (obstructed) {
             error("Portal area obstructed. Move and try again.");
@@ -153,20 +140,20 @@ public class AutoPortal extends Module {
             toggle();
             return;
         }
-        // refactored base. to finalBase. after defining blockstate checks
-        portalBlocks.add(finalBase.offset(right, 1));
-        portalBlocks.add(finalBase.offset(right, 2));
+
+        portalBlocks.add(base.offset(right, 1));
+        portalBlocks.add(base.offset(right, 2));
 
         for (int i = 1; i <= 3; i++) {
-            portalBlocks.add(finalBase.offset(right, 0).up(i));
+            portalBlocks.add(base.offset(right, 0).up(i));
         }
 
         for (int i = 1; i <= 3; i++) {
-            portalBlocks.add(finalBase.offset(right, 3).up(i));
+            portalBlocks.add(base.offset(right, 3).up(i));
         }
 
-        portalBlocks.add(finalBase.offset(right, 1).up(4));
-        portalBlocks.add(finalBase.offset(right, 2).up(4));
+        portalBlocks.add(base.offset(right, 1).up(4));
+        portalBlocks.add(base.offset(right, 2).up(4));
 
         for (int i = 0; i < 9; i++) {
             if (mc.player.getInventory().getStack(i).getItem() == Items.OBSIDIAN) {
@@ -199,8 +186,7 @@ public class AutoPortal extends Module {
         for (int i = 0; i < blocksPerTick.get() && index < portalBlocks.size(); i++, index++) {
             BlockPos pos = portalBlocks.get(index);
             // prevent faulty portal placements (not being used due to boolean obstruction check above, but will fix in the future)
-            Block block = mc.world.getBlockState(pos).getBlock();
-            if (!mc.world.getBlockState(pos).isAir() && block != Blocks.SOUL_SAND && block != Blocks.SOUL_SOIL) {
+            if (!mc.world.getBlockState(pos).isReplaceable()) {
                 if (!waitingForBreak.contains(pos) && mc.world.getBlockState(pos).getBlock().asItem() != Items.OBSIDIAN) {
                     if (mc.interactionManager != null) {
                         mc.interactionManager.attackBlock(pos, Direction.UP);

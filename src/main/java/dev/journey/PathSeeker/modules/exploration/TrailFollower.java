@@ -227,9 +227,7 @@ public class TrailFollower extends Module {
                 afkFly.toggle(); // fix to work every time in overworld now!
                 mc.execute(() -> {
                     afkFly.toggle();
-                    mc.execute(() -> {
-                        afkFly.toggle();
-                    });
+                    mc.execute(afkFly::toggle);
                 });
             }
         }
