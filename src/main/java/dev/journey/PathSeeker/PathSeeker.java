@@ -7,13 +7,10 @@ import dev.journey.PathSeeker.modules.automation.*;
 import dev.journey.PathSeeker.modules.exploration.*;
 import dev.journey.PathSeeker.modules.render.*;
 import dev.journey.PathSeeker.modules.utility.*;
-import dev.journey.PathSeeker.utils.Update.UpdateChecker;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
-import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.orbit.EventHandler;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +44,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new GrimDuraFirework());
         Modules.get().add(new SignHistorian());
         Modules.get().add(new Pitch40Util());
-        Modules.get().add(new GrimEfly());
+        Modules.get().add(new ElytraFlyPlusPlus());
 
         //Render
         Modules.get().add(new HoleAndTunnelAndStairsESP());
@@ -88,11 +85,6 @@ public class PathSeeker extends MeteorAddon {
         } else {
             LOG.info("Xaeros minimap and world map not found, disabling modules that require it.");
         }
-    }
-
-    @EventHandler
-    private void onGameLeft(GameLeftEvent event) {
-        UpdateChecker.resetCheckedStatus();
     }
 
     @Override
