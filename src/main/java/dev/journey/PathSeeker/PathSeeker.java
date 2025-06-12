@@ -43,9 +43,8 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new GrimDuraFirework());
         Modules.get().add(new SignHistorian());
         Modules.get().add(new Pitch40Util());
-        Modules.get().add(new GrimEfly());
+        Modules.get().add(new ElytraFlyPlusPlus());
         Modules.get().add(new Firework());
-        Modules.get().add(new BaritonePathing());
 
         //Render
         Modules.get().add(new HoleAndTunnelAndStairsESP());
@@ -56,12 +55,15 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new VanityESP());
 
         //Automation
+        Modules.get().add(new ElytraSwap());
         Modules.get().add(new TridentDupe());
+        Modules.get().add(new Firework());
         Modules.get().add(new AutoEnchant());
         Modules.get().add(new AreaLoader());
         Modules.get().add(new AFKVanillaFly());
-        Modules.get().add(new AutoPortal());
         Modules.get().add(new TridentAura());
+        Modules.get().add(new AutoPortal());
+        Modules.get().add(new AutoSmithingTable());
 
         /* To Release
 

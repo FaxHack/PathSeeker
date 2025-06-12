@@ -1,4 +1,4 @@
-package dev.journey.PathSeeker.modules.render;
+package dev.journey.PathSeeker.modules.exploration;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;

@@ -7,6 +7,8 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.text.ClickEvent;
@@ -16,6 +18,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.io.File;
 import java.net.URI;
@@ -185,6 +188,58 @@ public class PathSeekerUtil {
             jsonObject = "{\"content\": \"<@" + pingID + ">\"}";
             sendRequest(webhookURL, jsonObject);
         }
+    }
+    public static int totalInvCount(MinecraftClient mc, Item item) {
+        if (mc.player == null) return 0;
+        int itemCount = 0;
+        for (int i = 0; i < 36; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (stack.getItem() == item) {
+                itemCount += stack.getCount();
+            }
+        }
+        return itemCount;
+    }
+
+    public static double angleOnAxis(double yaw)
+    {
+        if (yaw < 0) yaw += 360;
+        return Math.round(yaw / 45.0f) * 45;
+    }
+
+    public static Vec3d normalizedPositionOnAxis(Vec3d pos) {
+        double angle = -Math.atan2(pos.x, pos.z);
+        double angleDeg = Math.toDegrees(angle);
+
+        return positionInDirection(new Vec3d(0,0,0), angleOnAxis(angleDeg), 1);
+    }
+
+    /**
+     * Converts a yaw in degrees to a direction vector.
+     * @param yaw The yaw in degrees.
+     * @return The direction vector.
+     */
+    public static Vec3d yawToDirection(double yaw)
+    {
+        yaw = yaw * Math.PI / 180;
+        double x = -Math.sin(yaw);
+        double z = Math.cos(yaw);
+        return new Vec3d(x, 0, z);
+    }
+
+    public static double distancePointToDirection(Vec3d point, Vec3d direction, @Nullable Vec3d start) {
+        if (start == null) start = Vec3d.ZERO;
+
+        point = point.multiply(new Vec3d(1, 0, 1));
+        start = start.multiply(new Vec3d(1, 0, 1));
+        direction = direction.multiply(new Vec3d(1, 0, 1));
+
+        Vec3d directionVec = point.subtract(start);
+
+        double projectionLength = directionVec.dotProduct(direction) / direction.lengthSquared();
+        Vec3d projection = direction.multiply(projectionLength);
+        Vec3d perp = directionVec.subtract(projection);
+        return perp.length();
     }
 
     private static void sendRequest(String webhookURL, String json) {
