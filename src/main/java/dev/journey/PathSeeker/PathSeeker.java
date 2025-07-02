@@ -1,5 +1,6 @@
 package dev.journey.PathSeeker;
 
+import dev.journey.PathSeeker.commands.CoordinateConverterCommand;
 import dev.journey.PathSeeker.commands.MeteorFolderCommand;
 import dev.journey.PathSeeker.commands.ScreenshotFolderCommand;
 import dev.journey.PathSeeker.commands.Stats2b2t;
@@ -55,6 +56,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new VanityESP());
 
         //Automation
+        //Modules.get().add(new SpawnerMine());
         Modules.get().add(new ElytraSwap());
         Modules.get().add(new TridentDupe());
         Modules.get().add(new Firework());
@@ -72,6 +74,7 @@ public class PathSeeker extends MeteorAddon {
         */
 
         //Commands
+        Commands.add(new CoordinateConverterCommand());
         Commands.add(new MeteorFolderCommand());
         Commands.add(new ScreenshotFolderCommand());
         Commands.add(new Stats2b2t());
