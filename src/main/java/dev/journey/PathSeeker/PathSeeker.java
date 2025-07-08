@@ -46,6 +46,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new SignHistorian());
         Modules.get().add(new Pitch40Util());
         Modules.get().add(new ElytraFlyPlusPlus());
+        Modules.get().add(new InventoryInfoModule());
 
         //Render
         Modules.get().add(new HoleAndTunnelAndStairsESP());
