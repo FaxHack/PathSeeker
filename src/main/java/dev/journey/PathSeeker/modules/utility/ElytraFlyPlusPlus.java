@@ -76,6 +76,14 @@ public class ElytraFlyPlusPlus extends Module {
             .build()
     );
 
+    private final Setting<Boolean> motionYBoost = sgGeneral.add(new BoolSetting.Builder()
+            .name("Motion Y Boost")
+            .description("Greatly increases speed by cancelling Y momentum.")
+            .defaultValue(false)
+            .visible(bounce::get)
+            .build()
+    );
+
     private final Setting<Boolean> highwayObstaclePasser = sgObstaclePasser.add(new BoolSetting.Builder()
             .name("Highway Obstacle Passer")
             .description("Uses baritone to pass obstacles.")
@@ -282,6 +290,12 @@ public class ElytraFlyPlusPlus extends Module {
         }
 
         if (enabled()) mc.player.setSprinting(true);
+
+        if (enabled() && motionYBoost.get() && mc.player.getVelocity().y > 0)
+        {
+            mc.player.setVelocity(mc.player.getVelocity().x, 0.0, mc.player.getVelocity().z);
+        }
+
         if (bounce.get())
         {
             if (tempPath != null && mc.player.getBlockPos().getSquaredDistance(tempPath) < 500)

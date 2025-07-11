@@ -36,8 +36,6 @@ public class PathSeeker extends MeteorAddon {
         //Hunting
         Modules.get().add(new ActivatedSpawnerDetector());
         Modules.get().add(new StackedMinecartsDetector());
-        Modules.get().add(new CaveDisturbanceDetector());
-        Modules.get().add(new PortalPatternFinder());
         Modules.get().add(new NewerNewChunks());
         Modules.get().add(new BaseFinder());
 
