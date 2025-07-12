@@ -53,11 +53,19 @@ public class ElytraFlyPlusPlus extends Module {
             .build()
     );
 
+    private final Setting<Boolean> motionYBoost = sgGeneral.add(new BoolSetting.Builder()
+            .name("Motion Y Boost")
+            .description("Greatly increases speed by cancelling Y momentum.")
+            .defaultValue(false)
+            .visible(bounce::get)
+            .build()
+    );
+
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("Speed")
             .description("The speed in blocks per second to keep you at.")
             .defaultValue(100.0)
-            .visible(() -> bounce.get() && lockPitch.get() && autoAdjustPitch.get())
+            .visible(() -> bounce.get() && (lockPitch.get() && autoAdjustPitch.get() || motionYBoost.get()))
             .build()
     );
 
@@ -90,14 +98,6 @@ public class ElytraFlyPlusPlus extends Module {
             .description("The yaw to set when bounce is enabled. This is auto set to the closest 45 deg angle to you unless Use Custom Yaw is enabled.")
             .defaultValue(0.0)
             .visible(() -> bounce.get() && useCustomYaw.get())
-            .build()
-    );
-
-    private final Setting<Boolean> motionYBoost = sgGeneral.add(new BoolSetting.Builder()
-            .name("Motion Y Boost")
-            .description("Greatly increases speed by cancelling Y momentum.")
-            .defaultValue(false)
-            .visible(bounce::get)
             .build()
     );
 
@@ -384,7 +384,8 @@ public class ElytraFlyPlusPlus extends Module {
                 paused = false;
                 if (!enabled()) return;
 
-                if (enabled() && motionYBoost.get() && mc.player.getVelocity().y > 0)
+                double playerSpeed = Utils.getPlayerSpeed().multiply(1, 0, 1).length();
+                if (enabled() && motionYBoost.get() && mc.player.getVelocity().y > 0 && playerSpeed < this.speed.get())
                 {
                     mc.player.setVelocity(mc.player.getVelocity().x, 0.0, mc.player.getVelocity().z);
                 }
@@ -403,7 +404,6 @@ public class ElytraFlyPlusPlus extends Module {
                 {
                     if (autoAdjustPitch.get())
                     {
-                        double playerSpeed = Utils.getPlayerSpeed().multiply(1, 0, 1).length();
                         mc.player.setPitch((float) Math.min(90, Math.max(-90, (speed.get() - playerSpeed) * 5)));
                     }
                     else
