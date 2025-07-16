@@ -3,27 +3,45 @@ package dev.journey.PathSeeker.modules.utility;
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalBlock;
 import dev.journey.PathSeeker.PathSeeker;
+import static dev.journey.PathSeeker.utils.PathSeekerUtil.angleOnAxis;
+import static dev.journey.PathSeeker.utils.PathSeekerUtil.distancePointToDirection;
+import static dev.journey.PathSeeker.utils.PathSeekerUtil.positionInDirection;
+import static dev.journey.PathSeeker.utils.PathSeekerUtil.yawToDirection;
+
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
+import meteordevelopment.meteorclient.events.world.PlaySoundEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BlockPosSetting;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.DoubleSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.*;
+import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
-
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 
-
-import static dev.journey.PathSeeker.utils.PathSeekerUtil.*;
+import java.util.List;
 
 public class ElytraFlyPlusPlus extends Module {
 
@@ -34,22 +52,6 @@ public class ElytraFlyPlusPlus extends Module {
             .name("Bounce")
             .description("Automatically does bounce efly.")
             .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> lockPitch = sgGeneral.add(new BoolSetting.Builder()
-            .name("Lock Pitch")
-            .description("Whether to lock your pitch when bounce is enabled.")
-            .defaultValue(true)
-            .visible(bounce::get)
-            .build()
-    );
-
-    private final Setting<Boolean> autoAdjustPitch = sgGeneral.add(new BoolSetting.Builder()
-            .name("Auto Adjust Pitch")
-            .description("Whether to auto adjust your pitch to stay at a set speed")
-            .defaultValue(false)
-            .visible(() -> bounce.get() && lockPitch.get())
             .build()
     );
 
@@ -65,7 +67,16 @@ public class ElytraFlyPlusPlus extends Module {
             .name("Speed")
             .description("The speed in blocks per second to keep you at.")
             .defaultValue(100.0)
-            .visible(() -> bounce.get() && (lockPitch.get() && autoAdjustPitch.get() || motionYBoost.get()))
+            .range(10, 105)
+            .visible(() -> bounce.get() && motionYBoost.get())
+            .build()
+    );
+
+    private final Setting<Boolean> lockPitch = sgGeneral.add(new BoolSetting.Builder()
+            .name("Lock Pitch")
+            .description("Whether to lock your pitch when bounce is enabled.")
+            .defaultValue(true)
+            .visible(bounce::get)
             .build()
     );
 
@@ -73,7 +84,7 @@ public class ElytraFlyPlusPlus extends Module {
             .name("Pitch")
             .description("The pitch to set when bounce is enabled.")
             .defaultValue(90.0)
-            .visible(() -> bounce.get() && lockPitch.get() && !autoAdjustPitch.get())
+            .visible(() -> bounce.get() && lockPitch.get())
             .build()
     );
 
@@ -177,10 +188,18 @@ public class ElytraFlyPlusPlus extends Module {
             .build()
     );
 
+    private final Setting<Boolean> fakeFly = sgGeneral.add(new BoolSetting.Builder()
+            .name("Chestplate / Fakefly")
+            .description("Lets you fly using a chestplate to use almost 0 elytra durability. Must have elytra in hotbar.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> toggleElytra = sgGeneral.add(new BoolSetting.Builder()
             .name("Toggle Elytra")
             .description("Equips an elytra on activate, and a chestplate on deactivate.")
             .defaultValue(false)
+            .visible(() -> !fakeFly.get())
             .build()
     );
 
@@ -204,6 +223,10 @@ public class ElytraFlyPlusPlus extends Module {
         if (event.packet instanceof PlayerPositionLookS2CPacket packet)
         {
             onActivate();
+        }
+        else if (event.packet instanceof CloseScreenS2CPacket)
+        {
+            event.cancel();
         }
     }
 
@@ -272,7 +295,7 @@ public class ElytraFlyPlusPlus extends Module {
 
         mc.player.setSprinting(startSprinting);
 
-        if (toggleElytra.get())
+        if (toggleElytra.get() && !fakeFly.get())
         {
             if (!mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem().toString().contains("chestplate")) {
                 Modules.get().get(ChestSwap.class).swap();
@@ -294,7 +317,7 @@ public class ElytraFlyPlusPlus extends Module {
     {
         if (mc.player == null || mc.player.getAbilities().allowFlying) return;
 
-        if (toggleElytra.get() && !elytraToggled)
+        if (toggleElytra.get() && !fakeFly.get() && !elytraToggled)
         {
             if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem().equals(Items.ELYTRA)))
             {
@@ -327,12 +350,10 @@ public class ElytraFlyPlusPlus extends Module {
                 return;
             }
 
-            // Length check to fix weird issue where goal gets set to 0 0 when going through queue, even though it gets reset. Likely due to bad connection.
-            if (highwayObstaclePasser.get() && mc.player.getPos().length() > 100 && (mc.player.getY() < targetY.get()
-                    || mc.player.getY() > targetY.get() + 2
-                    || mc.player.horizontalCollision)
-                    || portalTrap != null && portalTrap.getSquaredDistance(mc.player.getBlockPos()) < portalAvoidDistance.get() * portalAvoidDistance.get()
-                    || waitingForChunksToLoad)
+            if (highwayObstaclePasser.get() && mc.player.getPos().length() > 100 && // > 100 check needed bc server sends queue coordinates when joining in first tick causing goal coordinates to be set to (0, 0)
+                    (mc.player.getY() < targetY.get() || mc.player.getY() > targetY.get() + 2 || mc.player.horizontalCollision) // collisions / out of highway
+                    || (portalTrap != null && portalTrap.getSquaredDistance(mc.player.getBlockPos()) < portalAvoidDistance.get() * portalAvoidDistance.get()) // portal trap detection
+                    || waitingForChunksToLoad) // waiting for chunks to load
             {
                 waitingForChunksToLoad = false;
                 paused = true;
@@ -384,15 +405,18 @@ public class ElytraFlyPlusPlus extends Module {
                 paused = false;
                 if (!enabled()) return;
 
-                double playerSpeed = Utils.getPlayerSpeed().multiply(1, 0, 1).length();
-                if (enabled() && motionYBoost.get() && mc.player.getVelocity().y > 0 && playerSpeed < this.speed.get())
+                if (!fakeFly.get())
                 {
-                    mc.player.setVelocity(mc.player.getVelocity().x, 0.0, mc.player.getVelocity().z);
-                }
+                    double playerSpeed = Utils.getPlayerSpeed().multiply(1, 0, 1).length();
+                    if (motionYBoost.get() && mc.player.getVelocity().y > 0 && playerSpeed < speed.get())
+                    {
+                        mc.player.setVelocity(mc.player.getVelocity().x, 0.0, mc.player.getVelocity().z);
+                    }
 
-                if (mc.player.isOnGround())
-                {
-                    mc.player.jump();
+                    if (mc.player.isOnGround())
+                    {
+                        mc.player.jump();
+                    }
                 }
 
                 // set yaw and pitch
@@ -402,30 +426,109 @@ public class ElytraFlyPlusPlus extends Module {
                 }
                 if (lockPitch.get())
                 {
-                    if (autoAdjustPitch.get())
-                    {
-                        mc.player.setPitch((float) Math.min(90, Math.max(-90, (speed.get() - playerSpeed) * 5)));
-                    }
-                    else
-                    {
-                        mc.player.setPitch(pitch.get().floatValue());
-                    }
+                    mc.player.setPitch(pitch.get().floatValue());
                 }
             }
         }
 
         if (enabled())
         {
-            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(
-                    mc.player,
-                    ClientCommandC2SPacket.Mode.START_FALL_FLYING
-            ));
+            if (fakeFly.get())
+            {
+                doGrimEflyStuff();
+            }
+            else
+            {
+                sendStartFlyingPacket();
+            }
         }
     }
 
     public boolean enabled()
     {
-        return this.isActive() && !paused && mc.player != null && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem().toString().contains("elytra");
+        return this.isActive() && !paused && mc.player != null && (fakeFly.get() || mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem().equals(Items.ELYTRA));
+    }
+
+    private void doGrimEflyStuff()
+    {
+        FindItemResult itemResult = InvUtils.findInHotbar(Items.ELYTRA);
+        if (!itemResult.found()) return;
+
+        swapToItem(itemResult.slot());
+
+        double playerSpeed = Utils.getPlayerSpeed().multiply(1, 0, 1).length();
+        if (bounce.get() && motionYBoost.get() && mc.player.getVelocity().y > 0 && playerSpeed < speed.get())
+        {
+            mc.player.setVelocity(mc.player.getVelocity().x, 0.0, mc.player.getVelocity().z);
+        }
+
+        sendStartFlyingPacket();
+
+        if (bounce.get() && mc.player.isOnGround())
+        {
+            mc.player.jump();
+        }
+
+        swapToItem(itemResult.slot());
+
+    }
+
+    @EventHandler
+    private void onPlaySound(PlaySoundEvent event)
+    {
+        List<Identifier> armorEquipSounds = List.of(
+                Identifier.of("minecraft:item.armor.equip_generic"),
+                Identifier.of("minecraft:item.armor.equip_netherite"),
+                Identifier.of("minecraft:item.armor.equip_elytra"),
+                Identifier.of("minecraft:item.armor.equip_diamond"),
+                Identifier.of("minecraft:item.armor.equip_gold"),
+                Identifier.of("minecraft:item.armor.equip_iron"),
+                Identifier.of("minecraft:item.armor.equip_chain"),
+                Identifier.of("minecraft:item.armor.equip_leather"),
+                Identifier.of("minecraft:item.elytra.flying")
+        );
+        for (Identifier identifier : armorEquipSounds) {
+            if (identifier.equals(event.sound.getId())) {
+                event.cancel();
+                break;
+            }
+        }
+    }
+
+    // 38 is the meteor mapping for chestplate
+    // serverside uses default mappings: https://imgs.search.brave.com/cyvAxjIhLweeF1qeRXpC_8ESRlImhUmMGWbV_n2to_A/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jNGsz/LmdpdGh1Yi5pby93/aWtpLnZnL2ltYWdl/cy8xLzEzL0ludmVu/dG9yeS1zbG90cy5w/bmc
+    private void swapToItem(int slot) {
+        ItemStack chestItem = mc.player.getInventory().getStack(38);
+        ItemStack hotbarSwapItem = mc.player.getInventory().getStack(slot);
+
+        Int2ObjectMap<ItemStack> changedSlots = new Int2ObjectOpenHashMap<>();
+        changedSlots.put(6, hotbarSwapItem);
+        changedSlots.put(slot + 36, chestItem);
+
+        sendSwapPacket(changedSlots, slot);
+    }
+
+    private void sendStartFlyingPacket() {
+        if (mc.player == null) return;
+        mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(
+                mc.player,
+                ClientCommandC2SPacket.Mode.START_FALL_FLYING
+        ));
+    }
+
+    private void sendSwapPacket(Int2ObjectMap<ItemStack> changedSlots, int buttonNum) {
+        int syncId  = mc.player.currentScreenHandler.syncId;
+        int stateId = mc.player.currentScreenHandler.getRevision();
+
+        mc.player.networkHandler.sendPacket(new ClickSlotC2SPacket(
+                syncId,
+                stateId,
+                6,                 // slotNum
+                buttonNum,   // the slot number thats being swapped
+                SlotActionType.SWAP,
+                new ItemStack(Items.AIR),
+                changedSlots
+        ));
     }
 
     @EventHandler

@@ -1,6 +1,7 @@
 package dev.journey.PathSeeker.modules.automation;
 
 import dev.journey.PathSeeker.PathSeeker;
+import dev.journey.PathSeeker.utils.PathSeekerUtil;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -13,33 +14,32 @@ import net.minecraft.util.Hand;
 
 public class AFKVanillaFly extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final Setting<AutoFireworkMode> fireworkMode = sgGeneral.add(new EnumSetting.Builder<AutoFireworkMode>()
-            .name("Auto Firework Mode")
-            .description("Choose between velocity-based or timed firework usage.")
-            .defaultValue(AutoFireworkMode.VELOCITY)
-            .build()
-    );
     private final Setting<Integer> fireworkDelay = sgGeneral.add(new IntSetting.Builder()
             .name("Timed Delay (ms)")
             .description("How long to wait between fireworks when using Timed Delay.")
-            .defaultValue(3000)
-            .sliderRange(0, 6000)
-            .visible(() -> fireworkMode.get() == AutoFireworkMode.TIMED_DELAY)
+            .defaultValue(4000)
+            .sliderRange(0, 10000)
             .build()
     );
-    private final Setting<Double> velocityThreshold = sgGeneral.add(new DoubleSetting.Builder()
-            .name("Velocity Threshold")
-            .description("Use a firework if your horizontal speed is below this value.")
-            .defaultValue(0.7)
-            .sliderRange(0.1, 2.0)
-            .visible(() -> fireworkMode.get() == AutoFireworkMode.VELOCITY)
+    private final Setting<Boolean> useManualY = sgGeneral.add(new BoolSetting.Builder()
+            .name("Use Manual Y Level")
+            .description("Use a manually set Y level instead of the Y level when activated.")
+            .defaultValue(false)
             .build()
     );
     private long lastRocketUse = 0;
     private boolean launched = false;
     private double yTarget = -1;
+    private final Setting<Integer> manualYLevel = sgGeneral.add(new IntSetting.Builder()
+            .name("Manual Y Level")
+            .description("The Y level to maintain when using manual Y level.")
+            .defaultValue(256)
+            .sliderRange(-64, 320)
+            .visible(useManualY::get)
+            .onChanged(val -> yTarget = val)
+            .build()
+    );
     private float targetPitch = 0;
-
     public AFKVanillaFly() {
         super(PathSeeker.Automation, "AFKVanillaFly", "Maintains a level Y-flight with fireworks and smooth pitch control.");
     }
@@ -54,7 +54,6 @@ public class AFKVanillaFly extends Module {
         }
     }
 
-    // this method is now then default logic, it did not need to be called in TrailFollower
     public void tickFlyLogic() {
         if (mc.player == null) return;
 
@@ -62,21 +61,28 @@ public class AFKVanillaFly extends Module {
 
         if (mc.player.isFallFlying()) {
             if (yTarget == -1 || !launched) {
-                yTarget = currentY;
+                if (useManualY.get()) {
+                    yTarget = manualYLevel.get();
+                } else {
+                    yTarget = currentY;
+                }
                 launched = true;
             }
 
             // will prevent from flying straight down into the ground - adjust y range if player moves vertical
-            double yDiffFromLock = currentY - yTarget;
-            if (Math.abs(yDiffFromLock) > 10.0) {
-                yTarget = currentY; // reset the current y-level to maintain
-                info("Y-lock reset due to altitude deviation.");
+            // but only if not using manual Y level
+            if (!useManualY.get()) {
+                double yDiffFromLock = currentY - yTarget;
+                if (Math.abs(yDiffFromLock) > 10.0) {
+                    yTarget = currentY; // reset the current y-level to maintain
+                    info("Y-lock reset due to altitude deviation.");
+                }
             }
 
             double yDiff = currentY - yTarget;
 
             if (Math.abs(yDiff) > 10.0) {
-                targetPitch = (float) (-Math.atan2(yDiff, 100) * (180 / Math.PI));
+                targetPitch = (float) (Math.atan2(yDiff, 100) * (180 / Math.PI));
             } else if (yDiff > 2.0) {
                 targetPitch = 10f;
             } else if (yDiff < -2.0) {
@@ -89,17 +95,9 @@ public class AFKVanillaFly extends Module {
             float pitchDiff = targetPitch - currentPitch;
             mc.player.setPitch(currentPitch + pitchDiff * 0.1f);
 
-            if (fireworkMode.get() == AutoFireworkMode.TIMED_DELAY) {
-                if (System.currentTimeMillis() - lastRocketUse > fireworkDelay.get()) {
-                    tryUseFirework();
-                }
-            } else if (fireworkMode.get() == AutoFireworkMode.VELOCITY) {
-                double horizontalSpeed = Math.sqrt(Math.pow(mc.player.getVelocity().x, 2) + Math.pow(mc.player.getVelocity().z, 2));
-                if (horizontalSpeed < velocityThreshold.get()) {
-                    tryUseFirework();
-                }
+            if (System.currentTimeMillis() - lastRocketUse > fireworkDelay.get()) {
+                tryUseFirework();
             }
-            //need this for initiate flying check if on ground, will configure in the future (won't affect grim fly since not being used)
         } else {
             if (!launched) {
                 mc.player.jump();
@@ -138,11 +136,7 @@ public class AFKVanillaFly extends Module {
                 return;
             }
         }
-
-        if (mc.player.getMainHandStack().isOf(Items.FIREWORK_ROCKET)) {
-            mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-        }
-
+        PathSeekerUtil.firework(mc, false);
         lastRocketUse = System.currentTimeMillis();
     }
 
@@ -151,10 +145,5 @@ public class AFKVanillaFly extends Module {
             if (mc.player.getInventory().getStack(i).isEmpty()) return i;
         }
         return -1;
-    }
-
-    public enum AutoFireworkMode {
-        VELOCITY,
-        TIMED_DELAY
     }
 }
