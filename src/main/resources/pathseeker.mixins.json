@@ -9,6 +9,8 @@
     "defaultRequire": 1
   },
   "mixins": [
+    "EntityMixin",
+    "LivingEntityMixin",
     "PlayerEntityMixin",
     "accessor.ClientConnectionAccessor"
   ]
