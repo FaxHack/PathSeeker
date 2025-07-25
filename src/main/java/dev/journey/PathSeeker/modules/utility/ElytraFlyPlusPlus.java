@@ -2,18 +2,20 @@ package dev.journey.PathSeeker.modules.utility;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalBlock;
-import dev.journey.PathSeeker.PathSeeker;
 import static dev.journey.PathSeeker.utils.PathSeekerUtil.angleOnAxis;
 import static dev.journey.PathSeeker.utils.PathSeekerUtil.distancePointToDirection;
 import static dev.journey.PathSeeker.utils.PathSeekerUtil.positionInDirection;
 import static dev.journey.PathSeeker.utils.PathSeekerUtil.yawToDirection;
 
+import dev.journey.PathSeeker.PathSeeker;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.events.world.PlaySoundEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.BlockPosSetting;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
@@ -23,12 +25,12 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.MovementType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
@@ -40,8 +42,12 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.modules.world.Timer;
+import net.minecraft.network.packet.c2s.play.*;
 
 import java.util.List;
+
 
 public class ElytraFlyPlusPlus extends Module {
 
@@ -63,11 +69,19 @@ public class ElytraFlyPlusPlus extends Module {
             .build()
     );
 
+    private final Setting<Boolean> tunnelBounce = sgGeneral.add(new BoolSetting.Builder()
+            .name("Tunnel Bounce")
+            .description("Allows you to bounce in 1x2 tunnels. This should not be on if you are not in a tunnel.")
+            .defaultValue(false)
+            .visible(() -> bounce.get() && motionYBoost.get())
+            .build()
+    );
+
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("Speed")
             .description("The speed in blocks per second to keep you at.")
             .defaultValue(100.0)
-            .range(10, 105)
+            .sliderRange(20, 250)
             .visible(() -> bounce.get() && motionYBoost.get())
             .build()
     );
@@ -154,7 +168,7 @@ public class ElytraFlyPlusPlus extends Module {
 
     private final Setting<Integer> targetY = sgObstaclePasser.add(new IntSetting.Builder()
             .name("Y Level")
-            .description("The Y level to bounce at.")
+            .description("The Y level to bounce at. This must be correct or bounce will not start properly.")
             .defaultValue(120)
             .visible(() -> bounce.get() && highwayObstaclePasser.get())
             .build()
@@ -217,12 +231,15 @@ public class ElytraFlyPlusPlus extends Module {
 
     private boolean elytraToggled = false;
 
+    private Vec3d lastUnstuckPos;
+    private int stuckTimer = 0;
+
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event)
     {
         if (event.packet instanceof PlayerPositionLookS2CPacket packet)
         {
-            onActivate();
+//            onActivate();
         }
         else if (event.packet instanceof CloseScreenS2CPacket)
         {
@@ -241,6 +258,9 @@ public class ElytraFlyPlusPlus extends Module {
         paused = false;
         waitingForChunksToLoad = false;
         elytraToggled = false;
+        lastPos = mc.player.getPos();
+        lastUnstuckPos = mc.player.getPos();
+        stuckTimer = 0;
 
         // I don't know any other way to fix this stupid shit
         if (bounce.get() && mc.player.getPos().multiply(1, 0, 1).length() >= 100)
@@ -278,6 +298,34 @@ public class ElytraFlyPlusPlus extends Module {
                 }
             }
         }
+    }
+
+    private Vec3d lastPos;
+
+    @EventHandler
+    private void onPlayerMove(PlayerMoveEvent event) {
+        if (mc.player == null || event.type != MovementType.SELF || !enabled() || !motionYBoost.get() || !bounce.get()) return;
+
+        if (lastPos != null)
+        {
+            double speedBps = mc.player.getPos().subtract(lastPos).multiply(20, 0, 20).length();
+
+            Timer timer = Modules.get().get(    Timer.class);
+            if (timer.isActive()) {
+                speedBps *= timer.getMultiplier();
+            }
+
+            if (mc.player.isOnGround() && mc.player.isSprinting() && speedBps < speed.get())
+            {
+                if (speedBps > 20 || tunnelBounce.get())
+                {
+                    event.movement = new Vec3d(event.movement.x, 0.0, event.movement.z);
+                }
+                mc.player.setVelocity(mc.player.getVelocity().x, 0.0, mc.player.getVelocity().z);
+            }
+        }
+
+        lastPos = mc.player.getPos();
     }
 
     @Override
@@ -350,10 +398,21 @@ public class ElytraFlyPlusPlus extends Module {
                 return;
             }
 
+            if (mc.player.squaredDistanceTo(lastUnstuckPos) < 25)
+            {
+                stuckTimer++;
+            }
+            else
+            {
+                stuckTimer = 0;
+                lastUnstuckPos = mc.player.getPos();
+            }
+
             if (highwayObstaclePasser.get() && mc.player.getPos().length() > 100 && // > 100 check needed bc server sends queue coordinates when joining in first tick causing goal coordinates to be set to (0, 0)
                     (mc.player.getY() < targetY.get() || mc.player.getY() > targetY.get() + 2 || mc.player.horizontalCollision) // collisions / out of highway
                     || (portalTrap != null && portalTrap.getSquaredDistance(mc.player.getBlockPos()) < portalAvoidDistance.get() * portalAvoidDistance.get()) // portal trap detection
-                    || waitingForChunksToLoad) // waiting for chunks to load
+                    || waitingForChunksToLoad // waiting for chunks to load
+                    || stuckTimer > 30)
             {
                 waitingForChunksToLoad = false;
                 paused = true;
@@ -407,12 +466,6 @@ public class ElytraFlyPlusPlus extends Module {
 
                 if (!fakeFly.get())
                 {
-                    double playerSpeed = Utils.getPlayerSpeed().multiply(1, 0, 1).length();
-                    if (motionYBoost.get() && mc.player.getVelocity().y > 0 && playerSpeed < speed.get())
-                    {
-                        mc.player.setVelocity(mc.player.getVelocity().x, 0.0, mc.player.getVelocity().z);
-                    }
-
                     if (mc.player.isOnGround())
                     {
                         mc.player.jump();
@@ -455,12 +508,6 @@ public class ElytraFlyPlusPlus extends Module {
         if (!itemResult.found()) return;
 
         swapToItem(itemResult.slot());
-
-        double playerSpeed = Utils.getPlayerSpeed().multiply(1, 0, 1).length();
-        if (bounce.get() && motionYBoost.get() && mc.player.getVelocity().y > 0 && playerSpeed < speed.get())
-        {
-            mc.player.setVelocity(mc.player.getVelocity().x, 0.0, mc.player.getVelocity().z);
-        }
 
         sendStartFlyingPacket();
 
@@ -534,7 +581,7 @@ public class ElytraFlyPlusPlus extends Module {
     @EventHandler
     private void onChunkData(ChunkDataEvent event)
     {
-        if (!avoidPortalTraps.get()) return;
+        if (!avoidPortalTraps.get() || !highwayObstaclePasser.get()) return;
         ChunkPos pos = event.chunk().getPos();
 
         BlockPos centerPos = pos.getCenterAtY(targetY.get());
