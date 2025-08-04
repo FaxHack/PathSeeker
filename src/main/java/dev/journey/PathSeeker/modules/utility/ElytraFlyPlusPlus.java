@@ -2,11 +2,6 @@ package dev.journey.PathSeeker.modules.utility;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalBlock;
-import static dev.journey.PathSeeker.utils.PathSeekerUtil.angleOnAxis;
-import static dev.journey.PathSeeker.utils.PathSeekerUtil.distancePointToDirection;
-import static dev.journey.PathSeeker.utils.PathSeekerUtil.positionInDirection;
-import static dev.journey.PathSeeker.utils.PathSeekerUtil.yawToDirection;
-
 import dev.journey.PathSeeker.PathSeeker;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -16,15 +11,12 @@ import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.events.world.PlaySoundEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
-import meteordevelopment.meteorclient.settings.BlockPosSetting;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.DoubleSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
+import meteordevelopment.meteorclient.systems.modules.world.Timer;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -42,11 +34,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
-import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.world.Timer;
-import net.minecraft.network.packet.c2s.play.*;
 
 import java.util.List;
+
+import static dev.journey.PathSeeker.utils.PathSeekerUtil.*;
 
 
 public class ElytraFlyPlusPlus extends Module {
@@ -98,6 +89,7 @@ public class ElytraFlyPlusPlus extends Module {
             .name("Pitch")
             .description("The pitch to set when bounce is enabled.")
             .defaultValue(90.0)
+            .sliderRange(-90, 90)
             .visible(() -> bounce.get() && lockPitch.get())
             .build()
     );
@@ -122,6 +114,7 @@ public class ElytraFlyPlusPlus extends Module {
             .name("Yaw")
             .description("The yaw to set when bounce is enabled. This is auto set to the closest 45 deg angle to you unless Use Custom Yaw is enabled.")
             .defaultValue(0.0)
+            .sliderRange(0, 359)
             .visible(() -> bounce.get() && useCustomYaw.get())
             .build()
     );
@@ -310,7 +303,7 @@ public class ElytraFlyPlusPlus extends Module {
         {
             double speedBps = mc.player.getPos().subtract(lastPos).multiply(20, 0, 20).length();
 
-            Timer timer = Modules.get().get(    Timer.class);
+            Timer timer = Modules.get().get(Timer.class);
             if (timer.isActive()) {
                 speedBps *= timer.getMultiplier();
             }
@@ -409,10 +402,10 @@ public class ElytraFlyPlusPlus extends Module {
             }
 
             if (highwayObstaclePasser.get() && mc.player.getPos().length() > 100 && // > 100 check needed bc server sends queue coordinates when joining in first tick causing goal coordinates to be set to (0, 0)
-                    (mc.player.getY() < targetY.get() || mc.player.getY() > targetY.get() + 2 || mc.player.horizontalCollision) // collisions / out of highway
-                    || (portalTrap != null && portalTrap.getSquaredDistance(mc.player.getBlockPos()) < portalAvoidDistance.get() * portalAvoidDistance.get()) // portal trap detection
-                    || waitingForChunksToLoad // waiting for chunks to load
-                    || stuckTimer > 30)
+                    (mc.player.getY() < targetY.get() || mc.player.getY() > targetY.get() + 2 || mc.player.horizontalCollision // collisions / out of highway
+                            || (portalTrap != null && portalTrap.getSquaredDistance(mc.player.getBlockPos()) < portalAvoidDistance.get() * portalAvoidDistance.get()) // portal trap detection
+                            || waitingForChunksToLoad // waiting for chunks to load
+                            || stuckTimer > 50))
             {
                 waitingForChunksToLoad = false;
                 paused = true;
@@ -466,7 +459,7 @@ public class ElytraFlyPlusPlus extends Module {
 
                 if (!fakeFly.get())
                 {
-                    if (mc.player.isOnGround())
+                    if (mc.player.isOnGround() && (!motionYBoost.get() || Utils.getPlayerSpeed().multiply(1, 0, 1).length() < speed.get()))
                     {
                         mc.player.jump();
                     }
@@ -511,7 +504,7 @@ public class ElytraFlyPlusPlus extends Module {
 
         sendStartFlyingPacket();
 
-        if (bounce.get() && mc.player.isOnGround())
+        if (bounce.get() && mc.player.isOnGround() && (!motionYBoost.get() || Utils.getPlayerSpeed().multiply(1, 0, 1).length() < speed.get()))
         {
             mc.player.jump();
         }
