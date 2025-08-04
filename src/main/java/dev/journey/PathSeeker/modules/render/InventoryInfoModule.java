@@ -1,14 +1,13 @@
 package dev.journey.PathSeeker.modules.render;
 
 import dev.journey.PathSeeker.PathSeeker;
-import dev.journey.PathSeeker.utils.ShulkerInfo;
 import dev.journey.PathSeeker.events.ScreenRenderEvent;
+import dev.journey.PathSeeker.utils.ShulkerInfo;
 import dev.journey.PathSeeker.utils.Type;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -44,12 +43,14 @@ public class InventoryInfoModule extends Module {
         super(PathSeeker.Utility, "inventory-info", "prigozhinplugg");
     }
 
-    @EventHandler private void onTick(TickEvent.Post event) {
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
         if (!(mc.currentScreen instanceof HandledScreen<?>) || mc.player.age % 4 != 0) return;
         refresh((HandledScreen<?>) mc.currentScreen);
     }
 
-    @EventHandler private void onRenderScreen(ScreenRenderEvent event) {
+    @EventHandler
+    private void onRenderScreen(ScreenRenderEvent event) {
         int y = 3 + offset;
         for (ShulkerInfo shulkerInfo : info) {
             int count = 0, x = 2, startY = y, maxX = 22;
@@ -63,7 +64,7 @@ public class InventoryInfoModule extends Module {
                 renderQueue.add(() -> {
                     event.drawContext.drawItem(stack, finalX + 2, finalY);
                     if (stack.getCount() > 999) {
-                        event.drawContext.drawItemInSlot(mc.textRenderer, stack, finalX + 2, finalY,  "%.1fk".formatted(stack.getCount() / 1000f));
+                        event.drawContext.drawItemInSlot(mc.textRenderer, stack, finalX + 2, finalY, "%.1fk".formatted(stack.getCount() / 1000f));
                     } else {
                         event.drawContext.drawItemInSlot(mc.textRenderer, stack, finalX + 2, finalY);
                     }

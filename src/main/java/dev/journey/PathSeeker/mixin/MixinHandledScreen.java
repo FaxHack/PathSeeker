@@ -35,9 +35,11 @@ public class MixinHandledScreen extends Screen {
         Modules.get().get(InventoryInfoModule.class).setClicked(new Vec2f((float) mouseX, (float) mouseY));
     }
 
-    @Override public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         InventoryInfoModule m = Modules.get().get(InventoryInfoModule.class);
-        if (!m.isActive() && verticalAmount == 0) return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+        if (!m.isActive() && verticalAmount == 0)
+            return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
         m.setOffset((int) (m.getOffset() + Math.ceil(verticalAmount) * 18));
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }

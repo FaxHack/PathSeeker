@@ -204,7 +204,8 @@ public class SignHistorian extends Module {
                     })
                     .build()
     );
-    private final Set<BlockPos> signsBrokenByPlayer = new HashSet<>();    private final Setting<Boolean> openBlacklistFile = sgBlacklist.add(
+    private final Set<BlockPos> signsBrokenByPlayer = new HashSet<>();
+    private final Set<SignBlockEntity> modifiedSigns = new HashSet<>();    private final Setting<Boolean> openBlacklistFile = sgBlacklist.add(
             new BoolSetting.Builder()
                     .name("open-blacklist-file")
                     .description("Open the content-blacklist.txt file.")
@@ -218,7 +219,6 @@ public class SignHistorian extends Module {
                     })
                     .build()
     );
-    private final Set<SignBlockEntity> modifiedSigns = new HashSet<>();
     private final Set<SignBlockEntity> destroyedSigns = new HashSet<>();
     private final HashSet<SignBlockEntity> signsToWax = new HashSet<>();
     private final HashSet<SignBlockEntity> signsToGlowInk = new HashSet<>();

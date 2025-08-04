@@ -3,13 +3,15 @@ package dev.journey.PathSeeker.modules.automation;
 import dev.journey.PathSeeker.PathSeeker;
 import dev.journey.PathSeeker.utils.PathSeekerUtil;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
 
 
 public class AFKVanillaFly extends Module {
@@ -40,6 +42,7 @@ public class AFKVanillaFly extends Module {
             .build()
     );
     private float targetPitch = 0;
+
     public AFKVanillaFly() {
         super(PathSeeker.Automation, "AFKVanillaFly", "Maintains a level Y-flight with fireworks and smooth pitch control.");
     }

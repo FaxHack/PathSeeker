@@ -3,11 +3,7 @@ package dev.journey.PathSeeker.modules.automation;
 import dev.journey.PathSeeker.PathSeeker;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -17,11 +13,7 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.trim.ArmorTrim;
-import net.minecraft.item.trim.ArmorTrimMaterial;
-import net.minecraft.item.trim.ArmorTrimMaterials;
-import net.minecraft.item.trim.ArmorTrimPattern;
-import net.minecraft.item.trim.ArmorTrimPatterns;
+import net.minecraft.item.trim.*;
 import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -109,80 +101,80 @@ public class AutoSmithingTable extends Module {
 
     // Armor Trim Settings
     private final Setting<Boolean> applyTrims = sgTrims.add(new BoolSetting.Builder()
-        .name("apply-trims")
-        .description("Whether to apply armor trims using the smithing table.")
-        .defaultValue(Boolean.FALSE)
-        .build()
+            .name("apply-trims")
+            .description("Whether to apply armor trims using the smithing table.")
+            .defaultValue(Boolean.FALSE)
+            .build()
     );
 
     private final Setting<Boolean> trimDiamondArmor = sgTrims.add(new BoolSetting.Builder()
-        .name("trim-diamond-armor")
-        .description("Apply selected trims to diamond armor.")
-        .defaultValue(Boolean.TRUE)
-        .build()
+            .name("trim-diamond-armor")
+            .description("Apply selected trims to diamond armor.")
+            .defaultValue(Boolean.TRUE)
+            .build()
     );
 
     private final Setting<Boolean> trimNetheriteArmor = sgTrims.add(new BoolSetting.Builder()
-        .name("trim-netherite-armor")
-        .description("Apply selected trims to netherite armor.")
-        .defaultValue(Boolean.TRUE)
-        .build()
+            .name("trim-netherite-armor")
+            .description("Apply selected trims to netherite armor.")
+            .defaultValue(Boolean.TRUE)
+            .build()
     );
 
     // Helmet Trim Settings
     private final Setting<TrimTemplateType> helmetTrimTemplate = sgTrims.add(new EnumSetting.Builder<TrimTemplateType>()
-        .name("helmet-trim-template")
-        .description("Smithing template to use for helmet trims.")
-        .defaultValue(TrimTemplateType.NONE)
-        .build()
+            .name("helmet-trim-template")
+            .description("Smithing template to use for helmet trims.")
+            .defaultValue(TrimTemplateType.NONE)
+            .build()
     );
     private final Setting<TrimMaterialType> helmetTrimMaterial = sgTrims.add(new EnumSetting.Builder<TrimMaterialType>()
-        .name("helmet-trim-material")
-        .description("Material to use for helmet trims.")
-        .defaultValue(TrimMaterialType.NONE)
-        .build()
+            .name("helmet-trim-material")
+            .description("Material to use for helmet trims.")
+            .defaultValue(TrimMaterialType.NONE)
+            .build()
     );
 
     // Chestplate Trim Settings
     private final Setting<TrimTemplateType> chestplateTrimTemplate = sgTrims.add(new EnumSetting.Builder<TrimTemplateType>()
-        .name("chestplate-trim-template")
-        .description("Smithing template to use for chestplate trims.")
-        .defaultValue(TrimTemplateType.NONE)
-        .build()
+            .name("chestplate-trim-template")
+            .description("Smithing template to use for chestplate trims.")
+            .defaultValue(TrimTemplateType.NONE)
+            .build()
     );
     private final Setting<TrimMaterialType> chestplateTrimMaterial = sgTrims.add(new EnumSetting.Builder<TrimMaterialType>()
-        .name("chestplate-trim-material")
-        .description("Material to use for chestplate trims.")
-        .defaultValue(TrimMaterialType.NONE)
-        .build()
+            .name("chestplate-trim-material")
+            .description("Material to use for chestplate trims.")
+            .defaultValue(TrimMaterialType.NONE)
+            .build()
     );
 
     // Leggings Trim Settings
     private final Setting<TrimTemplateType> leggingsTrimTemplate = sgTrims.add(new EnumSetting.Builder<TrimTemplateType>()
-        .name("leggings-trim-template")
-        .description("Smithing template to use for leggings trims.")
-        .defaultValue(TrimTemplateType.NONE)
-        .build()
+            .name("leggings-trim-template")
+            .description("Smithing template to use for leggings trims.")
+            .defaultValue(TrimTemplateType.NONE)
+            .build()
     );
     private final Setting<TrimMaterialType> leggingsTrimMaterial = sgTrims.add(new EnumSetting.Builder<TrimMaterialType>()
-        .name("leggings-trim-material")
-        .description("Material to use for leggings trims.")
-        .defaultValue(TrimMaterialType.NONE)
-        .build()
+            .name("leggings-trim-material")
+            .description("Material to use for leggings trims.")
+            .defaultValue(TrimMaterialType.NONE)
+            .build()
     );
 
     // Boots Trim Settings
     private final Setting<TrimTemplateType> bootsTrimTemplate = sgTrims.add(new EnumSetting.Builder<TrimTemplateType>()
-        .name("boots-trim-template")
-        .description("Smithing template to use for boots trims.")
-        .defaultValue(TrimTemplateType.NONE)
-        .build()
+            .name("boots-trim-template")
+            .description("Smithing template to use for boots trims.")
+            .defaultValue(TrimTemplateType.NONE)
+            .build()
     );
     private final Setting<TrimMaterialType> bootsTrimMaterial = sgTrims.add(new EnumSetting.Builder<TrimMaterialType>()
-        .name("boots-trim-material")
-        .description("Material to use for boots trims.")
-        .defaultValue(TrimMaterialType.NONE)
-        .build()
+            .name("boots-trim-material")
+            .description("Material to use for boots trims.")
+            .defaultValue(TrimMaterialType.NONE)
+            .build()
     );
 
     private final Queue<Runnable> actionQueue = new LinkedList<>();
@@ -226,14 +218,14 @@ public class AutoSmithingTable extends Module {
         if (!trimDiamondArmor.get() && !trimNetheriteArmor.get()) return false;
 
         boolean anyTemplate = helmetTrimTemplate.get() != TrimTemplateType.NONE ||
-                              chestplateTrimTemplate.get() != TrimTemplateType.NONE ||
-                              leggingsTrimTemplate.get() != TrimTemplateType.NONE ||
-                              bootsTrimTemplate.get() != TrimTemplateType.NONE;
+                chestplateTrimTemplate.get() != TrimTemplateType.NONE ||
+                leggingsTrimTemplate.get() != TrimTemplateType.NONE ||
+                bootsTrimTemplate.get() != TrimTemplateType.NONE;
 
         boolean anyMaterial = helmetTrimMaterial.get() != TrimMaterialType.NONE ||
-                              chestplateTrimMaterial.get() != TrimMaterialType.NONE ||
-                              leggingsTrimMaterial.get() != TrimMaterialType.NONE ||
-                              bootsTrimMaterial.get() != TrimMaterialType.NONE;
+                chestplateTrimMaterial.get() != TrimMaterialType.NONE ||
+                leggingsTrimMaterial.get() != TrimMaterialType.NONE ||
+                bootsTrimMaterial.get() != TrimMaterialType.NONE;
 
         return anyTemplate && anyMaterial;
     }
@@ -337,7 +329,7 @@ public class AutoSmithingTable extends Module {
                     TrimMaterialType materialType = getTrimMaterialForArmor(armorItem);
 
                     if (templateType != null && templateType != TrimTemplateType.NONE && templateType.item != null && templateType.patternKey != null &&
-                        materialType != null && materialType != TrimMaterialType.NONE && materialType.item != null && materialType.materialKey != null) {
+                            materialType != null && materialType != TrimMaterialType.NONE && materialType.item != null && materialType.materialKey != null) {
 
                         int trimTemplatePlayerSlot = findMaterialSlot(handler, templateType.item);
                         if (trimTemplatePlayerSlot == -1) {
@@ -359,9 +351,9 @@ public class AutoSmithingTable extends Module {
 
             // If we get here, check if we're done with everything
             if (actionQueue.isEmpty()) {
-                boolean canUpgrade = findNextUpgradableItemSlot(handler) != -1 && 
-                                   findMaterialSlot(handler, Items.NETHERITE_INGOT) != -1 && 
-                                   (!useTemplates.get() || findMaterialSlot(handler, Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE) != -1);
+                boolean canUpgrade = findNextUpgradableItemSlot(handler) != -1 &&
+                        findMaterialSlot(handler, Items.NETHERITE_INGOT) != -1 &&
+                        (!useTemplates.get() || findMaterialSlot(handler, Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE) != -1);
                 boolean canTrim = applyTrims.get() && findNextTrimmableItemSlot(handler) != null;
 
                 if (!canUpgrade && !canTrim) {
@@ -465,7 +457,7 @@ public class AutoSmithingTable extends Module {
                 TrimMaterialType materialType = getTrimMaterialForArmor(armorItem);
 
                 if (templateType != null && templateType != TrimTemplateType.NONE && templateType.item != null && templateType.patternKey != null &&
-                    materialType != null && materialType != TrimMaterialType.NONE && materialType.item != null && materialType.materialKey != null) {
+                        materialType != null && materialType != TrimMaterialType.NONE && materialType.item != null && materialType.materialKey != null) {
 
                     int nextTrimTemplateSlot = findMaterialSlot(handler, templateType.item);
                     int nextTrimMaterialSlot = findMaterialSlot(handler, materialType.item);
@@ -496,7 +488,7 @@ public class AutoSmithingTable extends Module {
             if (!(mc.currentScreen instanceof SmithingScreen)) {
                 actionQueue.clear();
             }
-            currentOperationTypeForLogging = ""; 
+            currentOperationTypeForLogging = "";
         });
     }
 
@@ -567,9 +559,6 @@ public class AutoSmithingTable extends Module {
         return useKillAura;
     }
 
-    private record TrimmableItemInfo(int slot, Item item) {
-    }
-
     private TrimmableItemInfo findNextTrimmableItemSlot(SmithingScreenHandler handler) {
         if (!applyTrims.get() || mc.world == null) return null;
         int playerInvStartIndex = handler.slots.size() - 36;
@@ -590,7 +579,7 @@ public class AutoSmithingTable extends Module {
                 TrimMaterialType materialType = getTrimMaterialForArmor(item);
 
                 if (templateType != null && templateType != TrimTemplateType.NONE && templateType.item != null && templateType.patternKey != null &&
-                    materialType != null && materialType != TrimMaterialType.NONE && materialType.item != null && materialType.materialKey != null) {
+                        materialType != null && materialType != TrimMaterialType.NONE && materialType.item != null && materialType.materialKey != null) {
 
                     ArmorTrim existingTrim = stack.get(DataComponentTypes.TRIM);
                     if (existingTrim != null) {
@@ -613,16 +602,20 @@ public class AutoSmithingTable extends Module {
 
     private TrimTemplateType getTrimTemplateForArmor(Item armorItem) {
         if (armorItem == Items.DIAMOND_HELMET || armorItem == Items.NETHERITE_HELMET) return helmetTrimTemplate.get();
-        if (armorItem == Items.DIAMOND_CHESTPLATE || armorItem == Items.NETHERITE_CHESTPLATE) return chestplateTrimTemplate.get();
-        if (armorItem == Items.DIAMOND_LEGGINGS || armorItem == Items.NETHERITE_LEGGINGS) return leggingsTrimTemplate.get();
+        if (armorItem == Items.DIAMOND_CHESTPLATE || armorItem == Items.NETHERITE_CHESTPLATE)
+            return chestplateTrimTemplate.get();
+        if (armorItem == Items.DIAMOND_LEGGINGS || armorItem == Items.NETHERITE_LEGGINGS)
+            return leggingsTrimTemplate.get();
         if (armorItem == Items.DIAMOND_BOOTS || armorItem == Items.NETHERITE_BOOTS) return bootsTrimTemplate.get();
         return TrimTemplateType.NONE;
     }
 
     private TrimMaterialType getTrimMaterialForArmor(Item armorItem) {
         if (armorItem == Items.DIAMOND_HELMET || armorItem == Items.NETHERITE_HELMET) return helmetTrimMaterial.get();
-        if (armorItem == Items.DIAMOND_CHESTPLATE || armorItem == Items.NETHERITE_CHESTPLATE) return chestplateTrimMaterial.get();
-        if (armorItem == Items.DIAMOND_LEGGINGS || armorItem == Items.NETHERITE_LEGGINGS) return leggingsTrimMaterial.get();
+        if (armorItem == Items.DIAMOND_CHESTPLATE || armorItem == Items.NETHERITE_CHESTPLATE)
+            return chestplateTrimMaterial.get();
+        if (armorItem == Items.DIAMOND_LEGGINGS || armorItem == Items.NETHERITE_LEGGINGS)
+            return leggingsTrimMaterial.get();
         if (armorItem == Items.DIAMOND_BOOTS || armorItem == Items.NETHERITE_BOOTS) return bootsTrimMaterial.get();
         return TrimMaterialType.NONE;
     }
@@ -649,16 +642,15 @@ public class AutoSmithingTable extends Module {
         if (item == Items.DIAMOND_HELMET && upgradeHelmets.get()) return true;
         if (item == Items.DIAMOND_CHESTPLATE && upgradeChestplates.get()) return true;
         if (item == Items.DIAMOND_LEGGINGS && upgradeLeggings.get()) return true;
-        if (item == Items.DIAMOND_BOOTS && upgradeBoots.get()) return true;
-        return false;
+        return item == Items.DIAMOND_BOOTS && upgradeBoots.get();
     }
 
     private boolean isArmorPiece(Item item) {
         return item == Items.DIAMOND_HELMET || item == Items.DIAMOND_CHESTPLATE || item == Items.DIAMOND_LEGGINGS || item == Items.DIAMOND_BOOTS ||
-               item == Items.NETHERITE_HELMET || item == Items.NETHERITE_CHESTPLATE || item == Items.NETHERITE_LEGGINGS || item == Items.NETHERITE_BOOTS;
+                item == Items.NETHERITE_HELMET || item == Items.NETHERITE_CHESTPLATE || item == Items.NETHERITE_LEGGINGS || item == Items.NETHERITE_BOOTS;
     }
 
-    private enum AutoSmithingScreen { SMITHING, UNKNOWN, NONE }
+    private enum AutoSmithingScreen {SMITHING, UNKNOWN, NONE}
 
     private enum PauseReason {
         NO_SMITHING_TABLE,
@@ -735,5 +727,8 @@ public class AutoSmithingTable extends Module {
         public String toString() {
             return title;
         }
+    }
+
+    private record TrimmableItemInfo(int slot, Item item) {
     }
 }

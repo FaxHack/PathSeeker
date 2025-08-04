@@ -21,8 +21,8 @@ import java.util.Map;
 public record ShulkerInfo(String name, Type type, int color, int slot, List<ItemStack> stacks) {
 
     public static ShulkerInfo create(ItemStack stack, int slot) {
-        if (!(stack.getItem() instanceof BlockItem) || !(((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock)) return null;
-        ShulkerBoxBlock block = (ShulkerBoxBlock) ((BlockItem) stack.getItem()).getBlock();
+        if (!(stack.getItem() instanceof BlockItem) || !(((BlockItem) stack.getItem()).getBlock() instanceof ShulkerBoxBlock block))
+            return null;
         List<ItemStack> items = DefaultedList.ofSize(27, ItemStack.EMPTY);
         Type type = Type.COMPACT;
 
