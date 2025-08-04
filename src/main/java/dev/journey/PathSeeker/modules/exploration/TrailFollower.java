@@ -291,10 +291,14 @@ public class TrailFollower extends Module {
                     if (!pitch40UtilModule.isActive()) {
                         pitch40UtilModule.toggle();
                         if (pitch40Firework.get()) {
-                            Setting<Boolean> setting = ((Setting<Boolean>) pitch40UtilModule.settings.get("Auto Firework"));
-                            info("Auto Firework enabled, if you want to change the velocity threshold or the firework cooldown check the settings under Pitch40Util.");
-                            oldAutoFireworkValue = setting.get();
-                            setting.set(true);
+                            Setting<Boolean> setting = ((Setting<Boolean>) pitch40UtilModule.settings.get("auto-firework"));
+                            if (setting != null) {
+                                info("Auto Firework enabled, if you want to change the velocity threshold or the firework cooldown check the settings under Pitch40Util.");
+                                oldAutoFireworkValue = setting.get();
+                                setting.set(true);
+                            } else {
+                                error("Could not find auto-firework setting in Pitch40Util module");
+                            }
                         }
                     }
                 } else if (overworldFlightMode.get() == OverworldFlightMode.VANILLA) {
@@ -346,7 +350,10 @@ public class TrailFollower extends Module {
                     if (pitch40UtilModule.isActive()) {
                         pitch40UtilModule.toggle();
                     }
-                    ((Setting<Boolean>) pitch40UtilModule.settings.get("Auto Firework")).set(oldAutoFireworkValue);
+                    Setting<Boolean> setting = ((Setting<Boolean>) pitch40UtilModule.settings.get("auto-firework"));
+                    if (setting != null) {
+                        setting.set(oldAutoFireworkValue);
+                    }
                 }
                 break;
             }
