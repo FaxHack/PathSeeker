@@ -4,6 +4,7 @@ package dev.journey.PathSeeker.utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -137,14 +138,18 @@ public class PathSeekerUtil {
         }
     }
 
-    public static int firework(MinecraftClient mc) {
-        int elytraSwapSlot = -1;
+    public static int firework(MinecraftClient mc, boolean elytraRequired) {
 
-        if (!mc.player.getInventory().getArmorStack(2).isOf(Items.ELYTRA)) {
+        // cant use a rocket if not wearing an elytra
+        int elytraSwapSlot = -1;
+        if (elytraRequired && !mc.player.getInventory().getStack(SlotUtils.ARMOR_START + 2).isOf(Items.ELYTRA))
+        {
             FindItemResult itemResult = InvUtils.findInHotbar(Items.ELYTRA);
             if (!itemResult.found()) {
                 return -1;
-            } else {
+            }
+            else
+            {
                 elytraSwapSlot = itemResult.slot();
                 InvUtils.swap(itemResult.slot(), true);
                 mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
@@ -165,8 +170,11 @@ public class PathSeekerUtil {
             mc.player.swingHand(Hand.MAIN_HAND);
             InvUtils.swapBack();
         }
-
-        return elytraSwapSlot != -1 ? elytraSwapSlot : 200;
+        if (elytraSwapSlot != -1)
+        {
+            return elytraSwapSlot;
+        }
+        return 200;
     }
 
     public static void sendWebhook(String webhookURL, String title, String message, String pingID, String playerName) {

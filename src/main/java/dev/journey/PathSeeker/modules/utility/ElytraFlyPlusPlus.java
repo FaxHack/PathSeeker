@@ -33,15 +33,19 @@ import static dev.journey.PathSeeker.utils.PathSeekerUtil.*;
 public class ElytraFlyPlusPlus extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    public final Setting<Boolean> fakeHeadBlock = sgGeneral.add(new BoolSetting.Builder()
+            .name("fake-head-collision")
+            .description("Makes it seem like a block is above your head. Useful for bouncing in 1x2 tunnels to go over gaps.")
+            .defaultValue(false)
+            .build()
+    );
     private final SettingGroup sgObstaclePasser = settings.createGroup("Obstacle Passer");
-
     private final Setting<Boolean> bounce = sgGeneral.add(new BoolSetting.Builder()
             .name("Bounce")
             .description("Automatically does bounce efly.")
             .defaultValue(false)
             .build()
     );
-
     private final Setting<Boolean> lockPitch = sgGeneral.add(new BoolSetting.Builder()
             .name("Lock Pitch")
             .description("Whether to lock your pitch when bounce is enabled.")
@@ -49,7 +53,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(bounce::get)
             .build()
     );
-
     private final Setting<Boolean> autoAdjustPitch = sgGeneral.add(new BoolSetting.Builder()
             .name("Auto Adjust Pitch")
             .description("Whether to auto adjust your pitch to stay at a set speed")
@@ -57,7 +60,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(() -> bounce.get() && lockPitch.get())
             .build()
     );
-
     private final Setting<Double> pitch = sgGeneral.add(new DoubleSetting.Builder()
             .name("Pitch")
             .description("The pitch to set when bounce is enabled.")
@@ -65,7 +67,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(() -> bounce.get() && lockPitch.get() && !autoAdjustPitch.get())
             .build()
     );
-
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("Speed")
             .description("The speed in blocks per second to keep you at.")
@@ -73,7 +74,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(() -> bounce.get() && lockPitch.get() && autoAdjustPitch.get())
             .build()
     );
-
     private final Setting<Boolean> lockYaw = sgGeneral.add(new BoolSetting.Builder()
             .name("Lock Yaw")
             .description("Whether to lock your yaw when bounce is enabled.")
@@ -81,7 +81,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(bounce::get)
             .build()
     );
-
     private final Setting<Boolean> useCustomYaw = sgGeneral.add(new BoolSetting.Builder()
             .name("Use Custom Yaw")
             .description("Enable this if you want to use a yaw that isn't a factor of 45.")
@@ -89,7 +88,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(bounce::get)
             .build()
     );
-
     private final Setting<Double> yaw = sgGeneral.add(new DoubleSetting.Builder()
             .name("Yaw")
             .description("The yaw to set when bounce is enabled. This is auto set to the closest 45 deg angle to you unless Use Custom Yaw is enabled.")
@@ -97,7 +95,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(() -> bounce.get() && useCustomYaw.get())
             .build()
     );
-
     private final Setting<Boolean> highwayObstaclePasser = sgObstaclePasser.add(new BoolSetting.Builder()
             .name("Highway Obstacle Passer")
             .description("Uses baritone to pass obstacles.")
@@ -105,7 +102,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(bounce::get)
             .build()
     );
-
     private final Setting<Boolean> useCustomStartPos = sgObstaclePasser.add(new BoolSetting.Builder()
             .name("Use Custom Start Position")
             .description("Enable and set this ONLY if you are on a ringroad. Otherwise (0, 0) is the start position and will be automatically used.")
@@ -113,15 +109,13 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(() -> bounce.get() && highwayObstaclePasser.get())
             .build()
     );
-
     private final Setting<BlockPos> startPos = sgObstaclePasser.add(new BlockPosSetting.Builder()
             .name("Start Position")
             .description("The start position to use when using a custom start position.")
-            .defaultValue(new BlockPos(0,0,0))
+            .defaultValue(new BlockPos(0, 0, 0))
             .visible(() -> bounce.get() && highwayObstaclePasser.get() && useCustomStartPos.get())
             .build()
     );
-
     private final Setting<Boolean> awayFromStartPos = sgObstaclePasser.add(new BoolSetting.Builder()
             .name("Away From Start Position")
             .description("If true, will go away from the start position instead of towards it. The start pos is (0,0) if it is not set to a custom start pos.")
@@ -129,7 +123,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(() -> bounce.get() && highwayObstaclePasser.get())
             .build()
     );
-
     private final Setting<Double> distance = sgObstaclePasser.add(new DoubleSetting.Builder()
             .name("Distance")
             .description("The distance to set the baritone goal for path realignment.")
@@ -137,7 +130,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(() -> bounce.get() && highwayObstaclePasser.get())
             .build()
     );
-
     private final Setting<Integer> targetY = sgObstaclePasser.add(new IntSetting.Builder()
             .name("Y Level")
             .description("The Y level to bounce at.")
@@ -145,7 +137,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(() -> bounce.get() && highwayObstaclePasser.get())
             .build()
     );
-
     private final Setting<Boolean> avoidPortalTraps = sgObstaclePasser.add(new BoolSetting.Builder()
             .name("Avoid Portal Traps")
             .description("Will attempt to detect portal traps on chunk load and avoid them.")
@@ -153,7 +144,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(() -> bounce.get() && highwayObstaclePasser.get())
             .build()
     );
-
     private final Setting<Double> portalAvoidDistance = sgObstaclePasser.add(new DoubleSetting.Builder()
             .name("Portal Avoid Distance")
             .description("The distance to a portal trap where the obstacle passer will takeover and go around it.")
@@ -163,7 +153,6 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(() -> bounce.get() && highwayObstaclePasser.get() && avoidPortalTraps.get())
             .build()
     );
-
     private final Setting<Integer> portalScanWidth = sgObstaclePasser.add(new IntSetting.Builder()
             .name("Portal Scan Width")
             .description("The width on the axis of the highway that will be scanned for portal traps.")
@@ -173,29 +162,19 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(() -> bounce.get() && highwayObstaclePasser.get() && avoidPortalTraps.get())
             .build()
     );
-
     private final Setting<BlockPos> baritoneOffset = sgObstaclePasser.add(new BlockPosSetting.Builder()
             .name("Baritone Offset")
             .description("The offset in blocks from where goals should be set.")
-            .defaultValue(new BlockPos(0,0,0))
+            .defaultValue(new BlockPos(0, 0, 0))
             .visible(() -> bounce.get() && highwayObstaclePasser.get())
             .build()
     );
-
     private final Setting<Boolean> toggleElytra = sgGeneral.add(new BoolSetting.Builder()
             .name("Toggle Elytra")
             .description("Equips an elytra on activate, and a chestplate on deactivate.")
             .defaultValue(false)
             .build()
     );
-
-    public final Setting<Boolean> fakeHeadBlock = sgGeneral.add(new BoolSetting.Builder()
-            .name("fake-head-collision")
-            .description("Makes it seem like a block is above your head. Useful for bouncing in 1x2 tunnels to go over gaps.")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<Boolean> autoSwapElytra = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-swap-on-firework")
             .description("Swaps between a broken elytra and a non-broken one to be able to firework and lose minimal durability.")
@@ -222,6 +201,18 @@ public class ElytraFlyPlusPlus extends Module {
             .visible(autoSwapElytra::get)
             .build()
     );
+    // 5 chunks forwards
+    private final double maxDistance = 16 * 5;
+    private boolean startSprinting;
+    private BlockPos portalTrap = null;
+    private boolean paused = false;
+    private int swapBackSlot = -1; // slot used to hold the elytra slot when swapping to firework
+    // a path used when there are no valid blocks in range.
+    // it will instead path to this and then when it gets close it will look for a valid block again
+    private BlockPos tempPath = null;
+    private int swapTicks = 0;
+    private boolean swapping = false;
+    private boolean waitingForChunksToLoad;
 
     public ElytraFlyPlusPlus() {
         super(
@@ -231,25 +222,18 @@ public class ElytraFlyPlusPlus extends Module {
         );
     }
 
-    private boolean startSprinting;
-    private BlockPos portalTrap = null;
-    private boolean paused = false;
-    private int swapBackSlot = -1; // slot used to hold the elytra slot when swapping to firework
-
     @EventHandler
-    private void onReceivePacket(PacketEvent.Receive event)
-    {
-        if (event.packet instanceof PlayerSpawnPositionS2CPacket packet)
-        {
+    private void onReceivePacket(PacketEvent.Receive event) {
+        if (event.packet instanceof PlayerSpawnPositionS2CPacket packet) {
             onActivate();
         }
     }
 
     @Override
-    public void onActivate()
-    {
+    public void onActivate() {
         if (mc.player == null || mc.player.getAbilities().allowFlying) return;
-        if (mc.player.getPos().multiply(1, 0, 1).length() < 100) return; // I don't know any other way to fix this stupid shit
+        if (mc.player.getPos().multiply(1, 0, 1).length() < 100)
+            return; // I don't know any other way to fix this stupid shit
         startSprinting = mc.player.isSprinting();
         tempPath = null;
         portalTrap = null;
@@ -257,33 +241,26 @@ public class ElytraFlyPlusPlus extends Module {
         swapBackSlot = -1;
         waitingForChunksToLoad = false;
 
-        if (bounce.get())
-        {
-            if (BaritoneAPI.getProvider().getPrimaryBaritone().getElytraProcess().currentDestination() == null)
-            {
+        if (bounce.get()) {
+            if (BaritoneAPI.getProvider().getPrimaryBaritone().getElytraProcess().currentDestination() == null) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoal(null);
             }
 
-            if (!useCustomStartPos.get())
-            {
+            if (!useCustomStartPos.get()) {
                 startPos.set(new BlockPos(0, 0, 0));
             }
 
-            if (!useCustomYaw.get())
-            {
+            if (!useCustomYaw.get()) {
                 // If less than 100 blocks from the start pos, angle calculation may be wrong, so just use players yaw
-                if (mc.player.getBlockPos().getSquaredDistance(startPos.get()) < 10_000)
-                {
+                if (mc.player.getBlockPos().getSquaredDistance(startPos.get()) < 10_000) {
                     double playerAngleNormalized = angleOnAxis(mc.player.getYaw());
                     yaw.set(playerAngleNormalized);
-                } else
-                {
+                } else {
                     // Otherwise use the angle from the starting position to the players position
                     BlockPos directionVec = mc.player.getBlockPos().subtract(startPos.get());
                     double angle = Math.toDegrees(Math.atan2(-directionVec.getX(), directionVec.getZ()));
                     double angleNormalized = angleOnAxis(angle);
-                    if (!awayFromStartPos.get())
-                    {
+                    if (!awayFromStartPos.get()) {
                         angleNormalized += 180;
                     }
 
@@ -292,8 +269,7 @@ public class ElytraFlyPlusPlus extends Module {
             }
         }
 
-        if (toggleElytra.get())
-        {
+        if (toggleElytra.get()) {
             if (!mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem().toString().contains("elytra")) {
                 Modules.get().get(ChestSwap.class).swap();
             }
@@ -301,56 +277,35 @@ public class ElytraFlyPlusPlus extends Module {
     }
 
     @Override
-    public void onDeactivate()
-    {
+    public void onDeactivate() {
         if (mc.player == null) return;
 
-        if (bounce.get())
-        {
-            if (BaritoneAPI.getProvider().getPrimaryBaritone().getElytraProcess().currentDestination() == null)
-            {
+        if (bounce.get()) {
+            if (BaritoneAPI.getProvider().getPrimaryBaritone().getElytraProcess().currentDestination() == null) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoal(null);
             }
         }
 
         mc.player.setSprinting(startSprinting);
 
-        if (toggleElytra.get())
-        {
+        if (toggleElytra.get()) {
             if (!mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem().toString().contains("chestplate")) {
                 Modules.get().get(ChestSwap.class).swap();
             }
         }
     }
 
-    // 5 chunks forwards
-    private final double maxDistance = 16 * 5;
-
-    // a path used when there are no valid blocks in range.
-    // it will instead path to this and then when it gets close it will look for a valid block again
-    private BlockPos tempPath = null;
-
-    private int swapTicks = 0;
-    private boolean swapping = false;
-
-    private boolean waitingForChunksToLoad;
-
     @EventHandler
-    private void onTick(TickEvent.Pre event)
-    {
+    private void onTick(TickEvent.Pre event) {
         if (mc.player == null || mc.player.getAbilities().allowFlying) return;
 
         swapTicks--;
-        if (swapTicks <= 0)
-        {
-            if (swapping && swapBackSlot != -1)
-            {
+        if (swapTicks <= 0) {
+            if (swapping && swapBackSlot != -1) {
                 mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
                 swapTicks = swapBackDelay.get();
                 swapping = false;
-            }
-            else if (swapBackSlot != -1)
-            {
+            } else if (swapBackSlot != -1) {
                 InvUtils.move().fromArmor(2).to(swapBackSlot);
                 swapBackSlot = -1;
             }
@@ -359,22 +314,17 @@ public class ElytraFlyPlusPlus extends Module {
 
 
         if (enabled()) mc.player.setSprinting(true);
-        if (bounce.get())
-        {
-            if (tempPath != null && mc.player.getBlockPos().getSquaredDistance(tempPath) < 500)
-            {
+        if (bounce.get()) {
+            if (tempPath != null && mc.player.getBlockPos().getSquaredDistance(tempPath) < 500) {
                 tempPath = null;
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoal(null);
-            }
-            else if (tempPath != null)
-            {
+            } else if (tempPath != null) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(tempPath));
                 return;
             }
 
             // if still pathing, wait for that to complete
-            if (highwayObstaclePasser.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().getGoal() != null)
-            {
+            if (highwayObstaclePasser.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().getGoal() != null) {
                 return;
             }
 
@@ -383,8 +333,7 @@ public class ElytraFlyPlusPlus extends Module {
                     || mc.player.getY() > targetY.get() + 2
                     || mc.player.horizontalCollision)
                     || portalTrap != null && portalTrap.getSquaredDistance(mc.player.getBlockPos()) < portalAvoidDistance.get() * portalAvoidDistance.get()
-                    || waitingForChunksToLoad)
-            {
+                    || waitingForChunksToLoad) {
                 waitingForChunksToLoad = false;
                 paused = true;
                 BlockPos goal = mc.player.getBlockPos();
@@ -396,10 +345,8 @@ public class ElytraFlyPlusPlus extends Module {
                     info("Pathing around portal.");
                 }
 
-                do
-                {
-                    if (currDistance > maxDistance)
-                    {
+                do {
+                    if (currDistance > maxDistance) {
                         tempPath = goal;
                         BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(goal));
                         return;
@@ -413,12 +360,11 @@ public class ElytraFlyPlusPlus extends Module {
                     Vec3d pos = startPos.get().toCenterPos().add(parallelCurrPosComponent);
                     pos = positionInDirection(pos, yaw.get(), currDistance);
 
-                    goal = new BlockPos((int)(Math.floor(pos.x) + baritoneOffset.get().getX()), targetY.get() + baritoneOffset.get().getY(), (int)Math.floor(pos.z) + baritoneOffset.get().getZ());
+                    goal = new BlockPos((int) (Math.floor(pos.x) + baritoneOffset.get().getX()), targetY.get() + baritoneOffset.get().getY(), (int) Math.floor(pos.z) + baritoneOffset.get().getZ());
                     currDistance++;
 
                     // Blocks in unloaded chunks are void air, for some reason checking if the chunk is loaded was always true, so I check this instead
-                    if (mc.world.getBlockState(goal).getBlock() == Blocks.VOID_AIR)
-                    {
+                    if (mc.world.getBlockState(goal).getBlock() == Blocks.VOID_AIR) {
                         waitingForChunksToLoad = true;
                         return;
                     }
@@ -429,39 +375,30 @@ public class ElytraFlyPlusPlus extends Module {
                         !mc.world.getBlockState(goal).isAir() ||
                         (fakeHeadBlock.get() && !mc.world.getBlockState(goal.up(2)).isSolidBlock(mc.world, goal.up(2))));
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(goal));
-            }
-            else
-            {
+            } else {
                 // keep jumping
                 paused = false;
                 if (!enabled()) return;
-                if (mc.player.isOnGround())
-                {
+                if (mc.player.isOnGround()) {
                     mc.player.jump();
                 }
 
                 // set yaw and pitch
-                if (lockYaw.get())
-                {
+                if (lockYaw.get()) {
                     mc.player.setYaw(yaw.get().floatValue());
                 }
-                if (lockPitch.get())
-                {
-                    if (autoAdjustPitch.get())
-                    {
+                if (lockPitch.get()) {
+                    if (autoAdjustPitch.get()) {
                         double playerSpeed = Utils.getPlayerSpeed().multiply(1, 0, 1).length();
                         mc.player.setPitch((float) Math.min(90, Math.max(-90, (speed.get() - playerSpeed) * 5)));
-                    }
-                    else
-                    {
+                    } else {
                         mc.player.setPitch(pitch.get().floatValue());
                     }
                 }
             }
         }
 
-        if (enabled())
-        {
+        if (enabled()) {
             mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(
                     mc.player,
                     ClientCommandC2SPacket.Mode.START_FALL_FLYING
@@ -469,14 +406,12 @@ public class ElytraFlyPlusPlus extends Module {
         }
     }
 
-    public boolean enabled()
-    {
+    public boolean enabled() {
         return this.isActive() && !paused && mc.player != null && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem().toString().contains("elytra");
     }
 
     @EventHandler
-    private void onChunkData(ChunkDataEvent event)
-    {
+    private void onChunkData(ChunkDataEvent event) {
         if (!avoidPortalTraps.get()) return;
         ChunkPos pos = event.chunk().getPos();
 
@@ -488,29 +423,25 @@ public class ElytraFlyPlusPlus extends Module {
 
         if (distanceToHighway > 21) return;
 
-        for (int x = 0; x < 16; x++)
-        {
-            for (int z = 0; z < 16; z++)
-            {
-                for (int y = targetY.get(); y < targetY.get() + 3; y++)
-                {
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = targetY.get(); y < targetY.get() + 3; y++) {
                     BlockPos position = new BlockPos(pos.x * 16 + x, y, pos.z * 16 + z);
 
-                    if (distancePointToDirection(Vec3d.of(position), moveDir, mc.player.getPos()) > portalScanWidth.get()) continue;
+                    if (distancePointToDirection(Vec3d.of(position), moveDir, mc.player.getPos()) > portalScanWidth.get())
+                        continue;
 
                     if (mc.world.getBlockState(position).getBlock().equals(Blocks.NETHER_PORTAL)) // TODO: This position could be unloaded
                     {
-                        BlockPos posBehind = new BlockPos((int)Math.floor(position.getX() + moveDir.x), position.getY(), (int) Math.floor(position.getZ() + moveDir.z));
+                        BlockPos posBehind = new BlockPos((int) Math.floor(position.getX() + moveDir.x), position.getY(), (int) Math.floor(position.getZ() + moveDir.z));
 
                         // Trap is detected when a portal has a solid block or another portal behind it
                         if (mc.world.getBlockState(posBehind).isSolidBlock(mc.world, posBehind) ||
-                                mc.world.getBlockState(posBehind).getBlock() == Blocks.NETHER_PORTAL)
-                        {
+                                mc.world.getBlockState(posBehind).getBlock() == Blocks.NETHER_PORTAL) {
                             if (portalTrap == null || (
                                     portalTrap.getSquaredDistance(posBehind) > 100 &&
                                             mc.player.getBlockPos().getSquaredDistance(posBehind) < mc.player.getBlockPos().getSquaredDistance(portalTrap))
-                            )
-                            {
+                            ) {
                                 portalTrap = posBehind;
                             }
                         }
@@ -528,8 +459,7 @@ public class ElytraFlyPlusPlus extends Module {
 
             if (!enabled()) return;
             ItemStack chestStack = mc.player.getEquippedStack(EquipmentSlot.CHEST);
-            if (chestStack.getDamage() >= chestStack.getMaxDamage() - 1)
-            {
+            if (chestStack.getDamage() >= chestStack.getMaxDamage() - 1) {
                 FindItemResult foundItem = InvUtils.find(item -> item.getItem() == Items.ELYTRA && item.getDamage() < item.getMaxDamage() - 1);
                 if (foundItem.found()) {
                     InvUtils.move().from(foundItem.slot()).toArmor(2);

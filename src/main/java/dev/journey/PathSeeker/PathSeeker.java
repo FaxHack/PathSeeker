@@ -6,6 +6,7 @@ import dev.journey.PathSeeker.commands.Stats2b2t;
 import dev.journey.PathSeeker.modules.automation.*;
 import dev.journey.PathSeeker.modules.exploration.*;
 import dev.journey.PathSeeker.modules.render.*;
+import dev.journey.PathSeeker.modules.render.BetterStashFinder;
 import dev.journey.PathSeeker.modules.utility.*;
 import dev.journey.PathSeeker.utils.Update.UpdateChecker;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
@@ -31,17 +32,10 @@ public class PathSeeker extends MeteorAddon {
         UpdateChecker.checkForUpdate();
 
         //Hunting
-        Modules.get().add(new ActivatedSpawnerDetector());
         Modules.get().add(new StackedMinecartsDetector());
-        Modules.get().add(new CaveDisturbanceDetector());
-        Modules.get().add(new PortalPatternFinder());
-        Modules.get().add(new NewerNewChunks());
-        Modules.get().add(new BaseFinder());
 
 
         //Utility
-        Modules.get().add(new GrimDuraFirework());
-        Modules.get().add(new SignHistorian());
         Modules.get().add(new Pitch40Util());
         Modules.get().add(new ElytraFlyPlusPlus());
         Modules.get().add(new Firework());
@@ -50,20 +44,16 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new HoleAndTunnelAndStairsESP());
         Modules.get().add(new PotESP());
         Modules.get().add(new MobGearESP());
-        Modules.get().add(new DroppedItemESP());
-        Modules.get().add(new EntityClusterESP());
         Modules.get().add(new VanityESP());
 
         //Automation
         //Modules.get().add(new ElytraSwap());
         Modules.get().add(new TridentDupe());
         Modules.get().add(new Firework());
-        Modules.get().add(new AutoEnchant());
         Modules.get().add(new AreaLoader());
         Modules.get().add(new AFKVanillaFly());
         Modules.get().add(new TridentAura());
         Modules.get().add(new AutoPortal());
-        Modules.get().add(new AutoSmithingTable());
 
         /* To Release
 

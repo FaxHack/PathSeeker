@@ -2,110 +2,38 @@ package dev.journey.PathSeeker.modules.render;
 
 import dev.journey.PathSeeker.PathSeeker;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.BannerBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.WallBannerBlock;
+import net.minecraft.block.entity.BannerBlockEntity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.item.*;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.Text;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.chunk.WorldChunk;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public class DroppedItemESP extends Module {
-    private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
-    public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
-    );
-    public final Setting<Double> fillOpacity = sgGeneral.add(new DoubleSetting.Builder()
-            .name("fill-opacity")
-            .description("The opacity of the shape fill.")
-            .defaultValue(0.3)
-            .range(0, 1)
-            .sliderMax(1)
-            .build()
-    );
-    public final Setting<Boolean> enchants = sgGeneral.add(new BoolSetting.Builder()
-            .name("enforce-item-enchants")
-            .description("Requires that armor and tools must be enchanted for module to detect.")
-            .defaultValue(true)
-            .build()
-    );
-    public final Setting<Boolean> certainenchants = sgGeneral.add(new BoolSetting.Builder()
-            .name("find-certain-item-enchants")
-            .description("Requires that armor and tools must be enchanted with these enchants.")
-            .defaultValue(false)
-            .visible(enchants::get)
-            .build()
-    );
-    private final Setting<Set<RegistryKey<Enchantment>>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Mining Tool Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.EFFICIENCY, Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Sword Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Armor Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> maceenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Mace Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
-    private final Setting<Set<RegistryKey<Enchantment>>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("Trident Enchants")
-            .description("List of enchantments required.")
-            .visible(() -> enchants.get() && certainenchants.get())
-            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
-            .build());
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
-    public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
-            .name("distance-colors")
-            .description("Changes the color of tracers depending on distance.")
-            .defaultValue(true)
-            .build()
-    );
-    private final Setting<SettingColor> distantColor = sgColors.add(new ColorSetting.Builder()
-            .name("distant-color")
-            .description("The item's bounding box and tracer color when you are far away.")
-            .defaultValue(new SettingColor(25, 255, 255, 255))
-            .visible(distance::get)
-            .build()
-    );
-    public final Setting<Integer> distanceInt = sgColors.add(new IntSetting.Builder()
-            .name("distance-colors-threshold")
-            .description("The max distance for colors to change.")
-            .defaultValue(128)
-            .min(1)
-            .sliderRange(1, 1024)
-            .visible(distance::get)
-            .build()
-    );
     private final List<Item> defaultPlayerItems = new ArrayList<>(List.of(
             Items.DIAMOND_HELMET,
             Items.DIAMOND_CHESTPLATE,
@@ -151,159 +79,318 @@ public class DroppedItemESP extends Module {
             Items.BROWN_SHULKER_BOX,
             Items.BLACK_SHULKER_BOX
     ));
-    private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("fade-distance")
-            .description("The distance from an entity where the color begins to fade.")
-            .defaultValue(3)
-            .min(0)
-            .sliderMax(12)
+    private final Setting<Boolean> highlightBanners = sgGeneral.add(new BoolSetting.Builder()
+            .name("Find Banners")
+            .description("highlights banners.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> highlightMaps = sgGeneral.add(new BoolSetting.Builder()
+            .name("Find Maps")
+            .description("highlights item frames that contain maps.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> highlightItems = sgGeneral.add(new BoolSetting.Builder()
+            .name("Find Items in Frames")
+            .description("highlights item frames that contain items.")
+            .defaultValue(true)
             .build()
     );
     private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("item-checker")
             .description("Items to check for.")
             .defaultValue(defaultPlayerItems)
+            .visible(() -> highlightItems.get())
             .build()
     );
-    private final Setting<Boolean> chatFeedback = sgGeneral.add(new BoolSetting.Builder()
-            .name("Chat feedback")
-            .description("Display info about items in chat")
+    public final Setting<Boolean> enchants = sgGeneral.add(new BoolSetting.Builder()
+            .name("enforce-item-enchants")
+            .description("Requires that armor and tools must be enchanted for module to detect.")
             .defaultValue(true)
+            .visible(() -> highlightItems.get())
             .build()
     );
-    private final Setting<Boolean> coordsInChat = sgGeneral.add(new BoolSetting.Builder()
-            .name("Display coords in chat")
-            .description("Display coords of a detected item")
-            .visible(chatFeedback::get)
-            .defaultValue(true)
+    public final Setting<Boolean> certainenchants = sgGeneral.add(new BoolSetting.Builder()
+            .name("find-certain-item-enchants")
+            .description("Requires that armor and tools must be enchanted with these enchants.")
+            .defaultValue(false)
+            .visible(() -> enchants.get())
             .build()
     );
-    private final Setting<Boolean> tracers = sgGeneral.add(new BoolSetting.Builder()
-            .name("Tracers")
-            .description("Add tracers to item detected")
-            .defaultValue(true)
+    private final Setting<Set<RegistryKey<Enchantment>>> toolenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .name("Mining Tool Enchants")
+            .description("List of enchantments required.")
+            .visible(() -> enchants.get() && certainenchants.get())
+            .defaultValue(Enchantments.EFFICIENCY, Enchantments.UNBREAKING, Enchantments.MENDING)
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> swordenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .name("Sword Enchants")
+            .description("List of enchantments required.")
+            .visible(() -> enchants.get() && certainenchants.get())
+            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> armorenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .name("Armor Enchants")
+            .description("List of enchantments required.")
+            .visible(() -> enchants.get() && certainenchants.get())
+            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> maceenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .name("Mace Enchants")
+            .description("List of enchantments required.")
+            .visible(() -> enchants.get() && certainenchants.get())
+            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
+            .build());
+    private final Setting<Set<RegistryKey<Enchantment>>> tridentenchants = sgGeneral.add(new EnchantmentListSetting.Builder()
+            .name("Trident Enchants")
+            .description("List of enchantments required.")
+            .visible(() -> enchants.get() && certainenchants.get())
+            .defaultValue(Enchantments.UNBREAKING, Enchantments.MENDING)
+            .build());
+
+    private final Setting<SettingColor> mapColor = sgColors.add(new ColorSetting.Builder()
+            .name("map-color")
+            .description("fill color for item frames containing maps.")
+            .defaultValue(new SettingColor(255, 255, 0, 50, true))
             .build()
     );
-    private final Setting<SettingColor> monstersColor = sgColors.add(new ColorSetting.Builder()
-            .name("items-color")
-            .description("The item's bounding box and tracer color.")
-            .defaultValue(new SettingColor(255, 25, 255, 255))
+
+    private final Setting<SettingColor> mapOutlineColor = sgColors.add(new ColorSetting.Builder()
+            .name("map-outline-color")
+            .description("outline color for item frames containing maps.")
+            .defaultValue(new SettingColor(255, 255, 0, 255, true))
             .build()
     );
-    private final Color lineColor = new Color();
-    private final Color sideColor = new Color();
-    private final Color baseColor = new Color();
-    private final Set<Entity> scannedEntities = Collections.synchronizedSet(new HashSet<>());
-    private int count;
+    private final Setting<SettingColor> itemColor = sgColors.add(new ColorSetting.Builder()
+            .name("item-color")
+            .description("fill color for item frames containing items.")
+            .defaultValue(new SettingColor(255, 255, 0, 50))
+            .build()
+    );
+
+    private final Setting<SettingColor> itemOutlineColor = sgColors.add(new ColorSetting.Builder()
+            .name("item-outline-color")
+            .description("outline color for item frames containing items.")
+            .defaultValue(new SettingColor(255, 255, 0, 255))
+            .build()
+    );
+    private final Setting<SettingColor> bannerColor = sgColors.add(new ColorSetting.Builder()
+            .name("banner-fill")
+            .description("fill color for banners.")
+            .defaultValue(new SettingColor(255, 0, 0, 50))
+            .build()
+    );
+
+    private final Setting<SettingColor> bannerOutline = sgColors.add(new ColorSetting.Builder()
+            .name("banner-outline")
+            .description("outline color for banners.")
+            .defaultValue(new SettingColor(255, 0, 0, 255))
+            .build()
+    );
+
     public DroppedItemESP() {
-        super(PathSeeker.Render, "DroppedItemESP", "ESP Module that highlights only certain items.");
+        super(PathSeeker.Render, "CollectibleESP", "Highlights collectible items in item frames and banners!");
+    }
+
+    public static boolean isTool(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.AXES) ||
+                itemStack.isIn(ItemTags.HOES) ||
+                itemStack.isIn(ItemTags.PICKAXES) ||
+                itemStack.isIn(ItemTags.SHOVELS) ||
+                itemStack.getItem() instanceof ShearsItem ||
+                itemStack.getItem() instanceof FlintAndSteelItem;
+    }
+
+    public static boolean isArmor(ItemStack itemStack) {
+        return itemStack.isIn(ItemTags.HEAD_ARMOR) ||
+                itemStack.isIn(ItemTags.CHEST_ARMOR) ||
+                itemStack.isIn(ItemTags.LEG_ARMOR) ||
+                itemStack.isIn(ItemTags.FOOT_ARMOR);
     }
 
     @EventHandler
-    private void onRender3D(Render3DEvent event) {
-        count = 0;
-        for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof ItemEntity itemEntity)) continue;
-            if (shouldSkip(itemEntity)) continue;
-            if (!scannedEntities.contains(entity)) {
-                StringBuilder message = new StringBuilder(itemEntity.getStack().getItem().getName().getString() + " found ");
-                if (coordsInChat.get())
-                    message.append(" at ").append(entity.getBlockX()).append(", ").append(entity.getBlockY()).append(", ").append(entity.getBlockZ());
-                ChatUtils.sendMsg(Text.of(message.toString()));
-            }
-            scannedEntities.add(entity);
-            drawBoundingBox(event, entity);
-            if (tracers.get()) drawTracer(event, entity);
-            count++;
-        }
-    }
-
-    @Override
-    public void onActivate() {
-        scannedEntities.clear();
-    }
-
-    @Override
-    public void onDeactivate() {
-        scannedEntities.clear();
-    }
-
-    private void drawBoundingBox(Render3DEvent event, Entity entity) {
-        Color color = getColor(entity);
-        if (color != null) {
-            lineColor.set(color);
-            sideColor.set(color).a((int) (sideColor.a * fillOpacity.get()));
-        }
-
-        double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
-        double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
-        double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
-        Box box = entity.getBoundingBox();
-        event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
-    }
-
-    private void drawTracer(Render3DEvent event, Entity entity) {
-        if (mc.options.hudHidden) return;
-
-        Color baseColor = monstersColor.get();
-        if (distance.get()) {
-            baseColor = getOpposingColor(baseColor, entity);
-        }
-
-        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
-        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
-        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
-        double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
-        y += height / 2;
-
-        event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, x, y, z, baseColor);
-    }
-
-    private Color getOpposingColor(Color c, Entity e) {
-        Color interpolatedColor;
-        Color oppositeColor = distantColor.get();
-
-        double distance = Math.sqrt(mc.player.squaredDistanceTo(e));
-
-        double maxDistance = distanceInt.get();
-        double percent = MathHelper.clamp(distance / maxDistance, 0, 1);
-
-        int r = (int) (c.r + (oppositeColor.r - c.r) * percent);
-        int g = (int) (c.g + (oppositeColor.g - c.g) * percent);
-        int b = (int) (c.b + (oppositeColor.b - c.b) * percent);
-        int a = c.a;
-
-        interpolatedColor = new Color(r, g, b, a);
-        return interpolatedColor;
-    }
-
-    public boolean shouldSkip(ItemEntity entity) {
-        boolean skip = false;
-        if (enchants.get()) {
-            if (!certainenchants.get() && (entity.getStack().getItem() instanceof MiningToolItem || entity.getStack().getItem() instanceof ArmorItem || entity.getStack().getItem() instanceof SwordItem || entity.getStack().getItem() instanceof FishingRodItem || entity.getStack().getItem() instanceof FlintAndSteelItem || entity.getStack().getItem() instanceof MaceItem || entity.getStack().getItem() instanceof ShearsItem || entity.getStack().getItem() instanceof ShieldItem || entity.getStack().getItem() instanceof TridentItem) && entity.getStack().isEnchantable() && entity.getStack().getEnchantments().isEmpty())
-                skip = true;
-            else if (certainenchants.get()) {
-                if (entity.getStack().getItem() instanceof MiningToolItem) {
-                    skip = compareEnchants(entity, toolenchants);
-                } else if (entity.getStack().getItem() instanceof SwordItem) {
-                    skip = compareEnchants(entity, swordenchants);
-                } else if (entity.getStack().getItem() instanceof ArmorItem) {
-                    skip = compareEnchants(entity, armorenchants);
-                } else if (entity.getStack().getItem() instanceof MaceItem) {
-                    skip = compareEnchants(entity, maceenchants);
-                } else if (entity.getStack().getItem() instanceof TridentItem) {
-                    skip = compareEnchants(entity, tridentenchants);
+    private void onRender(Render3DEvent event) {
+        if (mc.world == null || mc.player == null) return;
+        if (highlightMaps.get() || highlightItems.get()) {
+            for (Entity frame : mc.world.getEntities()) {
+                if (!(frame instanceof ItemFrameEntity itemframe)) continue;
+                boolean renderedFrame = false;
+                Box box;
+                if (highlightMaps.get() && itemframe.getHeldItemStack().getItem().getTranslationKey().equals("item.minecraft.filled_map")) {
+                    float pitch = itemframe.getPitch();
+                    if (pitch == 90 || pitch == -90) {
+                        box = itemframe.getBoundingBox().expand(0.12, 0.01, 0.12);
+                    } else {
+                        if (itemframe.getHorizontalFacing() == Direction.EAST || itemframe.getHorizontalFacing() == Direction.WEST)
+                            box = itemframe.getBoundingBox().expand(0.01, 0.12, 0.12);
+                        else box = itemframe.getBoundingBox().expand(0.12, 0.12, 0.01);
+                    }
+                    Color fill = new Color(mapColor.get());
+                    Color outline = new Color(mapOutlineColor.get());
+                    event.renderer.box(box, fill, outline, ShapeMode.Both, 0);
+                    renderedFrame = true;
+                }
+                if (!renderedFrame && highlightItems.get()) {
+                    if (shouldSkip(itemframe.getHeldItemStack())) continue;
+                    float pitch = itemframe.getPitch();
+                    if (pitch == 90 || pitch == -90) {
+                        box = itemframe.getBoundingBox().expand(0.12, 0.01, 0.12);
+                    } else {
+                        if (itemframe.getHorizontalFacing() == Direction.EAST || itemframe.getHorizontalFacing() == Direction.WEST)
+                            box = itemframe.getBoundingBox().expand(0.01, 0.12, 0.12);
+                        else box = itemframe.getBoundingBox().expand(0.12, 0.12, 0.01);
+                    }
+                    Color fill = new Color(itemColor.get());
+                    Color outline = new Color(itemOutlineColor.get());
+                    event.renderer.box(box, fill, outline, ShapeMode.Both, 0);
                 }
             }
         }
-        if (!items.get().contains(entity.getStack().getItem())) skip = true;
+        if (highlightBanners.get()) {
+            AtomicReferenceArray<WorldChunk> chunks = mc.world.getChunkManager().chunks.chunks;
+
+            for (int i = 0; i < chunks.length(); i++) {
+                WorldChunk chunk = chunks.get(i);
+                if (chunk != null) {
+                    for (BlockEntity be : chunk.getBlockEntities().values()) {
+                        if (!(be instanceof BannerBlockEntity banner)) continue;
+
+                        BlockPos pos = banner.getPos();
+                        BlockState state = mc.world.getBlockState(pos);
+                        Box box;
+
+                        Color fill = new Color(bannerColor.get());
+                        Color outline = new Color(bannerOutline.get());
+
+                        if (state.contains(WallBannerBlock.FACING)) {
+                            Direction facing = state.get(WallBannerBlock.FACING);
+                            double centerX = pos.getX() + 0.5;
+                            double centerZ = pos.getZ() + 0.5;
+                            double offset = 0.1;
+                            double depth = 0.03;
+                            double width = 0.45;
+                            double y1 = pos.getY() - 0.95;
+                            double y2 = pos.getY() + 0.85;
+
+                            switch (facing) {
+                                case NORTH:
+                                    box = new Box(centerX - width, y1, pos.getZ() + 1 - offset - depth, centerX + width, y2, pos.getZ() + 1 - offset);
+                                    break;
+                                case SOUTH:
+                                    box = new Box(centerX - width, y1, pos.getZ() + offset, centerX + width, y2, pos.getZ() + offset + depth);
+                                    break;
+                                case WEST:
+                                    box = new Box(pos.getX() + 1 - offset - depth, y1, centerZ - width, pos.getX() + 1 - offset, y2, centerZ + width);
+                                    break;
+                                case EAST:
+                                    box = new Box(pos.getX() + offset, y1, centerZ - width, pos.getX() + offset + depth, y2, centerZ + width);
+                                    break;
+                                default:
+                                    continue;
+                            }
+
+                            event.renderer.box(box, fill, outline, ShapeMode.Both, 0);
+                        } else if (state.contains(BannerBlock.ROTATION)) {
+                            int rotation = state.get(BannerBlock.ROTATION);
+                            double centerX = pos.getX() + 0.5;
+                            double centerZ = pos.getZ() + 0.5;
+                            double y1 = pos.getY();
+                            double y2 = pos.getY() + 1.85;
+                            double angle = Math.toRadians((rotation % 16) * 22.5);
+                            double width = 0.45;
+                            double depth = -0.05;
+                            double outlineOffset = 0.02;
+
+                            double dxx = depth * Math.sin(angle);
+                            double dzz = depth * Math.cos(angle);
+
+                            double x1 = centerX - width * Math.cos(angle) + dxx;
+                            double z1 = centerZ - width * Math.sin(angle) - dzz;
+                            double x2 = centerX + width * Math.cos(angle) + dxx;
+                            double z2 = centerZ + width * Math.sin(angle) - dzz;
+
+                            event.renderer.quad(
+                                    x1, y1, z1,
+                                    x1, y2, z1,
+                                    x2, y2, z2,
+                                    x2, y1, z2,
+                                    fill
+                            );
+
+                            double ox = outlineOffset * Math.sin(angle);
+                            double oz = outlineOffset * Math.cos(angle);
+                            double ox1 = x1 - ox;
+                            double oz1 = z1 + oz;
+                            double ox2 = x2 - ox;
+                            double oz2 = z2 + oz;
+                            double ox3 = x2 + ox;
+                            double oz3 = z2 - oz;
+                            double ox4 = x1 + ox;
+                            double oz4 = z1 - oz;
+
+                            event.renderer.quad(
+                                    ox1, y2, oz1,
+                                    ox2, y2, oz2,
+                                    ox3, y2, oz3,
+                                    ox4, y2, oz4,
+                                    outline
+                            );
+                            event.renderer.quad(
+                                    ox4, y1, oz4,
+                                    ox3, y1, oz3,
+                                    ox2, y1, oz2,
+                                    ox1, y1, oz1,
+                                    outline
+                            );
+                            event.renderer.quad(
+                                    ox1, y1, oz1,
+                                    ox1, y2, oz1,
+                                    ox4, y2, oz4,
+                                    ox4, y1, oz4,
+                                    outline
+                            );
+                            event.renderer.quad(
+                                    ox2, y1, oz2,
+                                    ox3, y1, oz3,
+                                    ox3, y2, oz3,
+                                    ox2, y2, oz2,
+                                    outline
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean shouldSkip(ItemStack stack) {
+        boolean skip = false;
+        if (enchants.get()) {
+            if (!certainenchants.get() && (isTool(stack) || isArmor(stack) || stack.isIn(ItemTags.SWORDS) || stack.getItem() instanceof FishingRodItem || stack.getItem() instanceof FlintAndSteelItem || stack.getItem() instanceof MaceItem || stack.getItem() instanceof ShearsItem || stack.getItem() instanceof ShieldItem || stack.getItem() instanceof TridentItem) && stack.isEnchantable() && stack.getEnchantments().isEmpty())
+                skip = true;
+            else if (certainenchants.get()) {
+                if (isTool(stack)) {
+                    skip = compareEnchants(stack, toolenchants);
+                } else if (stack.isIn(ItemTags.SWORDS)) {
+                    skip = compareEnchants(stack, swordenchants);
+                } else if (isArmor(stack)) {
+                    skip = compareEnchants(stack, armorenchants);
+                } else if (stack.getItem() instanceof MaceItem) {
+                    skip = compareEnchants(stack, maceenchants);
+                } else if (stack.getItem() instanceof TridentItem) {
+                    skip = compareEnchants(stack, tridentenchants);
+                }
+            }
+        }
+        if (!items.get().contains(stack.getItem())) skip = true;
         return skip;
     }
 
-    private boolean compareEnchants(ItemEntity entity, Setting<Set<RegistryKey<Enchantment>>> enchantsetting) {
+    private boolean compareEnchants(ItemStack stack, Setting<Set<RegistryKey<Enchantment>>> enchantsetting) {
         boolean skip = false;
         Set<RegistryKey<Enchantment>> itemenchants = new HashSet<>();
-        entity.getStack().getEnchantments().getEnchantments().forEach(enchantment -> {
+        stack.getEnchantments().getEnchantments().forEach(enchantment -> {
             itemenchants.add(enchantment.getKey().get());
         });
         for (RegistryKey<Enchantment> enchantKey : enchantsetting.get()) {
@@ -313,41 +400,5 @@ public class DroppedItemESP extends Module {
             }
         }
         return skip;
-    }
-
-    public Color getColor(Entity entity) {
-        double alpha = getFadeAlpha(entity);
-        if (alpha == 0) return null;
-        Color color = monstersColor.get();
-        if (distance.get()) {
-            color = getOpposingColor(color, entity);
-        }
-        return baseColor.set(color.r, color.g, color.b, (int) (color.a * alpha));
-    }
-
-    private double getFadeAlpha(Entity entity) {
-        double dist = PlayerUtils.squaredDistanceToCamera(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ() + entity.getWidth() / 2);
-        double fadeDist = Math.pow(fadeDistance.get(), 2);
-        double alpha = 1;
-        if (dist <= fadeDist * fadeDist) alpha = (float) (Math.sqrt(dist) / fadeDist);
-        if (alpha <= 0.075) alpha = 0;
-        return alpha;
-    }
-
-    @Override
-    public String getInfoString() {
-        return Integer.toString(count);
-    }
-
-    @EventHandler
-    private void onPreTick(TickEvent.Pre event) {
-        if (mc.world != null) {
-            Iterable<net.minecraft.entity.Entity> entities = mc.world.getEntities();
-            scannedEntities.removeIf(entity -> {
-                Set<Entity> entitySet = new HashSet<>();
-                entities.forEach(entitySet::add);
-                return !entitySet.contains(entity);
-            });
-        }
     }
 }

@@ -1,9 +1,16 @@
-package dev.journey.PathSeeker.modules.exploration;
+package dev.journey.PathSeeker.modules.render;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.journey.PathSeeker.PathSeeker;
+import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
+import meteordevelopment.orbit.EventPriority;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.util.math.Vec3d;
 import xaero.common.minimap.waypoints.Waypoint;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -36,13 +43,9 @@ import xaeroplus.module.impl.OldChunks;
 import xaeroplus.module.impl.PaletteNewChunks;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static dev.journey.PathSeeker.utils.PathSeekerUtil.sendWebhook;
-
 
 public class BetterStashFinder extends Module
 {
@@ -72,6 +75,27 @@ public class BetterStashFinder extends Module
             .name("shulker-instant-hit")
             .description("If a single shulker counts as a stash.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> crafterInstantHit = sgGeneral.add(new BoolSetting.Builder()
+            .name("crafter-instant-hit")
+            .description("If a single auto crafter counts as a stash.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> disableOnTeleport = sgGeneral.add(new BoolSetting.Builder()
+            .name("disable-on-teleport-or-death")
+            .description("If on, will disable this module when respawning or teleporting to try to prevent coord leaks.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> ignoreTrialChambers = sgGeneral.add(new BoolSetting.Builder()
+            .name("ignore-trial-chambers")
+            .description("Attempts to ignore trial chambers, but may cause false negatives if someone made their base to look like a trial chamber.")
+            .defaultValue(true)
             .build()
     );
 
@@ -115,22 +139,29 @@ public class BetterStashFinder extends Module
     );
 
     private final Setting<Boolean> sendWebhook = sgGeneral.add(new BoolSetting.Builder()
-            .name("Send Webhook")
+            .name("send-webhook")
             .description("Sends a webhook when a stash is found.")
             .defaultValue(false)
             .build()
     );
 
     public final Setting<String> webhookLink = sgGeneral.add(new StringSetting.Builder()
-            .name("Webhook Link")
+            .name("webhook-link")
             .description("A discord webhook link. Looks like this: https://discord.com/api/webhooks/webhookUserId/webHookTokenOrSomething")
             .defaultValue("")
             .visible(sendWebhook::get)
             .build()
     );
 
+    public final Setting<Boolean> advancedLogging = sgGeneral.add(new BoolSetting.Builder()
+            .name("advanced-logging")
+            .description("Will log more information, including the amount of each container found.")
+            .defaultValue(false)
+            .build()
+    );
+
     public final Setting<Boolean> ping = sgGeneral.add(new BoolSetting.Builder()
-            .name("Ping For Stash Finder")
+            .name("ping-for-stash-finder")
             .description("Pings you for stash finder and base finder messages")
             .defaultValue(false)
             .visible(sendWebhook::get)
@@ -138,7 +169,7 @@ public class BetterStashFinder extends Module
     );
 
     public final Setting<String> discordId = sgGeneral.add(new StringSetting.Builder()
-            .name("Discord ID")
+            .name("discord-ID")
             .description("Your discord ID")
             .defaultValue("")
             .visible(() -> sendWebhook.get() && ping.get())
@@ -147,11 +178,14 @@ public class BetterStashFinder extends Module
 
     public BetterStashFinder()
     {
-        super(PathSeeker.Hunting, "better-stash-finder", "Meteors StashFinder but with more features.");
+        super(PathSeeker.Render, "better-stash-finder", "Meteors StashFinder but with more features.");
     }
+
+    private Vec3d lastPosition = null;
 
     @Override
     public void onActivate() {
+        lastPosition = null;
         XaeroPlus.EVENT_BUS.register(this);
         load();
     }
@@ -173,29 +207,35 @@ public class BetterStashFinder extends Module
 
         RegistryKey<World> currentDimension = mc.world.getRegistryKey();
 
-        // Check that the chunk is in old chunks
-        if (onlyOldchunks.get())
-        {
-            ChunkPos chunkPos = chunk.chunkPos;
-            PaletteNewChunks paletteNewChunks = ModuleManager.getModule(PaletteNewChunks.class);
-            boolean is119NewChunk = paletteNewChunks
-                    .isNewChunk(
-                            chunkPos.x,
-                            chunkPos.z,
-                            currentDimension
-                    );
+        ChunkPos chunkPos = chunk.chunkPos;
+        PaletteNewChunks paletteNewChunks = ModuleManager.getModule(PaletteNewChunks.class);
+        boolean is119NewChunk = paletteNewChunks
+                .isNewChunk(
+                        chunkPos.x,
+                        chunkPos.z,
+                        currentDimension
+                );
 
-            boolean is112OldChunk = ModuleManager.getModule(OldChunks.class)
-                    .isOldChunk(
-                            chunkPos.x,
-                            chunkPos.z,
-                            currentDimension
-                    );
-            if (is119NewChunk && !is112OldChunk) return;
-        }
+        boolean is112OldChunk = ModuleManager.getModule(OldChunks.class)
+                .isOldChunk(
+                        chunkPos.x,
+                        chunkPos.z,
+                        currentDimension
+                );
+
+        // Check that the chunk is in old chunks
+        if (onlyOldchunks.get() && (is119NewChunk && !is112OldChunk)) return;
 
         for (BlockEntity blockEntity : event.chunk().getBlockEntities().values()) {
             if (!storageBlocks.get().contains(blockEntity.getType())) continue;
+
+            Block blockUnder = mc.world.getBlockState(blockEntity.getPos().down()).getBlock();
+            if (ignoreTrialChambers.get() && blockUnder.equals(Blocks.WAXED_OXIDIZED_CUT_COPPER) ||
+                    blockUnder.equals(Blocks.TUFF_BRICKS) || blockUnder.equals(Blocks.WAXED_COPPER_BLOCK) ||
+                    blockUnder.equals(Blocks.WAXED_OXIDIZED_COPPER))
+            {
+                continue;
+            }
 
             if (blockEntity instanceof ChestBlockEntity) chunk.chests++;
             else if (blockEntity instanceof BarrelBlockEntity) chunk.barrels++;
@@ -204,9 +244,10 @@ public class BetterStashFinder extends Module
             else if (blockEntity instanceof AbstractFurnaceBlockEntity) chunk.furnaces++;
             else if (blockEntity instanceof DispenserBlockEntity) chunk.dispensersDroppers++;
             else if (blockEntity instanceof HopperBlockEntity) chunk.hoppers++;
+            else if (blockEntity instanceof CrafterBlockEntity) chunk.crafters++;
         }
 
-        if ((chunk.getTotal() >= minimumStorageCount.get()) || (shulkerInstantHit.get() && chunk.shulkers > 0)) {
+        if ((chunk.getTotal() >= minimumStorageCount.get()) || (shulkerInstantHit.get() && chunk.shulkers > 0) || (crafterInstantHit.get() && chunk.crafters > 0)) {
             Chunk prevChunk = null;
             int i = chunks.indexOf(chunk);
 
@@ -222,18 +263,84 @@ public class BetterStashFinder extends Module
                     switch (notificationMode.get())
                     {
                         case Chat -> info("Found stash at (highlight)%s(default), (highlight)%s(default).", chunk.x, chunk.z);
-                        case Toast -> mc.getToastManager().add(new MeteorToast(Items.CHEST, title, "Found Stash!"));
+                        case Toast -> {
+                            MeteorToast toast = new MeteorToast.Builder(title).icon(Items.CHEST).text("Found Stash!").build();
+                            mc.getToastManager().add(toast);
+                        }
                         case Both -> {
                             info("Found stash at (highlight)%s(default), (highlight)%s(default).", chunk.x, chunk.z);
-                            mc.getToastManager().add(new MeteorToast(Items.CHEST, title, "Found Stash!"));
+                            MeteorToast toast = new MeteorToast.Builder(title).icon(Items.CHEST).text("Found Stash!").build();
+                            mc.getToastManager().add(toast);
                         }
                     }
                 }
+
                 if (sendWebhook.get() && !webhookLink.get().isEmpty())
                 {
-                    String message = "Found stash at " + chunk.x + ", " + chunk.z + ".";
-                    new Thread(() -> sendWebhook(webhookLink.get(), title, message, ping.get() ? discordId.get() : null, mc.player.getGameProfile().getName())).start();
+                    if (advancedLogging.get())
+                    {
+                        String chunkType = "";
+                        if (is119NewChunk && !is112OldChunk) chunkType = "new";
+                        else if (is119NewChunk && is112OldChunk) chunkType = "unfollowed 1.12";
+                        else if (!is119NewChunk && !is112OldChunk) chunkType = "1.19";
+                        else if (!is119NewChunk && is112OldChunk) chunkType = "followed 1.12";
+                        String json = "{\"embeds\": [{" +
+                                "\"title\": \"Stash Found!\"," +
+                                "\"color\": 2154012," +
+                                "\"description\": \"Coordinates: || X: " + chunk.x + " Z: " + chunk.z + "|| in " + chunkType + " chunks\"," +
+                                "\"fields\": [" +
+                                "{" +
+                                "\"name\": \"Chests\"," +
+                                "\"value\": " + chunk.chests + "," +
+                                "\"inline\": true" +
+                                "}," +
+                                "{" +
+                                "\"name\": \"Barrels\"," +
+                                "\"value\": " + chunk.barrels + "," +
+                                "\"inline\": true" +
+                                "}," +
+                                "{" +
+                                "\"name\": \"Shulkers\"," +
+                                "\"value\": " + chunk.shulkers + "," +
+                                "\"inline\": true" +
+                                "}," +
+                                "{" +
+                                "\"name\": \"Ender Chests\"," +
+                                "\"value\": " + chunk.enderChests + "," +
+                                "\"inline\": true" +
+                                "}," +
+                                "{" +
+                                "\"name\": \"Hoppers\"," +
+                                "\"value\": " + chunk.hoppers + "," +
+                                "\"inline\": true" +
+                                "}," +
+                                "{" +
+                                "\"name\": \"Dispensers/Droppers\"," +
+                                "\"value\": " + chunk.dispensersDroppers + "," +
+                                "\"inline\": true" +
+                                "}," +
+                                "{" +
+                                "\"name\": \"Furnaces\"," +
+                                "\"value\": " + chunk.furnaces + "," +
+                                "\"inline\": true" +
+                                "}," +
+                                "{" +
+                                "\"name\": \"Crafters\"," +
+                                "\"value\": " + chunk.crafters + "," +
+                                "\"inline\": true" +
+                                "}" +
+                                "]" +
+                                "}]}";
+
+                        new Thread(() -> sendWebhook(webhookLink.get(), json, ping.get() ? discordId.get() : null)).start();
+                    }
+                    else
+                    {
+                        String message = "Found stash at " + chunk.x + ", " + chunk.z + ".";
+                        new Thread(() -> sendWebhook(webhookLink.get(), title, message, ping.get() ? discordId.get() : null, mc.player.getGameProfile().getName())).start();
+                    }
                 }
+
                 if (saveToWaypoints.get())
                 {
                     WaypointSet waypointSet = getWaypointSet();
@@ -472,6 +579,7 @@ public class BetterStashFinder extends Module
         if (chunk.hoppers > 0) waypointName += "H:" + chunk.hoppers;
         if (chunk.dispensersDroppers > 0) waypointName += "D:" + chunk.dispensersDroppers;
         if (chunk.furnaces > 0) waypointName += "F:" + chunk.furnaces;
+        if (chunk.crafters > 0) waypointName += "A:" + chunk.crafters;
         return waypointName;
     }
 
@@ -501,7 +609,7 @@ public class BetterStashFinder extends Module
 
         public ChunkPos chunkPos;
         public transient int x, z;
-        public int chests, barrels, shulkers, enderChests, furnaces, dispensersDroppers, hoppers;
+        public int chests, barrels, shulkers, enderChests, furnaces, dispensersDroppers, hoppers, crafters;
 
         public Chunk(ChunkPos chunkPos) {
             this.chunkPos = chunkPos;
@@ -515,19 +623,19 @@ public class BetterStashFinder extends Module
         }
 
         public int getTotal() {
-            return chests + barrels + shulkers + enderChests + furnaces + dispensersDroppers + hoppers;
+            return chests + barrels + shulkers + enderChests + furnaces + dispensersDroppers + hoppers + crafters;
         }
 
         public void write(Writer writer) throws IOException {
             sb.setLength(0);
             sb.append(x).append(',').append(z).append(',');
-            sb.append(chests).append(',').append(barrels).append(',').append(shulkers).append(',').append(enderChests).append(',').append(furnaces).append(',').append(dispensersDroppers).append(',').append(hoppers).append('\n');
+            sb.append(chests).append(',').append(barrels).append(',').append(shulkers).append(',').append(enderChests).append(',').append(furnaces).append(',').append(dispensersDroppers).append(',').append(hoppers).append(',').append(crafters).append('\n');
             writer.write(sb.toString());
         }
 
         public boolean countsEqual(Chunk c) {
             if (c == null) return false;
-            return chests != c.chests || barrels != c.barrels || shulkers != c.shulkers || enderChests != c.enderChests || furnaces != c.furnaces || dispensersDroppers != c.dispensersDroppers || hoppers != c.hoppers;
+            return chests != c.chests || barrels != c.barrels || shulkers != c.shulkers || enderChests != c.enderChests || furnaces != c.furnaces || dispensersDroppers != c.dispensersDroppers || hoppers != c.hoppers || crafters != c.crafters;
         }
 
         @Override
@@ -592,6 +700,27 @@ public class BetterStashFinder extends Module
 
             t.add(theme.label("Hoppers:"));
             t.add(theme.label(chunk.hoppers + ""));
+            t.row();
+
+            t.add(theme.label("Crafters:"));
+            t.add(theme.label(chunk.crafters + ""));
         }
+    }
+
+    @meteordevelopment.orbit.EventHandler(priority = EventPriority.HIGH)
+    private void onOpenScreenEvent(OpenScreenEvent event) {
+        if (!(event.screen instanceof DeathScreen)) return;
+        if (!disableOnTeleport.get()) return;
+
+        this.toggle();
+    }
+
+    @meteordevelopment.orbit.EventHandler(priority = EventPriority.HIGH)
+    private void onPlayerMove(PlayerMoveEvent event) {
+        if (lastPosition != null)
+        {
+            if (disableOnTeleport.get() && mc.player.squaredDistanceTo(lastPosition) > 16 * 16) this.toggle();
+        }
+        lastPosition = mc.player.getPos();
     }
 }

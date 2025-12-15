@@ -1,14 +1,12 @@
 package dev.journey.PathSeeker.modules.utility;
 
 import dev.journey.PathSeeker.PathSeeker;
-import dev.journey.PathSeeker.modules.automation.AFKVanillaFly;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
@@ -76,7 +74,7 @@ public class Firework extends Module {
             }
         }
 
-            Vec3d currentPos = mc.player.getPos();
+        Vec3d currentPos = mc.player.getPos();
         Vec3d velocity = currentPos.subtract(lastPos);
         lastPos = currentPos;
 

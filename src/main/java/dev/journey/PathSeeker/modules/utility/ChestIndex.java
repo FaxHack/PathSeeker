@@ -1,5 +1,9 @@
 package dev.journey.PathSeeker.modules.utility;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import dev.journey.PathSeeker.PathSeeker;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.InventoryEvent;
@@ -16,20 +20,25 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.*;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.ChestBlock;
+import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -39,13 +48,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import com.google.gson.JsonObject; // For JsonObject
-import java.io.IOException;        // For handling IOExceptions
-
-import com.google.gson.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.NotNull;
 
 import static meteordevelopment.meteorclient.utils.Utils.getItemsInContainerItem;
 import static meteordevelopment.meteorclient.utils.Utils.hasItems;
@@ -95,14 +97,14 @@ public class ChestIndex extends Module {
     private final Setting<SettingColor> sideColor = sgGeneral.add(new ColorSetting.Builder()
             .name("Side Color")
             .description("The side color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 100))
+            .defaultValue(new SettingColor(16, 106, 144, 100))
             .build()
     );
 
     private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("Line Color")
             .description("The line color of the bounding box.")
-            .defaultValue(new SettingColor(16,106,144, 255))
+            .defaultValue(new SettingColor(16, 106, 144, 255))
             .build()
     );
 

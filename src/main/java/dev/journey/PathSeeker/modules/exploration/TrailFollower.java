@@ -204,6 +204,7 @@ public class TrailFollower extends Module {
     private double targetYaw;
     private int baritoneSetGoalTicks = 0;
     private double pathDistanceActual;
+
     public TrailFollower() {
         super(PathSeeker.Hunting, "TrailFollower", "Automatically follows trails in all dimensions.");
     }
