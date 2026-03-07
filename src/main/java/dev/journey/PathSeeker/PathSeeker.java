@@ -45,6 +45,7 @@ public class PathSeeker extends MeteorAddon {
         Modules.get().add(new PotESP());
         Modules.get().add(new MobGearESP());
         Modules.get().add(new VanityESP());
+        Modules.get().add(new DroppedItemESP());
 
         //Automation
         //Modules.get().add(new ElytraSwap());
@@ -91,3 +92,4 @@ public class PathSeeker extends MeteorAddon {
     }
 
 }
+
